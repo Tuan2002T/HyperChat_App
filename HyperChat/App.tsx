@@ -26,8 +26,11 @@ function TabScreens() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        tabBarStyle:{
+          height: 50,       
+        },
+        tabBarActiveTintColor: 'black',
         tabBarIcon: ({ focused, color, size }) => {
-
           let iconName;
           let rn = route.name;
           if (rn === 'Message') {
@@ -43,10 +46,10 @@ function TabScreens() {
         }
       })}
     >
-      <Tab.Screen name="Message" component={MessageScreen} options={{headerShown: false}} />
-      <Tab.Screen name="Call" component={CallScreen} options={{ headerShown: false }} />
-      <Tab.Screen name="Contact" component={ContactScreen} options={{ headerShown: false }} />
-      <Tab.Screen name="Setting" component={SettingScreen} options={{ headerShown: false}} />
+      <Tab.Screen name="Message" component={MessageScreen} options={{ headerShown: false, tabBarLabelStyle:{fontSize:12} }} />
+      <Tab.Screen name="Call" component={CallScreen} options={{ headerShown: false, tabBarLabelStyle:{fontSize:12} }} />
+      <Tab.Screen name="Contact" component={ContactScreen} options={{ headerShown: false, tabBarLabelStyle:{fontSize:12} }} />
+      <Tab.Screen name="Setting" component={SettingScreen} options={{ headerShown: false, tabBarLabelStyle:{fontSize:12} }} />
     </Tab.Navigator>
   );
 }
