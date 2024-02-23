@@ -1,24 +1,52 @@
 // App.tsx
 import * as React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-
-// import LoginScreen from './screens/LoginScreen';
-// import ProfileScreen from './screens/ProfileScreen';
-// import DetailsScreen from './screens/DetailsScreen';
-import HomeScreen from './Screens/HomeScreen';
-import DetailsScreen from './Screens/DetailsScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Button, View, Image } from 'react-native';
 import LoginScreen from './Screens/LoginScreen';
+import MessageScreen from './Screens/MessageScreen';
+import CallScreen from './Screens/CallScreen';
+import ContactScreen from './Screens/ContactScreen';
+import SettingScreen from './Screens/SettingScreen';
+
+import messageIcon from './Images/IconBottomTab/Message.png';
+import messageIconFocus from './Images/IconBottomTab/MessageFocus.png';
+import callIcon from './Images/IconBottomTab/Call.png';
+import callIconFocus from './Images/IconBottomTab/CallFocus.png';
+import contactIcon from './Images/IconBottomTab/Contact.png';
+import contactIconFocus from './Images/IconBottomTab/ContactFocus.png';
+import settingIcon from './Images/IconBottomTab/Setting.png';
+import settingIconFocus from './Images/IconBottomTab/SettingFocus.png';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function HomeTabs() {
+function TabScreens() {
   return (
-    <Tab.Navigator screenOptions={{headerShown: false}}>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Details" component={DetailsScreen} />
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+
+          let iconName;
+          let rn = route.name;
+          if (rn === 'Message') {
+            iconName = focused ? <Image style={{ width: 25, height: 25 }} source={messageIconFocus} /> : <Image style={{ width: 25, height: 25 }} source={messageIcon} />;
+          } else if (rn === 'Call') {
+            iconName = focused ? <Image style={{ width: 23, height: 23 }} source={callIconFocus} /> : <Image style={{ width: 23, height: 23 }} source={callIcon} />;
+          } else if (rn === 'Contact') {
+            iconName = focused ? <Image style={{ width: 25, height: 25 }} source={contactIconFocus} /> : <Image style={{ width: 25, height: 25 }} source={contactIcon} />;
+          } else if (rn === 'Setting') {
+            iconName = focused ? <Image style={{ width: 25, height: 25 }} source={settingIconFocus} /> : <Image style={{ width: 25, height: 25 }} source={settingIcon} />;
+          }
+          return iconName;
+        }
+      })}
+    >
+      <Tab.Screen name="Message" component={MessageScreen} options={{headerShown: false}} />
+      <Tab.Screen name="Call" component={CallScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Contact" component={ContactScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Setting" component={SettingScreen} options={{ headerShown: false}} />
     </Tab.Navigator>
   );
 }
@@ -28,11 +56,9 @@ function App() {
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName="Login"
-        screenOptions={{headerShown: false}}>
+        screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Main" component={HomeTabs} />
-        {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
-
+        <Stack.Screen name="Main" component={TabScreens} />
       </Stack.Navigator>
     </NavigationContainer>
   );
