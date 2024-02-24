@@ -18,6 +18,7 @@ import contactIcon from './Images/IconBottomTab/Contact.png';
 import contactIconFocus from './Images/IconBottomTab/ContactFocus.png';
 import settingIcon from './Images/IconBottomTab/Setting.png';
 import settingIconFocus from './Images/IconBottomTab/SettingFocus.png';
+import UserProfile from './Screens/UserProfile';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -62,6 +63,7 @@ function App() {
         screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Main" component={TabScreens} />
+        <Stack.Screen name="UserProfile" component={UserProfile} />
       </Stack.Navigator>
     </NavigationContainer>
   );
