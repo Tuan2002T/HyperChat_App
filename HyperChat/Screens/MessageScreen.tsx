@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView } from 'react-native';
 
-const MessageScreen = () => {
+const MessageScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <View style={{
@@ -58,7 +58,7 @@ const MessageScreen = () => {
         renderItem={({ item }) => {
           return (
             <Pressable style={{ width: '100%', height: 50, backgroundColor: 'white', marginVertical:5 }}
-              onPress={() => { console.log('Pressed') 
+              onPress={() => { navigation.navigate('ViewMessage');
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems:'center' }}>
