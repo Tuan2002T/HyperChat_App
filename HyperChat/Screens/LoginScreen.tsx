@@ -2,20 +2,16 @@ import React, {useState} from 'react';
 import {
   View,
   Text,
-  TextInput,
   Pressable,
   StyleSheet,
   Image,
 } from 'react-native';
 
 export default function LoginScreen({navigation}: {navigation: any}) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
   const handleLogin = () => {
     // Perform login logic here
-    navigation.navigate('Main');
-    console.log('Logging in...');
+    navigation.navigate('SignUp');
+    console.log('Sign up with mail');
   };
 
   const styles = StyleSheet.create({
@@ -38,13 +34,15 @@ export default function LoginScreen({navigation}: {navigation: any}) {
       paddingHorizontal: 10,
     },
     button: {
+        
       width: '80%',
       height: 50,
-      backgroundColor: 'blue',
+      backgroundColor: '#24786D',
       padding: 10,
       borderRadius: 5,
       justifyContent: 'center',
       alignItems: 'center',
+      marginVertical: 10,
     },
     buttonText: {
       color: 'white',
@@ -107,10 +105,12 @@ export default function LoginScreen({navigation}: {navigation: any}) {
             source={require('../Images/Icon/google.png')}
           />
         </Pressable>
-        <Pressable style={styles.circle}>
+        <Pressable style={styles.circle} onPress={()=>{
+            
+        }}>
           <Image
             style={{width: 30, height: 30, resizeMode: 'contain'}}
-            source={require('../Images/Icon/apple.png')}
+            source={require('../Images/Icon/apple2.png')}
           />
         </Pressable>
       </View>
@@ -128,9 +128,24 @@ export default function LoginScreen({navigation}: {navigation: any}) {
         <View style={{width: '35%', height: 1, borderBottomWidth: 1}} />
       </View>
 
+
       <Pressable onPress={handleLogin} style={styles.button}>
         <Text style={styles.buttonText}>Sign up with mail</Text>
       </Pressable>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginVertical: 10,
+        }}>
+        <Text style={{fontSize: 18}}>Already have an account?</Text>
+        <Pressable
+          style={{alignItems: 'center', marginLeft: 5}}
+          onPress={() => navigation.navigate('Login2')}>
+          <Text style={{fontSize: 18, fontWeight: 700}}>Login</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }

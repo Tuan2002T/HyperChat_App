@@ -5,6 +5,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Button, View, Image } from 'react-native';
 import LoginScreen from './Screens/LoginScreen';
+import LoginScreen2 from './Screens/LoginScreen2';
+import SingUpScreen from './Screens/SingUpScreen';
 import MessageScreen from './Screens/MessageScreen';
 import CallScreen from './Screens/CallScreen';
 import ContactScreen from './Screens/ContactScreen';
@@ -63,6 +65,9 @@ function App() {
         initialRouteName="Login"
         screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Login2" component={LoginScreen2} />
+        <Stack.Screen name="SignUp" component={SingUpScreen} />
+
         <Stack.Screen name="Main" component={TabScreens} />
         <Stack.Screen name="UserProfile" component={UserProfile}/>
         <Stack.Screen name="ViewMessage" component={Message} />
