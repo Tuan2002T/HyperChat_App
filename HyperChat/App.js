@@ -10,7 +10,7 @@ import CallScreen from './Screens/CallScreen';
 import ContactScreen from './Screens/ContactScreen';
 import SettingScreen from './Screens/SettingScreen';
 
-import messageIcon from './Images/IconBottomTab/Message.png';
+import messageIcon from './Images/IconBottomTab/message.png';
 import messageIconFocus from './Images/IconBottomTab/MessageFocus.png';
 import callIcon from './Images/IconBottomTab/Call.png';
 import callIconFocus from './Images/IconBottomTab/CallFocus.png';
