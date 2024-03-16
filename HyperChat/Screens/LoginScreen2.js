@@ -89,7 +89,7 @@ export default function LoginScreen2({navigation}) {
         <Text style={{fontSize: 20}}>account or email to continue us</Text>
       </View>
 
-      <View style={{flexDirection: 'row', marginVertical: 30}}>
+      <View style={{flexDirection: 'row', marginVertical: 20}}>
         <Pressable style={styles.circle}>
           <Image
             style={{width: 30, height: 30, resizeMode: 'contain'}}

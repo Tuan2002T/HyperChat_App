@@ -19,9 +19,10 @@ export default function LoginScreen({navigation}: {navigation: any}) {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      height: '100%'
     },
     welcome: {
-      fontSize: 72,
+      fontSize: 60,
       fontWeight: 'bold',
       marginBottom: 10,
     },

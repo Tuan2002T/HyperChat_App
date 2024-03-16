@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
+import {firebase} from '../firebase';
 
 export default function SignUpScreen({navigation}) {
   const [username, setUsername] = useState('');
@@ -18,6 +19,16 @@ export default function SignUpScreen({navigation}) {
     // Perform login logic here
     navigation.navigate('Main');
     console.log('Go to main');
+  };
+
+  const handleRegister = () => {
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        
+      })
+      .catch((error) => {
+        console.error('Error registering user:', error);
+      });
   };
 
   const styles = StyleSheet.create({
@@ -157,7 +168,7 @@ export default function SignUpScreen({navigation}) {
         </View>
       </View>
 
-      <Pressable onPress={handleLogin} style={styles.button}>
+      <Pressable onPress={handleRegister} style={styles.button}>
         <Text style={styles.buttonText}>Create an account</Text>
       </Pressable>
     </View>
