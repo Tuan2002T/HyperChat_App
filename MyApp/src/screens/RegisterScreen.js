@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, TextInput, Pressable, Alert } from 'react-native';
+import {View, Text, TextInput, Pressable, Alert} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
@@ -8,48 +8,46 @@ import i18n from '../i18n/i18n';
 const RegisterScreen = ({navigation}) => {
   const {t} = useTranslation();
 
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('0000000000');
 
-  const validatePhoneNumber = () => {
-    // Biểu thức chính quy để kiểm tra số điện thoại
-    const phoneRegex = /^[0-9]{10}$/;
-
-    if (phoneRegex.test(phoneNumber)) {
-      Alert.alert('Thông báo', 'Số điện thoại hợp lệ');
-    } else {
+  const handleContinue = async () => {
+    // Kiểm tra số điện thoại
+    if (phoneNumber.length !== 10) {
       Alert.alert('Thông báo', 'Số điện thoại không hợp lệ');
+      return;
     }
-  };
 
-  useEffect(() => {
-    AsyncStorage.getItem('language')
-      .then(language => {
-        if (language) {
-          i18n.changeLanguage(language);
-        }
-      })
-      .catch(error => {
-        console.error('Error loading language:', error);
-      });
-  });
-
-  const handleLogin = () => {
-    savePhoneNumber(phoneNumber);
-    navigation.navigate('Login');
-  };
-
-  const savePhoneNumber = async value => {
+    // Lưu số điện thoại vào bộ nhớ cục bộ
+    console.log('continue: phoneNumber:', phoneNumber);
     try {
-      await AsyncStorage.setItem('phone number', value);
+      await AsyncStorage.setItem('phoneNumber', phoneNumber);
+
+      // di chuyển đến màn hình AuthScreen
+      navigation.navigate('Auth');
     } catch (error) {
-      console.error('Error saving phone number:', error);
+      console.error('Error in handleContinue:', error);
     }
+
+    // Gửi mã OTP
+    const OTP = generateOTP();
+    await AsyncStorage.setItem('OTP', OTP);
+    console.log('OTP:', OTP);
+  
+  };
+
+  // generateOTP
+  const generateOTP = () => {
+    let OTP = '';
+    for (let i = 0; i < 6; i++) {
+      OTP += Math.floor(Math.random() * 10);
+    }
+    return OTP;
   };
 
   return (
     <View style={{flex: 1, alignItems: 'center'}}>
       <View style={{padding: '1%', width: '100%'}}>
-        <Pressable onPress={() => navigation.goBack()}>
+        <Pressable onPress={() => navigation.navigate('Start')}>
           <SvgIcons name="back" width={36} height={36} />
         </Pressable>
       </View>
@@ -93,8 +91,7 @@ const RegisterScreen = ({navigation}) => {
             marginTop: 10,
             borderRadius: 999,
           })}
-          // onPress={handleLogin}>
-          onPress={validatePhoneNumber}>
+          onPress={handleContinue}>
           {({pressed}) => <Text style={{fontSize: 20}}>{t('Continue')}</Text>}
         </Pressable>
       </View>

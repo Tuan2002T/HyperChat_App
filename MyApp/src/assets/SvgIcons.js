@@ -10,6 +10,7 @@ import group from './svg/group.svg';
 import friend from './svg/friend.svg';
 import call from './svg/phone-call.svg';
 import setting  from './svg/setting.svg';
+import edit from './svg/edit.svg';
 
 const icons  = {
   logo,
@@ -23,6 +24,7 @@ const icons  = {
   friend,
   call,
   setting,
+  edit
 };
 
 const SvgIcons = ({ name = '', width, height, ...restProps }) => {

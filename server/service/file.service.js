@@ -58,6 +58,7 @@ const uploadFile = async file => {
 
     // const fileName = `${process.env.CLOUDFRONT_URL}${data.Key}`; // Trả về thông tin của file đã upload link file từ CloudFront URL
 
+    return data.Location; // Trả về thông tin của file đã upload
     // return fileName;
   } catch (err) {
     console.error("Error uploading file to AWS S3:", err);

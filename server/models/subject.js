@@ -1,7 +1,7 @@
 const { dynamodb } = require("../utils/aws-helper"); // Import DynamoDB service đã khởi tạo từ file aws-helper.js
 const { v4: uuidv4 } = require("uuid"); // Import thư viện uuid để tạo unique ID cho subject
 
-const tableName = "HyperChat"; // Tên của table đã tạo trong DynamoDB
+const tableName = "HyperDB"; // Tên của table đã tạo trong DynamoDB
 
 // Dầu tiên, chúng ta sẽ tạo một object SubjectModel chứa các method đọc,thêm, sửa,xoá để thao tác với DynamoDB
 const SubjectModel = {

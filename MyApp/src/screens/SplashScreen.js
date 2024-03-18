@@ -1,9 +1,14 @@
-// Splash.js
-import React, {useEffect} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+// SplashScreen.js
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
+import { setUserToken, setIsLoggedIn } from '../redux/actions';
 
-const SplashScreen = ({navigation}) => {
+const SplashScreen = ({ navigation }) => {
+  console.log('SplashScreen');
+  const dispatch = useDispatch();
+
   useEffect(() => {
     checkLoginStatus();
   }, []);
@@ -15,11 +20,11 @@ const SplashScreen = ({navigation}) => {
 
       // Kiểm tra trạng thái đăng nhập
       if (userToken || isLoggedIn) {
+        dispatch(setUserToken(userToken));
+        dispatch(setIsLoggedIn(true));
         navigation.replace('Main');
       } else {
-        // navigation.replace('Login');
         navigation.replace('Start');
-
       }
     } catch (error) {
       console.error('Error checking login status:', error);
@@ -28,7 +33,7 @@ const SplashScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Your App Name</Text>
+      <Text style={styles.text}>Hyper chat</Text>
     </View>
   );
 };

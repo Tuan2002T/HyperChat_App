@@ -9,6 +9,8 @@ import Start from '../screens/StartScreen';
 import Login from '../screens/LoginScreen';
 import Register from '../screens/RegisterScreen';
 import Chat from '../screens/ChatScreen';
+import Auth from '../screens/AuthScreen';
+import Profile from '../screens/CreateProfileScreen';
 
 const Stack = createStackNavigator();
 
@@ -34,6 +36,8 @@ const MainStackNavigator = () => {
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen name="Auth" component={Auth} />
+      <Stack.Screen name="Profile" component={Profile} />
     </Stack.Navigator>
   );
 };
