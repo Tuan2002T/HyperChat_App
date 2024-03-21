@@ -4,9 +4,12 @@ import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
 import i18n from '../i18n/i18n';
+import {useDispatch, useSelector} from 'react-redux';
+import { selectCurrentScreen, changeScreen } from '../redux/screenSlice';
+
 
 const LoginScreen = ({goBack, onMain}) => {
-  const {t} = useTranslation();
+  const dispatch = useDispatch();
 
   const [username, setUsername] = useState('');
 
@@ -24,10 +27,7 @@ const LoginScreen = ({goBack, onMain}) => {
   });
 
   const handleLogin = () => {
-    saveUsername(username);
-    saveLoginStatus(true);
-    onMain();
-    console.log('Login successful');
+    dispatch(changeScreen('Main'));
   };
 
   const saveLoginStatus = async isLoggedIn => {
@@ -59,7 +59,7 @@ const LoginScreen = ({goBack, onMain}) => {
   };
 
   const handleGoBack = () => {
-    goBack();
+    dispatch(changeScreen('Splash'));
   };
 
   return (
@@ -84,7 +84,7 @@ const LoginScreen = ({goBack, onMain}) => {
               color: 'black',
               paddingHorizontal: 10,
             }}>
-            {t('Login')}
+            {i18n.t('Login')}
           </Text>
         </Pressable>
       </View>
@@ -97,7 +97,7 @@ const LoginScreen = ({goBack, onMain}) => {
 
       <View style={{width: '90%'}}>
         <TextInput
-          placeholder={t('Username')}
+          placeholder={i18n.t('Username')}
           style={{
             height: 40,
             width: '100%',
@@ -112,7 +112,7 @@ const LoginScreen = ({goBack, onMain}) => {
 
       <View style={{width: '90%'}}>
         <TextInput
-          placeholder={t('Password')}
+          placeholder={i18n.t('Password')}
           secureTextEntry
           style={{
             height: 40,
@@ -126,7 +126,7 @@ const LoginScreen = ({goBack, onMain}) => {
 
       <View style={{width: '90%'}}>
         <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
-          <Text style={{color: 'blue'}}>{t('Forgot password?')}</Text>
+          <Text style={{color: 'blue'}}>{i18n.t('Forgot password?')}</Text>
         </Pressable>
         <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
           <Text style={{color: 'blue'}}>Register account</Text>

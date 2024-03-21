@@ -4,6 +4,7 @@ import {View, Text, Pressable, Image} from 'react-native';
 import { useDispatch } from 'react-redux';
 import SvgIcons from '../assets/SvgIcons';
 import PngIcons from '../assets/PngIcons';
+import { changeScreen } from '../redux/screenSlice';
 
 let pl = 10;
 let px = 30;
@@ -15,7 +16,7 @@ const MeScreen = () => {
 
   const handleLogout = () => {;
     console.log("Thực hiện đăng xuất khỏi ứng dụng");
-    dispatch(setCurrentScreen('Splash')); // Dispatch action để chuyển đến màn hình Splash
+    dispatch(changeScreen('Splash'));
   };
 
   const handleAddUser = () => {
