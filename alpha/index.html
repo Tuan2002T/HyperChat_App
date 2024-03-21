@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload ảnh</title>
+</head>
+<body>
+  <h1>Tải lên ảnh</h1>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*">
+    <button type="submit">Tải lên</button>
+  </form>
+
+  <h2>Ảnh đã tải lên:</h2>
+  <div id="uploadedImages"></div>
+
+  <script>
+    // Hiển thị ảnh đã tải lên
+    fetch('/uploaded-images')
+      .then(response => response.json())
+      .then(images => {
+        const uploadedImagesElement = document.getElementById('uploadedImages');
+        images.forEach(image => {
+          const imgElement = document.createElement('img');
+          imgElement.src = image.url;
+          imgElement.width = 300;
+          uploadedImagesElement.appendChild(imgElement);
+        });
+      });
+  </script>
+</body>
+</html>

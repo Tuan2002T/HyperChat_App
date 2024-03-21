@@ -115,7 +115,11 @@ const SettingScreen = ({navigation}) => {
           {/* <Text style={{fontSize:12, fontWeight:'bold'}}>Privacy, security, change number</Text> */}
         </View>
       </Pressable>
-      
+      <Pressable onPress={()=>{
+        navigation.navigate('Login')
+      }}>
+        <Text style={{fontSize:16, color:'red', padding:30}}>Lougout</Text>
+      </Pressable>
     </View>
   );
 };
