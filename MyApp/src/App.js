@@ -1,18 +1,37 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { NavigationContainer } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import store from './redux/store';
 import SplashScreen from './screens/SplashScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
+import MainScreen from './components/MainTabNavigator';
 
 const App = () => {
+  const currentScreen = useSelector(state => state.screen.currentScreen);
 
-  return (
-    <Provider store={store}>
-      <NavigationContainer>
-        <SplashScreen />
-      </NavigationContainer>
-    </Provider>
-  );
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'Splash':
+        return <SplashScreen />;
+      case 'Login':
+        return <LoginScreen />;
+      case 'Register':
+        return <RegisterScreen />;
+      case 'Main':
+        return <MainScreen />;
+      default:
+        return <SplashScreen />;
+    }
+  };
+
+  return renderScreen();
 };
 
-export default App;
+const Root = () => (
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+
+export default Root;

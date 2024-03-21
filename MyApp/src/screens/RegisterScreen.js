@@ -1,12 +1,16 @@
 // src/screens/RegisterScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
 import i18n from '../i18n/i18n';
+import {useDispatch} from 'react-redux';
+import {changeScreen} from '../redux/screenSlice';
+
+
 
 const RegisterScreen = ({goBack, navigation}) => {
-  const {t} = useTranslation();
+  const dispatch = useDispatch();
 
   const [phoneNumber, setPhoneNumber] = useState('0000000000');
 
@@ -45,7 +49,7 @@ const RegisterScreen = ({goBack, navigation}) => {
   };
 
   const handleBack = () => {
-    goBack();
+    dispatch(changeScreen('Splash'))
   };
 
   return (
@@ -63,13 +67,13 @@ const RegisterScreen = ({goBack, navigation}) => {
           paddingHorizontal: '1%',
         }}>
         <Text style={{fontSize: 36, fontWeight: 700, color: 'black'}}>
-          {t('Enter your phone number')}
+          {i18n.t('Enter your phone number')}
         </Text>
       </View>
 
       <View style={{width: '90%'}}>
         <TextInput
-          placeholder={t('Enter your phone number')}
+          placeholder={i18n.t('Enter your phone number')}
           style={{
             height: 'auto',
             width: '100%',
@@ -96,7 +100,7 @@ const RegisterScreen = ({goBack, navigation}) => {
             borderRadius: 999,
           })}
           onPress={handleContinue}>
-          {({pressed}) => <Text style={{fontSize: 20}}>{t('Continue')}</Text>}
+          {({pressed}) => <Text style={{fontSize: 20}}>{i18n.t('Continue')}</Text>}
         </Pressable>
       </View>
 
