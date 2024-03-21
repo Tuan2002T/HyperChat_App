@@ -1,3 +1,4 @@
+// src/redux/languageSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 export const languageSlice = createSlice({
@@ -13,7 +14,5 @@ export const languageSlice = createSlice({
 });
 
 export const { changeLanguage } = languageSlice.actions;
-
 export const selectLanguage = (state) => state.language.value;
-
 export default languageSlice.reducer;

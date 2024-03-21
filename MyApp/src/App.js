@@ -1,16 +1,14 @@
-// App.js
 import React from 'react';
 import { Provider } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
-import StackNavigator from './src/components/StackNavigator';
-import store from './src/redux/store';
-import SplashScreen from './src/screens/SplashScreen';
+import store from './redux/store';
+import SplashScreen from './screens/SplashScreen';
 
 const App = () => {
+
   return (
     <Provider store={store}>
       <NavigationContainer>
-        {/* <StackNavigator /> */}
         <SplashScreen />
       </NavigationContainer>
     </Provider>

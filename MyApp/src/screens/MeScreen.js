@@ -1,8 +1,7 @@
 // MeScreen.js
 import React from 'react';
 import {View, Text, Pressable, Image} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useIsFocused} from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
 import SvgIcons from '../assets/SvgIcons';
 import PngIcons from '../assets/PngIcons';
 
@@ -11,12 +10,12 @@ let px = 30;
 let fs = 20;
 let fc = 'black';
 
-const MeScreen = ({navigation}) => {
-  const isFocused = useIsFocused();
+const MeScreen = () => {
+  const dispatch = useDispatch();
 
-  const handleLogout = async () => {
-    // Chuyển hướng đến màn hình đăng nhập
-    navigation.navigate('Login');
+  const handleLogout = () => {;
+    console.log("Thực hiện đăng xuất khỏi ứng dụng");
+    dispatch(setCurrentScreen('Splash')); // Dispatch action để chuyển đến màn hình Splash
   };
 
   const handleAddUser = () => {

@@ -1,17 +1,26 @@
 // src/redux/reducers.js
-import { SET_USER } from './actions';
+import { createReducer } from '@reduxjs/toolkit';
+import { setUserToken, setIsLoggedIn, logout } from './actions';
 
 const initialState = {
-  user: null,
+  userToken: null,
+  isLoggedIn: false,
 };
 
-const rootReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case SET_USER:
-      return { ...state, user: action.payload };
-    default:
-      return state;
-  }
-};
+const authReducer = createReducer(initialState, (builder) => {
+  builder
+    .addCase(setUserToken, (state, action) => {
+      state.userToken = action.payload;
+    })
+    .addCase(setIsLoggedIn, (state, action) => {
+      state.isLoggedIn = action.payload;
+    })
+    .addCase(logout, (state) => {
+      state.userToken = null;
+      state.isLoggedIn = false;
+    });
+});
 
-export default rootReducer;
+export const selectIsLoggedIn = (state) => state.auth.isLoggedIn;
+
+export default authReducer;

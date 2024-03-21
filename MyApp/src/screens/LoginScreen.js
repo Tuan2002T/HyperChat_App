@@ -1,12 +1,11 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, TextInput, Button, Pressable, Image} from 'react-native';
-import {useTranslation} from 'react-i18next';
+// src/screens/LoginScreen.js
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
-import PngIcons from '../assets/PngIcons';
 import i18n from '../i18n/i18n';
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = ({goBack, onMain}) => {
   const {t} = useTranslation();
 
   const [username, setUsername] = useState('');
@@ -27,7 +26,7 @@ const LoginScreen = ({navigation}) => {
   const handleLogin = () => {
     saveUsername(username);
     saveLoginStatus(true);
-    navigation.navigate('Main');
+    onMain();
     console.log('Login successful');
   };
 
@@ -59,6 +58,10 @@ const LoginScreen = ({navigation}) => {
     }
   };
 
+  const handleGoBack = () => {
+    goBack();
+  };
+
   return (
     <View style={{flex: 1, alignItems: 'center'}}>
       {/* Go to Start*/}
@@ -72,7 +75,7 @@ const LoginScreen = ({navigation}) => {
         }}>
         <Pressable
           style={{flexDirection: 'row'}}
-          onPress={() => navigation.navigate('Start')}>
+          onPress={handleGoBack}>
           <SvgIcons name="back" width={36} height={36} />
           <Text
             style={{

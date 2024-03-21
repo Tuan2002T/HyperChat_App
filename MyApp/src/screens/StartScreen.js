@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeLanguage, selectLanguage } from '../redux/reducers/languageSlice';
+import { changeLanguage, selectLanguage } from '../redux/languageSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n/i18n';
 import PngIcons from '../assets/PngIcons';

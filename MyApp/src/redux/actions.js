@@ -1,10 +1,6 @@
 // src/redux/actions.js
-export const setUserToken = (token) => ({
-  type: 'SET_USER_TOKEN',
-  payload: token,
-});
+import { createAction } from '@reduxjs/toolkit';
 
-export const setIsLoggedIn = (isLoggedIn) => ({
-  type: 'SET_IS_LOGGED_IN',
-  payload: isLoggedIn,
-});
+export const setUserToken = createAction('auth/setUserToken');
+export const setIsLoggedIn = createAction('auth/setIsLoggedIn');
+export const logout = createAction('auth/logout');
