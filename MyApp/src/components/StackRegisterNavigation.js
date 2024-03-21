@@ -1,23 +1,16 @@
-// MainStackNavigator.js
+// StackRegisterNavigation.js
 import React, {useEffect} from 'react';
 import { useNavigation } from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
-import MainTabNavigator from './MainTabNavigator';
-import Chat from '../screens/ChatScreen';
+import Register from '../screens/RegisterScreen';
+import Auth from '../screens/AuthScreen';
+import Profile from '../screens/CreateProfileScreen';
 
 const Stack = createStackNavigator();
 
-const MainStackNavigator = ({logout}) => {
+const StackRegisterNavigation = () => {
   const navigation = useNavigation();
-
-  const handleLogout = () => {
-    if (logout) {
-      logout();
-    } else {
-      console.log("Logout function is not provided!");
-    }
-  };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', () => {
@@ -30,13 +23,15 @@ const MainStackNavigator = ({logout}) => {
 
   return (
     <Stack.Navigator
-      initialRouteName="Main"
-      screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Main" component={MainTabNavigator} logout={handleLogout}/>
-      <Stack.Screen name="Chat" component={Chat} />
-
+      initialRouteName="Register"
+      screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Register">
+        {props => <Register {...props} goBack={() => navigation.goBack()} />}
+      </Stack.Screen>
+      <Stack.Screen name="Auth" component={Auth} />
+      <Stack.Screen name="Profile" component={Profile} />
     </Stack.Navigator>
   );
 };
 
-export default MainStackNavigator;
+export default StackRegisterNavigation;

@@ -56,7 +56,7 @@ const AuthScreen = ({navigation}) => {
         }}>
         <Pressable
           style={{flexDirection: 'row'}}
-          onPress={() => navigation.navigate('Start')}>
+          onPress={() => navigation.navigate('Register')}>
           <SvgIcons name="back" width={36} height={36} />
           <Text
             style={{

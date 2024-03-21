@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, TextInput, Pressable, Alert} from 'react-native';
-import {useTranslation} from 'react-i18next';
+// src/screens/RegisterScreen.js
+import React, { useState } from 'react';
+import { View, Text, TextInput, Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
 import i18n from '../i18n/i18n';
 
-const RegisterScreen = ({navigation}) => {
+const RegisterScreen = ({goBack, navigation}) => {
   const {t} = useTranslation();
 
   const [phoneNumber, setPhoneNumber] = useState('0000000000');
@@ -44,10 +44,14 @@ const RegisterScreen = ({navigation}) => {
     return OTP;
   };
 
+  const handleBack = () => {
+    goBack();
+  };
+
   return (
     <View style={{flex: 1, alignItems: 'center'}}>
       <View style={{padding: '1%', width: '100%'}}>
-        <Pressable onPress={() => navigation.navigate('Start')}>
+        <Pressable onPress={handleBack}>
           <SvgIcons name="back" width={36} height={36} />
         </Pressable>
       </View>
