@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView } from 'react-native';
 
-const MessageScreen = ({navigation}) => {
+const CallScreen = () => {
   return (
     <View style={styles.container}>
       <View style={{
@@ -30,26 +30,20 @@ const MessageScreen = ({navigation}) => {
         }} onPress={() => { }}>
           <Image source={require('../Images/Icon/Vector.png')} />
         </Pressable>
-        <Text style={{ color: 'black', fontSize: 20 }}>Home</Text>
-        <Image style={{ width: 45, height: 45, borderRadius: 100 }} source={{ uri: 'https://thegioiso.edu.vn/wp-content/uploads/2023/11/hinh-anh-gai-xinh-cute-1.jpg' }} />
+        <Text style={{ color: 'black', fontSize: 20 }}>Calls</Text>
+        <Pressable style={{
+          width: 37,
+          height: 37,
+          backgroundColor: 'white',
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderRadius: 100,
+          borderWidth: 0.3,
+          borderColor: 'black',
+        }} onPress={() => { }}>
+          <Image source={require('../Images/Icon/call-user.png')} />
+        </Pressable>
       </View>
-
-      {/* <View style={{ height: 100 }}>
-        <FlatList
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          data={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
-          renderItem={({ item }) => {
-            return (
-              <View style={{ width: 50, height: 50, backgroundColor: 'white', margin: 10, borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                <Image style={{ width: 45, height: 45, borderRadius: 100 }} source={{ uri: 'https://thegioiso.edu.vn/wp-content/uploads/2023/11/hinh-anh-gai-xinh-cute-1.jpg' }} />
-                <Text style={{ color: 'black' }}>{item}</Text>
-              </View>
-            );
-          }}
-        />
-
-      </View> */}
       <FlatList
         style={{ width: '100%', backgroundColor: 'white', borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
         // showsHorizontalScrollIndicator={false}
@@ -58,7 +52,7 @@ const MessageScreen = ({navigation}) => {
         renderItem={({ item }) => {
           return (
             <Pressable style={{ width: '100%', height: 50, backgroundColor: 'white', marginVertical:5 }}
-              onPress={() => { navigation.navigate('ViewMessage');
+              onPress={() => { console.log('Pressed') 
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems:'center' }}>
@@ -66,14 +60,16 @@ const MessageScreen = ({navigation}) => {
                   <Image style={{ width: 45, height: 45, borderRadius: 100, marginRight:10, marginLeft:20 }} source={{ uri: 'https://thegioiso.edu.vn/wp-content/uploads/2023/11/hinh-anh-gai-xinh-cute-1.jpg' }} />
                   <View>
                     <Text style={{ color: 'black' }}>Tên</Text>
-                    <Text style={{ color: 'gray', fontWeight: 'bold' }}>Tin nhắn mới nhất</Text>
+                    <Text style={{ color: 'gray', fontWeight: 'bold' }}>Today, 09:30 AM</Text>
                   </View>
                 </View>
-                <View style={{ alignItems:'center', marginRight:20}}>
-                  <Text style={{ color: 'gray', fontWeight: 'bold' }}>12:00</Text>
-                  <View style={{backgroundColor:'#F04A4C', width:20, height:20, alignItems:'center', borderRadius:20}}>
-                    <Text style={{ color: 'white', fontWeight: 'bold' }}>2</Text>
-                  </View>
+                <View style={{ alignItems:'center', flexDirection:'row'}}>
+                  <Pressable>
+                    <Image source={require('../Images/Icon/Call.png')} />
+                  </Pressable>
+                  <Pressable style = {{marginLeft:20, marginRight:20}}>
+                    <Image source={require('../Images/Icon/Video.png')} />
+                  </Pressable>
                 </View>
               </View>
             </Pressable>
@@ -98,4 +94,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MessageScreen;
+export default CallScreen;

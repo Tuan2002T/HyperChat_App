@@ -5,6 +5,8 @@ import MessagesScreen from '../screens/MessagesScreen';
 import ContactScreen from '../screens/ContactScreen';
 import MeScreen from '../screens/MeScreen';
 import DetailScreen from '../screens/DetailScreen';
+import SettingScreen from '../screens/SettingScreen';
+import CallScreen from '../screens/CallScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -14,9 +16,9 @@ const MainTabNavigator = () => {
       <Tab.Navigator
         screenOptions={{ headerShown: false }}>
         <Tab.Screen name="Messages" component={MessagesScreen} />
-        <Tab.Screen name="Contact" component={ContactScreen} />
-        <Tab.Screen name="Me" component={MeScreen}/>
-        <Tab.Screen name="Details" component={DetailScreen} />
+        <Tab.Screen name="Calls" component={CallScreen}/>
+        <Tab.Screen name="Contacts" component={ContactScreen} />
+        <Tab.Screen name="Settings" component={SettingScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
