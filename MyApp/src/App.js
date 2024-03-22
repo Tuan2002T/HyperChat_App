@@ -6,6 +6,7 @@ import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import MainScreen from './components/MainTabNavigator';
+import RegisterStack from './components/RegisterStackNavigator';
 
 const App = () => {
   const currentScreen = useSelector(state => state.screen.currentScreen);
@@ -17,7 +18,8 @@ const App = () => {
       case 'Login':
         return <LoginScreen />;
       case 'Register':
-        return <RegisterScreen />;
+        // return <RegisterScreen />;
+        return <RegisterStack />;
       case 'Main':
         return <MainScreen />;
       default:

@@ -1,37 +1,44 @@
 // DetailsScreen.tsx
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  FlatList,
+  Pressable,
+  TextInput,
+} from 'react-native';
+
+import SvgIcons from '../assets/SvgIcons';
+
+const MessagesScreen = ({navigation}) => {
+
 
 const MessageScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
-      <View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: 'white',
-        width: '100%',
-        height: 60,
-        marginTop: 20,
-        marginBottom: 20,
-        paddingLeft:20,
-        paddingRight:20,
-      }}>
-        <Pressable style={{
-          width: 37,
-          height: 37,
-          backgroundColor: 'white',
-          justifyContent: 'center',
+      <View
+        style={{
+          flexDirection: 'row',
+          width: '100%',
+          height: '10%',
+          backgroundColor: 'lightgrey',
           alignItems: 'center',
-          borderRadius: 100,
-          borderWidth: 0.3,
-          borderColor: 'black',
-        }} onPress={() => { }}>
-          <Image source={require('../Images/Icon/Vector.png')} />
-        </Pressable>
-        <Text style={{ color: 'black', fontSize: 20 }}>Home</Text>
-        <Image style={{ width: 45, height: 45, borderRadius: 100 }} source={{ uri: 'https://thegioiso.edu.vn/wp-content/uploads/2023/11/hinh-anh-gai-xinh-cute-1.jpg' }} />
+          justifyContent: 'space-between',
+        }}>
+        <View style={{flexDirection: 'row'}}>
+          <SvgIcons name="search" width={24} height={24} />
+          <TextInput style={{fontSize: 16}} placeholder="Search" />
+        </View>
+        <View>
+          <Text>Home</Text>
+        </View>
+        <View style={{flexDirection: 'row'}}>
+          <SvgIcons name="qr" width={24} height={24} />
+          <SvgIcons name="plus" width={24} height={24} />
+        </View>
+
       </View>
 
       {/* <View style={{ height: 100 }}>
