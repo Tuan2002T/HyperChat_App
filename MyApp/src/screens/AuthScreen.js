@@ -2,21 +2,21 @@
 
 import React, {Component, useState} from 'react';
 import {View, Text, TextInput, Pressable, Alert} from 'react-native';
-import {useTranslation} from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
 import i18n from '../i18n/i18n';
+import axios from 'axios';
+
 
 const AuthScreen = ({navigation}) => {
-  const [newOTP, setNewOTP] = useState('');
-
-  //get OTP from AsyncStorage
-  const [OTP, setOTP] = useState('');
-  AsyncStorage.getItem('OTP').then(OTP => {
-    if (OTP) {
-      setOTP(OTP);
+  const [otp, setOTP] = useState('');
+  const [email, setEmail] = useState('');
+  AsyncStorage.getItem('email').then(email => {
+    if (email) {
+      setEmail(email);
     }
   });
+
 
   // get phoneNumber from AsyncStorage
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -35,11 +35,22 @@ const AuthScreen = ({navigation}) => {
 
   // handle continue
   const handleContinue = async () => {
-    // if valid otp -> navigate to Main
-    if (newOTP === OTP) {
-      navigation.navigate('Profile');
-    } else {
-      Alert.alert('Thông báo', 'Mã xác thực không hợp lệ');
+    console.log('OTP:', otp);
+    console.log('email:', email);
+    try {
+      const response = await axios.post('http://192.168.2.41:5000/api/user/register/verifyOTP', {
+        email: email,
+        userOTP: otp, // Corrected key name
+      });
+      console.log('response:', response.data);
+      // Handle success response here
+      // Save token to AsyncStorage
+      await AsyncStorage.setItem('token', response.data.token);
+      // Navigate to Main screen
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error:', error.response.data);
+      // Handle error response here and display appropriate message to the user
     }
   };
 
@@ -84,7 +95,7 @@ const AuthScreen = ({navigation}) => {
         }}>
         <Text style={{fontSize: 36, fontWeight: 700, color: 'black'}}>
           {/*show phone number*/}
-          {phoneNumber}
+          {email}
         </Text>
       </View>
 
@@ -99,7 +110,7 @@ const AuthScreen = ({navigation}) => {
         }}
         keyboardType="numeric"
         placeholder="Enter OTP"
-        onChangeText={setNewOTP}
+        onChangeText={setOTP}
       />
 
       <Pressable

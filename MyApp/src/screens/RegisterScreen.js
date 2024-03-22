@@ -1,84 +1,91 @@
 // src/screens/RegisterScreen.js
-import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, Alert } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, TextInput, Pressable, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
 import i18n from '../i18n/i18n';
-import { useDispatch } from 'react-redux';
-import { changeScreen } from '../redux/screenSlice';
+import {useDispatch} from 'react-redux';
+import {changeScreen} from '../redux/screenSlice';
+import DatePicker from 'react-native-date-picker';
+import axios from 'axios';
 
-const RegisterScreen = ({ goBack, navigation }) => {
+const RegisterScreen = ({navigation}) => {
   const dispatch = useDispatch();
-  const [name, setName] = useState(''); // Tên người dùng
-  const [email, setEmail] = useState(''); 
-  const [phone, setPhone] = useState(''); 
-  const [pwd, setPwd] = useState(''); 
-  const [cpwd, setCpwd] = useState(''); 
-  const [contactInfo, setContactInfo] = useState({
-    type: 'phone', // Loại phương tiện đăng ký hiện tại: 'phone' hoặc 'email'
-    value: '0000000000' // Giá trị số điện thoại hoặc email
-  });
+  const [name, setName] = useState('Hoàng Hiện'); // Tên người dùng
+  const [email, setEmail] = useState('djn65341@fosiq.com');
+  const [phone, setPhone] = useState('0987687788');
+  const [pwd, setPwd] = useState('A@hihi8899');
+  const [cpwd, setCpwd] = useState('A@hihi8899');
+  const [open, setOpen] = useState(false);
+  const [birthday, setBirthday] = useState(new Date());
+  const formatDate = (date) => {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day < 10 ? '0' + day : day}/${month < 10 ? '0' + month : month}/${year}`;
+  };
+
+  const formatDate2 = (date) => {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day}`;
+  };
 
   const handleContinue = async () => {
-    // Kiểm tra số điện thoại hoặc email
-    if ((contactInfo.type === 'phone' && contactInfo.value.length !== 10) || (contactInfo.type === 'email' && !isValidEmail(contactInfo.value))) {
-      Alert.alert('Thông báo', contactInfo.type === 'phone' ? 'Số điện thoại không hợp lệ' : 'Email không hợp lệ');
+    if (!name || !email || !phone || !pwd || !cpwd) {
+      Alert.alert('Please enter all fields');
       return;
     }
 
-    // Lưu số điện thoại hoặc email vào bộ nhớ cục bộ
-    console.log('continue: contactInfo:', contactInfo);
-    try {
-      await AsyncStorage.setItem(contactInfo.type, contactInfo.value);
+    if (pwd !== cpwd) {
+      Alert.alert('Passwords do not match');
+      return;
+    }
 
-      // Di chuyển đến màn hình AuthScreen
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Invalid email address');
+      return;
+    }
+
+    // Validate phone number format
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+      Alert.alert('Invalid phone number');
+      return;
+    }
+
+    try {
+      await AsyncStorage.setItem('email', email);
+      const response = await axios.post('http://192.168.2.41:5000/api/user/register/send-otp', {
+        userName: name.replace(/\s/g, ''), // remove spaces
+        password: pwd,
+        fullname: name,
+        email: email,
+        phoneNumber: phone,
+        birthday: formatDate2(birthday),
+      });
+      console.log('Login successfully:', response.data);
       navigation.navigate('Auth');
     } catch (error) {
-      console.error('Error in handleContinue:', error);
+      console.error('Error in handleContinue:', error.response?.data || error.message);
+      Alert.alert('Error', error.response?.data?.error || 'Something went wrong');
     }
-
-    // Gửi mã OTP hoặc link xác nhận
-    if (contactInfo.type === 'phone') {
-      const OTP = generateOTP();
-      await AsyncStorage.setItem('OTP', OTP);
-      console.log('OTP:', OTP);
-    } else {
-      // Xử lý gửi email xác nhận
-    }
-  };
-
-  const isValidEmail = (email) => {
-    // Kiểm tra định dạng email
-    return /\S+@\S+\.\S+/.test(email);
-  };
-
-  // generateOTP
-  const generateOTP = () => {
-    let OTP = '';
-    for (let i = 0; i < 6; i++) {
-      OTP += Math.floor(Math.random() * 10);
-    }
-    return OTP;
   };
 
   const handleBack = () => {
     dispatch(changeScreen('Splash'));
   };
 
-  const toggleContactType = () => {
-    // Chuyển đổi giữa nhập số điện thoại và nhập email
-    const newType = contactInfo.type === 'phone' ? 'email' : 'phone';
-    setContactInfo({ ...contactInfo, type: newType, value: ''});
-  };
-
   return (
-    <View style={{ flex: 1, alignItems: 'center' }}>
-      <View style={{ padding: '1%', width: '100%' }}>
+    <View style={{flex: 1, alignItems: 'center'}}>
+      <View style={{padding: '1%', width: '100%'}}>
         <Pressable onPress={handleBack}>
           <SvgIcons name="back" width={36} height={36} />
         </Pressable>
       </View>
-
 
       <View
         style={{
@@ -86,12 +93,12 @@ const RegisterScreen = ({ goBack, navigation }) => {
           paddingVertical: '10%',
           paddingHorizontal: '1%',
         }}>
-        <Text style={{ fontSize: 36, fontWeight: 700, color: 'black' }}>
-          {contactInfo.type === 'phone' ? i18n.t('Enter your phone number') : i18n.t('Enter your email')}
+        <Text style={{fontSize: 36, fontWeight: 700, color: 'black'}}>
+          {i18n.t('Enter your info')}
         </Text>
       </View>
 
-      <View style={{ width: '90%' }}>
+      <View style={{width: '90%'}}>
         <TextInput
           placeholder={'Input your NAME'}
           style={{
@@ -107,7 +114,7 @@ const RegisterScreen = ({ goBack, navigation }) => {
         />
       </View>
 
-      <View style={{ width: '90%' }}>
+      <View style={{width: '90%'}}>
         <TextInput
           placeholder={'Input your EMAIL'}
           style={{
@@ -123,7 +130,7 @@ const RegisterScreen = ({ goBack, navigation }) => {
         />
       </View>
 
-      <View style={{ width: '90%' }}>
+      <View style={{width: '90%'}}>
         <TextInput
           placeholder={'Input your PHONE NUMBER'}
           style={{
@@ -139,7 +146,7 @@ const RegisterScreen = ({ goBack, navigation }) => {
         />
       </View>
 
-      <View style={{ width: '90%' }}>
+      <View style={{width: '90%'}}>
         <TextInput
           placeholder={'Input your phone PASSWORD'}
           style={{
@@ -155,7 +162,7 @@ const RegisterScreen = ({ goBack, navigation }) => {
         />
       </View>
 
-      <View style={{ width: '90%' }}>
+      <View style={{width: '90%'}}>
         <TextInput
           placeholder={'Confirm your PASSWORD'}
           style={{
@@ -170,10 +177,38 @@ const RegisterScreen = ({ goBack, navigation }) => {
           value={cpwd}
         />
       </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          width: '90%',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: '5%',
+        }}>
+        {/* show date picker */}
+        <Text style={{fontSize: 20, marginRight: 10}}>Date of Birth:</Text>
+        <Text style={{fontSize: 20, marginRight: 10, color: 'black'}}>
+          {formatDate(birthday)}
+        </Text>
 
-      <View style={{ width: '90%' }}>
+        <Pressable onPress={() => setOpen(true)}>
+          <SvgIcons name="edit" width={20} height={20} />
+        </Pressable>
+        <DatePicker
+          mode="date"
+          modal
+          open={open}
+          date={birthday}
+          onConfirm={selectedDate => {
+            setOpen(false);
+            setBirthday(selectedDate);
+          }}
+          onCancel={() => setOpen(false)}
+        />
+      </View>
+      <View style={{width: '90%'}}>
         <Pressable
-          style={({ pressed }) => ({
+          style={({pressed}) => ({
             backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
             justifyContent: 'center',
             alignItems: 'center',
@@ -182,30 +217,24 @@ const RegisterScreen = ({ goBack, navigation }) => {
             borderRadius: 999,
           })}
           onPress={handleContinue}>
-          {({ pressed }) => (
-            <Text style={{ fontSize: 20 }}>{i18n.t('Continue')}</Text>
+          {({pressed}) => (
+            <Text style={{fontSize: 20}}>{i18n.t('Continue')}</Text>
           )}
         </Pressable>
       </View>
 
-      <View style={{ flexDirection: 'row', paddingVertical: '5%' }}>
-        <Text>{contactInfo.type === 'phone' ? 'Bạn đã có tài khoản?' : 'Quay lại nhập số điện thoại?'}</Text>
+      {/* <View style={{flexDirection: 'row', paddingVertical: '5%'}}>
+        <Text>
+          {contactInfo.type === 'phone'
+            ? 'Bạn đã có tài khoản?'
+            : 'Quay lại nhập số điện thoại?'}
+        </Text>
         <Pressable onPress={toggleContactType}>
-          <Text style={{ color: 'blue' }}>{contactInfo.type === 'phone' ? 'Via email' : 'Via phone'}</Text>
+          <Text style={{color: 'blue'}}>
+            {contactInfo.type === 'phone' ? 'Via email' : 'Via phone'}
+          </Text>
         </Pressable>
-      </View>
-
-      {contactInfo.type === 'phone' && (
-        <View>
-          {/* Phần này sẽ hiển thị nếu đang nhập số điện thoại */}
-        </View>
-      )}
-
-      {contactInfo.type === 'email' && (
-        <View>
-          {/* Phần này sẽ hiển thị nếu đang nhập email */}
-        </View>
-      )}
+      </View> */}
     </View>
   );
 };

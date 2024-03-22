@@ -1,17 +1,43 @@
 // src/screens/LoginScreen.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Pressable, Alert } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, Text, TextInput, Pressable, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
 import i18n from '../i18n/i18n';
 import {useDispatch, useSelector} from 'react-redux';
-import { selectCurrentScreen, changeScreen } from '../redux/screenSlice';
+import {selectCurrentScreen, changeScreen} from '../redux/screenSlice';
+import axios from 'axios';
 
-
-const LoginScreen = ({goBack, onMain}) => {
+const LoginScreen = () => {
   const dispatch = useDispatch();
 
   const [username, setUsername] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('0938131256');
+  const [password, setPassword] = useState('HienLor@123123123');
+
+  const handleChecklogin = async () => {
+    console.log('checklogin');
+    console.log('phoneNumber:', phoneNumber);
+    console.log('password:', password);
+
+    if (phoneNumber === '' || password === '') {
+      Alert.alert('Please enter phoneNumber and password');
+      console.log('Please enter phoneNumber and password');
+      return;
+    }
+
+    /**/
+    try {
+      const response = await axios.post('http://192.168.2.41:5000/api/user/login', {
+        phoneNumber: phoneNumber,
+        password: password,
+      });
+      console.log('Login successfully:', response.data.token);
+    } catch (error) {
+      console.error('Error', error);
+    }
+  };
+  /**/
 
   useEffect(() => {
     loadUsername();
@@ -73,9 +99,7 @@ const LoginScreen = ({goBack, onMain}) => {
           paddingLeft: 20,
           justifyContent: 'center',
         }}>
-        <Pressable
-          style={{flexDirection: 'row'}}
-          onPress={handleGoBack}>
+        <Pressable style={{flexDirection: 'row'}} onPress={handleGoBack}>
           <SvgIcons name="back" width={36} height={36} />
           <Text
             style={{
@@ -145,6 +169,11 @@ const LoginScreen = ({goBack, onMain}) => {
             backgroundColor: 'lightblue',
           }}>
           <SvgIcons name="go" width={36} height={36} />
+        </Pressable>
+      </View>
+      <View>
+        <Pressable onPress={handleChecklogin}>
+          <Text>checklogin</Text>
         </Pressable>
       </View>
     </View>
