@@ -9,13 +9,10 @@ import {
   Pressable,
   TextInput,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {useIsFocused} from '@react-navigation/native';
 
 import SvgIcons from '../assets/SvgIcons';
 
 const MessagesScreen = ({navigation}) => {
-  const isFocused = useIsFocused(true);
 
   return (
     <View style={styles.container}>
@@ -23,14 +20,17 @@ const MessagesScreen = ({navigation}) => {
         style={{
           flexDirection: 'row',
           width: '100%',
-          height: '5%',
-          backgroundColor: 'lightblue',
+          height: '10%',
+          backgroundColor: 'lightgrey',
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
         <View style={{flexDirection: 'row'}}>
           <SvgIcons name="search" width={24} height={24} />
           <TextInput style={{fontSize: 16}} placeholder="Search" />
+        </View>
+        <View>
+          <Text>Home</Text>
         </View>
         <View style={{flexDirection: 'row'}}>
           <SvgIcons name="qr" width={24} height={24} />

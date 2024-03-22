@@ -9,11 +9,7 @@ import { changeScreen } from '../redux/screenSlice';
 
 const RegisterScreen = ({ goBack, navigation }) => {
   const dispatch = useDispatch();
-  const [name, setName] = useState(''); // Tên người dùng
-  const [email, setEmail] = useState(''); 
-  const [phone, setPhone] = useState(''); 
-  const [pwd, setPwd] = useState(''); 
-  const [cpwd, setCpwd] = useState(''); 
+
   const [contactInfo, setContactInfo] = useState({
     type: 'phone', // Loại phương tiện đăng ký hiện tại: 'phone' hoặc 'email'
     value: '0000000000' // Giá trị số điện thoại hoặc email
@@ -79,7 +75,6 @@ const RegisterScreen = ({ goBack, navigation }) => {
         </Pressable>
       </View>
 
-
       <View
         style={{
           alignItems: 'center',
@@ -93,7 +88,7 @@ const RegisterScreen = ({ goBack, navigation }) => {
 
       <View style={{ width: '90%' }}>
         <TextInput
-          placeholder={'Input your NAME'}
+          placeholder={contactInfo.type === 'phone' ? i18n.t('Enter your phone number') : i18n.t('Enter your email')}
           style={{
             height: 'auto',
             width: '100%',
@@ -102,72 +97,9 @@ const RegisterScreen = ({ goBack, navigation }) => {
             borderWidth: 1,
             borderRadius: 10,
           }}
-          onChangeText={setName}
-          value={name}
-        />
-      </View>
-
-      <View style={{ width: '90%' }}>
-        <TextInput
-          placeholder={'Input your EMAIL'}
-          style={{
-            height: 'auto',
-            width: '100%',
-            marginBottom: 10,
-            borderColor: 'gray',
-            borderWidth: 1,
-            borderRadius: 10,
-          }}
-          onChangeText={setEmail}
-          value={email}
-        />
-      </View>
-
-      <View style={{ width: '90%' }}>
-        <TextInput
-          placeholder={'Input your PHONE NUMBER'}
-          style={{
-            height: 'auto',
-            width: '100%',
-            marginBottom: 10,
-            borderColor: 'gray',
-            borderWidth: 1,
-            borderRadius: 10,
-          }}
-          onChangeText={setPhone}
-          value={phone}
-        />
-      </View>
-
-      <View style={{ width: '90%' }}>
-        <TextInput
-          placeholder={'Input your phone PASSWORD'}
-          style={{
-            height: 'auto',
-            width: '100%',
-            marginBottom: 10,
-            borderColor: 'gray',
-            borderWidth: 1,
-            borderRadius: 10,
-          }}
-          onChangeText={setPwd}
-          value={pwd}
-        />
-      </View>
-
-      <View style={{ width: '90%' }}>
-        <TextInput
-          placeholder={'Confirm your PASSWORD'}
-          style={{
-            height: 'auto',
-            width: '100%',
-            marginBottom: 10,
-            borderColor: 'gray',
-            borderWidth: 1,
-            borderRadius: 10,
-          }}
-          onChangeText={setCpwd}
-          value={cpwd}
+          keyboardType={contactInfo.type === 'phone' ? 'numeric' : 'email-address'}
+          onChangeText={text => setContactInfo({ ...contactInfo, value: text })}
+          value={contactInfo.value}
         />
       </View>
 
