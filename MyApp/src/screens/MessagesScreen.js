@@ -96,7 +96,7 @@ const MessageScreen = ({navigation}) => {
                 marginVertical: 5,
               }}
               onPress={() => {
-                navigation.navigate('ViewMessage');
+                navigation.navigate('ChatScreen');
               }}>
               <View
                 style={{

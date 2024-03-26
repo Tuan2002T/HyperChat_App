@@ -22,7 +22,6 @@ const LoginScreen = () => {
 
     if (phoneNumber === '' || password === '') {
       Alert.alert('Please enter phoneNumber and password');
-      console.log('Please enter phoneNumber and password');
       return;
     }
 

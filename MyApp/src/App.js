@@ -1,12 +1,13 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { useSelector } from 'react-redux';
+import { NavigationContainer } from '@react-navigation/native';
 import store from './redux/store';
 import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
-import RegisterScreen from './screens/RegisterScreen';
-import MainScreen from './components/MainTabNavigator';
-import RegisterStack from './components/RegisterStackNavigator';
+import MainTabNavigator from './components/MainTabNavigator';
+import RegisterStackNavigator from './components/RegisterStackNavigator';
+import MainStackNavigator from './components/MainStackNavigator';
 
 const App = () => {
   const currentScreen = useSelector(state => state.screen.currentScreen);
@@ -18,10 +19,9 @@ const App = () => {
       case 'Login':
         return <LoginScreen />;
       case 'Register':
-        // return <RegisterScreen />;
-        return <RegisterStack />;
+        return <RegisterStackNavigator />;
       case 'Main':
-        return <MainScreen />;
+        return <MainStackNavigator />;
       default:
         return <SplashScreen />;
     }
@@ -32,7 +32,9 @@ const App = () => {
 
 const Root = () => (
   <Provider store={store}>
-    <App />
+    <NavigationContainer>
+      <App />
+    </NavigationContainer>
   </Provider>
 );
 

@@ -17,6 +17,7 @@
     "@react-navigation/stack": "^6.3.25",
     "@redux-devtools/extension": "^3.3.0",
     "@reduxjs/toolkit": "^2.2.2",
+    "antd": "^5.15.4",
     "axios": "^1.6.8",
     "i18next": "^23.10.0",
     "install": "^0.13.0",
