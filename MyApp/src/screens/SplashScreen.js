@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet, Image, Text} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectIsLoggedIn } from '../redux/authSlice';
-import { changeScreen } from '../redux/screenSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {selectIsLoggedIn} from '../redux/authSlice';
+import {changeScreen} from '../redux/screenSlice';
 import PngIcons from '../assets/PngIcons';
 import i18n from '../i18n/i18n';
-import LoginButton from '../components/LoginButton';
-import RegisterButton from '../components/RegisterButton';
 import LanguageSelector from '../components/LanguageSelector ';
 import AnimatedCircle from '../components/AnimatedCircle';
+
+import {Button} from 'react-native-paper';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -47,7 +47,7 @@ const SplashScreen = () => {
 
   const renderIcon = iconSource => {
     return currentLanguage === iconSource ? (
-      <Image source={PngIcons[iconSource]} style={{ width: 50, height: 50 }} />
+      <Image source={PngIcons[iconSource]} style={{width: 50, height: 50}} />
     ) : null;
   };
 
@@ -62,10 +62,42 @@ const SplashScreen = () => {
       <AnimatedCircle />
       {showButtons && (
         <View style={styles.buttonContainer}>
-          <LoginButton handleLogin={() => dispatch(changeScreen('Login'))} />
+          {/* <LoginButton handleLogin={() => dispatch(changeScreen('Login'))} />
           <RegisterButton
             handleRegister={() => dispatch(changeScreen('Register'))}
-          />
+          /> */}
+          <Button
+            style={{
+              width: '100%',
+              height: 50,
+              marginVertical: 10,
+              borderRadius: 9999,
+              justifyContent: 'center',
+              backgroundColor: '#76ABAE',
+            }}
+            mode="contained"
+            labelStyle={{fontSize: 20}}
+            onPress={() => {
+              dispatch(changeScreen('Login'));
+            }}>
+            {i18n.t('Login')}
+          </Button>
+          <Button
+            style={{
+              width: '100%',
+              height: 50,
+              marginVertical: 10,
+              borderRadius: 9999,
+              justifyContent: 'center',
+              backgroundColor: '#EEE',
+            }}
+            mode="contained"
+            labelStyle={{fontSize: 20, color: '#76ABAE'}}
+            onPress={() => {
+              dispatch(changeScreen('Register'));
+            }}>
+            {i18n.t('Create new account')}
+          </Button>
           <LanguageSelector
             currentLanguage={currentLanguage}
             toggleLanguage={toggleLanguage}

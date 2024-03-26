@@ -5,7 +5,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import store from './redux/store';
 import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
-import MainTabNavigator from './components/MainTabNavigator';
 import RegisterStackNavigator from './components/RegisterStackNavigator';
 import MainStackNavigator from './components/MainStackNavigator';
 
