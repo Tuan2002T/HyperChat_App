@@ -75,6 +75,17 @@ const RegisterScreen = ({navigation}) => {
     }
   };
 
+  const handleTest = async () => {
+    try {
+      const response = await axios.get('http://192.168.2.41:5000/api/user');
+      console.log('Login successfully:', response.data);
+    } catch (error) {
+      console.error('Error in handleContinue:', error.response?.data || error.message);
+      Alert.alert('Error', error.response?.data?.error || 'Something went wrong');
+    }
+  };
+
+        
   const handleBack = () => {
     dispatch(changeScreen('Splash'));
   };
@@ -219,6 +230,22 @@ const RegisterScreen = ({navigation}) => {
           onPress={handleContinue}>
           {({pressed}) => (
             <Text style={{fontSize: 20}}>{i18n.t('Continue')}</Text>
+          )}
+        </Pressable>
+      </View>
+      <View style={{width: '90%'}}>
+        <Pressable
+          style={({pressed}) => ({
+            backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 10,
+            marginTop: 10,
+            borderRadius: 999,
+          })}
+          onPress={handleTest}>
+          {({pressed}) => (
+            <Text style={{fontSize: 20}}>{i18n.t('TEST')}</Text>
           )}
         </Pressable>
       </View>
