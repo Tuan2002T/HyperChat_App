@@ -1,8 +1,8 @@
-import React, { useRef, useMemo, useEffect } from 'react';
-import { View, Animated, Dimensions, StyleSheet } from 'react-native';
+import React, {useRef, useMemo, useEffect} from 'react';
+import {View, Animated, Dimensions, StyleSheet} from 'react-native';
 import SvgIcons from '../assets/SvgIcons';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 const circleWidth = width / 2;
 
 const AnimatedCircle = () => {
@@ -32,7 +32,7 @@ const AnimatedCircle = () => {
             useNativeDriver: true,
           }),
           Animated.timing(move, {
-            delay: 1000,
+            delay: 500,
             toValue: 0,
             duration: 1000,
             useNativeDriver: true,
@@ -60,61 +60,61 @@ const AnimatedCircle = () => {
 
   return (
     <View
+      style={{
+        position: 'absolute',
+        top: height / 3,
+        width: width / 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+      <Animated.View
         style={{
-          position: 'absolute',
-          top: height / 3,
-          width: width / 2,
+          width: circleWidth,
+          height: circleWidth,
+          ...StyleSheet.absoluteFill,
           alignItems: 'center',
           justifyContent: 'center',
+          opacity: textOpacity,
         }}>
-        <Animated.View
-          style={{
-            width: circleWidth,
-            height: circleWidth,
-            ...StyleSheet.absoluteFill,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: textOpacity,
-          }}>
-          <SvgIcons name="logo" width={circleWidth} height={circleWidth} />
-        </Animated.View>
-        <Animated.View
-          style={{
-            width: circleWidth,
-            height: circleWidth,
-            ...StyleSheet.absoluteFill,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: exhale,
-          }}>
-          <SvgIcons name="logo" width={circleWidth} height={circleWidth} />
-        </Animated.View>
-        {[0, 1, 2, 3, 4, 5, 6, 7].map(item => {
-          const rotation = move.interpolate({
-            inputRange: [0, 1],
-            outputRange: [`${item * 45}deg`, `${item * 45 + 180}deg`],
-          });
-          return (
-            <Animated.View
-              key={item}
-              style={{
-                opacity: 0.1,
-                backgroundColor: 'black',
-                width: circleWidth,
-                height: circleWidth,
-                borderRadius: circleWidth / 2,
-                ...StyleSheet.absoluteFill,
-                transform: [
-                  {
-                    rotateZ: rotation,
-                  },
-                  {translateX: translate},
-                  {translateY: translate},
-                ],
-              }}></Animated.View>
-          );
-        })}
-      </View>
+        <SvgIcons name="logo" width={circleWidth} height={circleWidth} />
+      </Animated.View>
+      <Animated.View
+        style={{
+          width: circleWidth,
+          height: circleWidth,
+          ...StyleSheet.absoluteFill,
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: exhale,
+        }}>
+        <SvgIcons name="logo" width={circleWidth} height={circleWidth} />
+      </Animated.View>
+      {[0, 1, 2, 3, 4, 5, 6, 7].map(item => {
+        const rotation = move.interpolate({
+          inputRange: [0, 1],
+          outputRange: [`${item * 45}deg`, `${item * 45 + 180}deg`],
+        });
+        return (
+          <Animated.View
+            key={item}
+            style={{
+              opacity: 0.1,
+              backgroundColor: 'black',
+              width: circleWidth,
+              height: circleWidth,
+              borderRadius: circleWidth / 2,
+              ...StyleSheet.absoluteFill,
+              transform: [
+                {
+                  rotateZ: rotation,
+                },
+                {translateX: translate},
+                {translateY: translate},
+              ],
+            }}></Animated.View>
+        );
+      })}
+    </View>
   );
 };
 

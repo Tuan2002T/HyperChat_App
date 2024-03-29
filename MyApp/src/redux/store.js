@@ -3,6 +3,8 @@ import navigationReducer from './navigationSlice';
 import languageReducer from './languageSlice';
 import authReducer from './authSlice';
 import screenReducer from './screenSlice';
+import chatReducer from './chatSlice';
+
 
 const store = configureStore({
   reducer: {
@@ -11,6 +13,8 @@ const store = configureStore({
     navigation: navigationReducer,
     auth: authReducer,
     screen: screenReducer,
+    chat: chatReducer,
+
   },
 });
 

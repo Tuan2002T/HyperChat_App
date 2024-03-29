@@ -3,19 +3,21 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 
 import MainTabNavigator from './MainTabNavigator';
-import ChatScreen from '../screens/ChatScreen';
+import ChatScreen from '../views/ChatScreen';
+import NewMessageScreen from '../views/NewMessageScreen';
+import SettingScreen from '../views/SettingScreen';
+import MyInfoScreen from '../views/MyInfoScreen';
 
 const Stack = createStackNavigator();
 
 const MainStackNavigator = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="MainTabNavigator"
-        component={MainTabNavigator}
-        options={{headerShown: false}}
-      />
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="MainTabNavigator" component={MainTabNavigator} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+      <Stack.Screen name="NewMessageScreen" component={NewMessageScreen} />
+      <Stack.Screen name="SettingScreen" component={SettingScreen} />
+      <Stack.Screen name="MyInfoScreen" component={MyInfoScreen} />
     </Stack.Navigator>
   );
 };

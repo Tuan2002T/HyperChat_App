@@ -19,6 +19,11 @@ import focus_messages from './svg/focus_messages.svg';
 import focus_calls from './svg/focus_calls.svg';
 import focus_contacts from './svg/focus_contacts.svg';
 import focus_settings from './svg/focus_settings.svg';
+import eye from './svg/eye.svg';
+import eye_off from './svg/eye-off.svg';
+import arrow_left from './svg/arrow-left.svg';
+import arrow_right from './svg/arrow-right.svg';
+import menu from './svg/menu.svg';
 
 const icons = {
   logo,
@@ -30,6 +35,11 @@ const icons = {
   focus_calls,
   focus_contacts,
   focus_settings,
+  eye,
+  eye_off,
+  arrow_left,
+  arrow_right,
+  menu,
 
   go,
   back,

@@ -16,11 +16,10 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const SplashScreen = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector(selectIsLoggedIn);
-  const [showButtons, setShowButtons] = useState(!isLoggedIn);
+  const [showButtons, setShowButtons] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en'); // State to store the current language
 
   useEffect(() => {
-    // Load language from AsyncStorage when the component mounts
     const loadLanguage = async () => {
       try {
         const language = await AsyncStorage.getItem('language');
@@ -33,6 +32,7 @@ const SplashScreen = () => {
       }
     };
     loadLanguage();
+    delay(2000).then(() => setShowButtons(true));
   }, []);
 
   const toggleLanguage = async newLanguage => {
@@ -53,56 +53,50 @@ const SplashScreen = () => {
 
   return (
     <View style={styles.container}>
-      {showButtons && (
-        <View style={styles.iconContainer}>
-          {renderIcon('vi')}
-          {renderIcon('en')}
-        </View>
-      )}
       <AnimatedCircle />
       {showButtons && (
-        <View style={styles.buttonContainer}>
-          {/* <LoginButton handleLogin={() => dispatch(changeScreen('Login'))} />
-          <RegisterButton
-            handleRegister={() => dispatch(changeScreen('Register'))}
-          /> */}
-          <Button
-            style={{
-              width: '100%',
-              height: 50,
-              marginVertical: 10,
-              borderRadius: 9999,
-              justifyContent: 'center',
-              backgroundColor: '#76ABAE',
-            }}
-            mode="contained"
-            labelStyle={{fontSize: 20}}
-            onPress={() => {
-              dispatch(changeScreen('Login'));
-            }}>
-            {i18n.t('Login')}
-          </Button>
-          <Button
-            style={{
-              width: '100%',
-              height: 50,
-              marginVertical: 10,
-              borderRadius: 9999,
-              justifyContent: 'center',
-              backgroundColor: '#EEE',
-            }}
-            mode="contained"
-            labelStyle={{fontSize: 20, color: '#76ABAE'}}
-            onPress={() => {
-              dispatch(changeScreen('Register'));
-            }}>
-            {i18n.t('Create new account')}
-          </Button>
-          <LanguageSelector
-            currentLanguage={currentLanguage}
-            toggleLanguage={toggleLanguage}
-          />
-        </View>
+        <>
+          <View style={styles.iconContainer}>
+            {renderIcon('vi')}
+            {renderIcon('en')}
+          </View>
+          <View style={styles.buttonContainer}>
+            <Button
+              style={{
+                width: '100%',
+                marginVertical: 10,
+                borderRadius: 9999,
+                justifyContent: 'center',
+                backgroundColor: '#76ABAE',
+              }}
+              mode="contained"
+              labelStyle={{fontSize: 18}}
+              onPress={() => {
+                dispatch(changeScreen('Login'));
+              }}>
+              {i18n.t('Login')}
+            </Button>
+            <Button
+              style={{
+                width: '100%',
+                marginVertical: 10,
+                borderRadius: 9999,
+                justifyContent: 'center',
+                backgroundColor: '#EEE',
+              }}
+              mode="contained"
+              labelStyle={{fontSize: 18, color: '#76ABAE'}}
+              onPress={() => {
+                dispatch(changeScreen('Register'));
+              }}>
+              {i18n.t('Create new account')}
+            </Button>
+            <LanguageSelector
+              currentLanguage={currentLanguage}
+              toggleLanguage={toggleLanguage}
+            />
+          </View>
+        </>
       )}
     </View>
   );

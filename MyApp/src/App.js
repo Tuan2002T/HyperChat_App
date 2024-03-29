@@ -3,8 +3,8 @@ import { Provider } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import store from './redux/store';
-import SplashScreen from './screens/SplashScreen';
-import LoginScreen from './screens/LoginScreen';
+import SplashScreen from './views/SplashScreen';
+import LoginScreen from './views/LoginScreen';
 import RegisterStackNavigator from './components/RegisterStackNavigator';
 import MainStackNavigator from './components/MainStackNavigator';
 

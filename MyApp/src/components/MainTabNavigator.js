@@ -2,10 +2,10 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import SvgIcons from '../assets/SvgIcons';
 
-import MessagesScreen from '../screens/MessagesScreen';
-import ContactScreen from '../screens/ContactScreen';
-import SettingScreen from '../screens/SettingScreen';
-import CallScreen from '../screens/CallScreen';
+import MessagesScreen from '../views/MessagesScreen';
+import ContactScreen from '../views/ContactScreen';
+import SettingScreen from '../views/SettingScreen';
+import CallScreen from '../views/CallScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -33,7 +33,7 @@ const MainTabNavigator = () => {
           fontSize: 14,
         },
         tabBarActiveTintColor: '#76ABAE',
-        tabBarInactiveTintColor: 'black',
+        tabBarInactiveTintColor: 'grey',
       })}>
       <Tab.Screen name="Chats" component={MessagesScreen} />
       <Tab.Screen name="Calls" component={CallScreen} />

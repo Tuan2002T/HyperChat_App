@@ -3,12 +3,22 @@
   "Start Screen": "Màn hình bắt đầu",
   "Login Screen": "Màn hình Đăng nhập",
   "Username": "Tên người dùng",
-  "Password": "Mật khẩu",
   "Login": "Đăng nhập",
   "Create new account": "Tạo tài khoản mới",
-
+  
   "Enter your phone number": "Nhập số điện thoại",
-  "Continue": "Tiếp tục"
+  "Continue": "Tiếp tục",
+  "Forgotten password?": "Quên mật khẩu?",
+  "Register": "Đăng ký",
+  "Account information": "Thông tin tài khoản",
+  "Full name": "Họ và tên",
+  "Email": "Email",
+  "Phone number": "Số điện thoại",
+  "Password": "Mật khẩu",
+  "Confirm password": "Xác nhận mật khẩu",
+
+  "Verify your email": "Xác minh email của bạn",
+  "The OTP code has been sent to your email": "Mã OTP đã được gửi đến email của bạn"
 
 
 

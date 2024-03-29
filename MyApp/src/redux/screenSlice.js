@@ -4,7 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 export const screenSlice = createSlice({
   name: 'screen',
   initialState: {
-    currentScreen: 'Splash', // Màn hình hiện tại
+    currentScreen: 'Splash',
   },
   reducers: {
     changeScreen: (state, action) => {
