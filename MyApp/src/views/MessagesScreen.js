@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {selectChat} from '../redux/chatSlice';
-import SvgIcons from '../assets/SvgIcons';
 import CustomHeader from '../components/CustomHeader';
 import {Searchbar} from 'react-native-paper';
 

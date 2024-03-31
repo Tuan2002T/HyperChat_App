@@ -1,16 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, Pressable, Alert} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n/i18n';
 import {useDispatch} from 'react-redux';
 import {changeScreen} from '../redux/screenSlice';
-import axios from 'axios';
-import {Button, Divider , Dialog} from 'react-native-paper';
+import {Button, Divider} from 'react-native-paper';
 import Header from '../components/Header';
 import CustomTextInput from '../components/CustomTextInput';
-import { loginUser } from '../api/loginUser'; // Import loginUser function
-
-
+import {loginUser} from '../api/loginUser'; // Import loginUser function
+import {loginUserSuccess} from '../redux/authSlice';
 
 const LoginScreen = () => {
   const dispatch = useDispatch();
@@ -32,8 +29,10 @@ const LoginScreen = () => {
     }
 
     try {
-      const phoneNumber = await loginUser(username, password);
-      Alert.alert('Login successfully:', phoneNumber);
+      const res = await loginUser(username, password);
+      dispatch(loginUserSuccess(res));
+      console.log(res);
+      Alert.alert('Login successfully:', res.phoneNumber);
       handleGotoChat();
     } catch (error) {
       Alert.alert(error.message);

@@ -15,7 +15,6 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const SplashScreen = () => {
   const dispatch = useDispatch();
-  const isLoggedIn = useSelector(selectIsLoggedIn);
   const [showButtons, setShowButtons] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en'); // State to store the current language
 

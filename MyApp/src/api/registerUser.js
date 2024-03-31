@@ -13,7 +13,8 @@ const formatDate = date => {
 export const registerUser = async (pwd, name, email, phone, birthday) => {
     try {
         const response = await axios.post(
-          'http://192.168.2.41:5000/api/user/register/send-otp',
+          
+          API_CONFIG.baseURL + API_CONFIG.endpoints.register,
           {
             userName: new Date().getTime(),
             password: pwd,

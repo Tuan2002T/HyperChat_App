@@ -1,5 +1,5 @@
 // src/screens/RegisterScreen.js
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Pressable, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SvgIcons from '../assets/SvgIcons';
@@ -21,7 +21,7 @@ const RegisterScreen = ({navigation}) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
 
   const [log, setLog] = useState('');
-  const [name, setName] = useState('Hoàng Hiện'); 
+  const [name, setName] = useState('Hoàng Hiện');
   const [email, setEmail] = useState('djn65341@fosiq.com');
   const [phone, setPhone] = useState('0987687788');
   const [pwd, setPwd] = useState('A@hihi8899');
@@ -37,13 +37,17 @@ const RegisterScreen = ({navigation}) => {
     }/${year}`;
   };
 
+  useEffect(() => {
+    console.log('Register Screen');
+  }, [setLog]);
+
+
   const handleContinue = async () => {
     const res = await registerUser(pwd, name, email, phone, birthday);
     if (res.status === 200) {
-      setLog('Register successfully');
       navigation.navigate('Auth');
-      
     }
+    setLog(res.data.message);
   };
 
   handleGoVerify = async () => {
@@ -71,7 +75,7 @@ const RegisterScreen = ({navigation}) => {
         handleGoBack={handleBack}
         indicator={isLoading}
       />
-
+      <Text style={{marginTop: 10}}>{log}</Text>
       <CustomTextInput label="Full name" value={name} onChangeText={setName} />
       <CustomTextInput label="Email" value={email} onChangeText={setEmail} />
       <CustomTextInput
@@ -142,10 +146,7 @@ const RegisterScreen = ({navigation}) => {
           {i18n.t('Continue')}
         </Button>
       </View>
-      <View>
-        {/* show respone data */}
-        <Text>{log}</Text>
-      </View>
+      <View>{/* show respone data */}</View>
     </View>
   );
 };

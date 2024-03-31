@@ -6,6 +6,7 @@ const API_CONFIG = {
     baseURL: API_BASE_URL,
     endpoints: {
         login: 'user/login',
+        info: 'user/phone',
         register: 'user/register/send-otp',
         verify: 'user/register/verifyOTP',
         // Add other endpoints here as needed

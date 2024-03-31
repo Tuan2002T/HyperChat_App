@@ -1,7 +1,12 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image, FlatList, Pressable} from 'react-native';
+import { useSelector } from 'react-redux';
 
 const MyInfoScreen = ({navigation}) => {
+  const user = useSelector(state => state.auth.user);
+  // console.log('User: ', user);
+
+
   return (
     <View style={styles.container}>
       <View
@@ -44,11 +49,11 @@ const MyInfoScreen = ({navigation}) => {
           fontWeight: 'bold',
           marginTop: 10,
         }}>
-        Trương Văn Tuấn
+        {user.fullname}
       </Text>
       <Text
         style={{color: 'gray', fontSize: 15, fontWeight: 'bold', marginTop: 5}}>
-        @tuaans.0204
+        {user.userName}
       </Text>
       <View
         style={{
@@ -100,7 +105,7 @@ const MyInfoScreen = ({navigation}) => {
           Display Name
         </Text>
         <Text style={{color: 'black', fontSize: 20, marginTop: 5}}>
-          Trương Văn Tuấn
+          {user.fullname}
         </Text>
       </View>
 
@@ -112,10 +117,10 @@ const MyInfoScreen = ({navigation}) => {
             fontWeight: 'bold',
             marginTop: 10,
           }}>
-          Email Address
+          Email 
         </Text>
         <Text style={{color: 'black', fontSize: 20, marginTop: 5}}>
-          truongvantuanIUH@gmail.com
+          {user.email}
         </Text>
       </View>
 
@@ -145,7 +150,7 @@ const MyInfoScreen = ({navigation}) => {
           Phone number
         </Text>
         <Text style={{color: 'black', fontSize: 20, marginTop: 5}}>
-          +(84) 345231231
+          {user.phoneNumber}
         </Text>
       </View>
       <View style={{width: '100%', marginLeft: 70, marginBottom: 10}}>
