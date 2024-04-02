@@ -1,3 +1,4 @@
 
 import { io } from "socket.io-client";
-export const socket = io.connect("http://192.168.2.40:3000");
+import API_CONFIG from "../api/apiConfig";
+export const socket = io.connect(API_CONFIG.socket);
