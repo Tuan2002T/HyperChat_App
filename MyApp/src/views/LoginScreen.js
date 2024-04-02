@@ -65,7 +65,7 @@ const LoginScreen = () => {
   };
 
   const handleForgottenPassword = () => {
-    dispatch(changeScreen('ForgottenPassword'));
+    dispatch(changeScreen('ForgotPassword'));
   };
 
   const handleGotoChat = () => {
