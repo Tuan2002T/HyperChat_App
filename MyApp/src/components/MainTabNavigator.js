@@ -38,7 +38,7 @@ const MainTabNavigator = () => {
       <Tab.Screen name="Chats" component={MessagesScreen} />
       <Tab.Screen name="Calls" component={CallScreen} />
       <Tab.Screen name="Contacts" component={ContactScreen} />
-      <Tab.Screen name="Settings" component={SettingScreen} />
+      {/* <Tab.Screen name="Settings" component={SettingScreen} /> */}
     </Tab.Navigator>
   );
 };

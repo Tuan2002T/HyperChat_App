@@ -1,6 +1,6 @@
 import React, {useRef, useMemo, useEffect} from 'react';
 import {View, Animated, Dimensions, StyleSheet} from 'react-native';
-import SvgIcons from '../assets/SvgIcons';
+import SvgIcons from '../../assets/SvgIcons';
 
 const {width, height} = Dimensions.get('window');
 const circleWidth = width / 2;

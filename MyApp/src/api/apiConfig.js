@@ -9,6 +9,7 @@ const API_CONFIG = {
         info: 'user/phone',
         register: 'user/register/send-otp',
         verify: 'user/register/verifyOTP',
+        update: 'user/update',
         // Add other endpoints here as needed
     },
 };

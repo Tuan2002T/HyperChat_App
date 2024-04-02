@@ -1,47 +1,164 @@
-import React from 'react';
-import {View, Text, StyleSheet, Image, FlatList, Pressable} from 'react-native';
-import { useSelector } from 'react-redux';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Image, Alert, Platform} from 'react-native';
+import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
+import {useSelector} from 'react-redux';
+import CustomHeader from '../components/CustomHeader';
+import {IconButton, Button} from 'react-native-paper';
+import { PermissionsAndroid } from 'react-native';
+import { updateUser } from '../api/updateUser';
+import { use } from 'i18next';
+
 
 const MyInfoScreen = ({navigation}) => {
   const user = useSelector(state => state.auth.user);
-  // console.log('User: ', user);
+  const [avatarUri, setAvatarUri] = useState(user.avatar);
 
+  const handleEditAvatar = async () => {
+    // Kiểm tra và yêu cầu quyền truy cập camera
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'This app needs access to your camera.',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Camera permission granted');
+          // Nếu được cấp quyền, mở camera
+          Alert.alert(
+            'Choose Option',
+            'Pick an option to set your avatar',
+            [
+              {
+                text: 'Choose from Library',
+                onPress: () => launchImagePicker('library'),
+              },
+              {
+                text: 'Take Photo',
+                onPress: () => launchImagePicker('camera'),
+              },
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+            ],
+            {cancelable: true},
+          );
+        } else {
+          console.log('Camera permission denied');
+          // Nếu không được cấp quyền, bạn có thể thông báo cho người dùng hoặc thực hiện hành động phù hợp khác
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    } else {
+      // Nếu không phải là Android, bạn có thể mở camera trực tiếp (đã kiểm tra quyền truy cập camera trước đó)
+      Alert.alert(
+        'Choose Option',
+        'Pick an option to set your avatar',
+        [
+          {
+            text: 'Choose from Library',
+            onPress: () => launchImagePicker('library'),
+          },
+          {
+            text: 'Take Photo',
+            onPress: () => launchImagePicker('camera'),
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: true},
+      );
+    }
+  };
 
+  const launchImagePicker = option => {
+    let options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+  
+    if (option === 'library') {
+      launchImageLibrary(options, response => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorMessage) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else {
+          console.log('Image URI:', response.assets[0]);
+          setAvatarUri(response.assets[0].uri);
+          setRes(response.assets[0]);
+        }
+      });
+    } else if (option === 'camera') {
+      launchCamera(options, response => {
+        if (response.didCancel) {
+          console.log('User cancelled camera');
+        } else if (response.errorMessage) {
+          console.log('Camera Error: ', response.errorMessage);
+        } else {
+          console.log('Image URI:', response.assets[0]);
+          setAvatarUri(response.assets[0].uri);
+          setRes(response.assets[0]);
+        }
+      });
+    }
+  };
+
+  const [res, setRes] = useState(null);
+  
+  const handleSave = async () => {
+    try {
+      const userData = {
+        userName: user.userName, 
+        fullname: user.fullname,
+        birthday: user.birthday, 
+        file: {
+          uri: res.uri,
+          type: res.type,
+          name: res.fileName,
+        },
+      };
+      await updateUser(user._id, userData);
+      Alert.alert('Success', 'Your profile has been updated successfully.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update profile. Please try again later.');
+      console.log('Error updating profile:', error);
+    }
+  };
+  
+  
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: 10,
-          backgroundColor: 'white',
-          width: '100%',
-          height: 60,
-          marginTop: 20,
-          marginBottom: 20,
-          paddingLeft: 20,
-          paddingRight: 20,
-        }}>
-        <Pressable
-          style={{
-            width: 37,
-            height: 37,
-            backgroundColor: 'white',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          onPress={() => {
-            navigation.goBack();
-          }}>
-          <Image source={require('../Images/Icon/Left.png')} />
-        </Pressable>
-      </View>
-      <Image
-        style={{width: 85, height: 85, borderRadius: 100}}
-        source={{
-          uri: 'https://i.pinimg.com/564x/c1/9a/1d/c19a1d3823b60a19194fe700f0524ae6.jpg',
-        }}
+      <CustomHeader
+        title="Profile"
+        leftIcon="arrow-left"
+        leftIconPress={handleGoBack}
       />
+      <View style={{width: '100%', height: '30%'}}>
+        {avatarUri && (
+          <Image
+            style={{width: '100%', height: '100%', resizeMode: 'cover'}}
+            source={{uri: avatarUri}}
+          />
+        )}
+        <IconButton
+          style={{position: 'absolute', right: 10, bottom: 10}}
+          icon="pencil"
+          iconColor="black"
+          size={32}
+          onPress={handleEditAvatar}
+        />
+      </View>
       <Text
         style={{
           color: 'black',
@@ -55,59 +172,6 @@ const MyInfoScreen = ({navigation}) => {
         style={{color: 'gray', fontSize: 15, fontWeight: 'bold', marginTop: 5}}>
         {user.userName}
       </Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          width: '70%',
-          justifyContent: 'space-around',
-          marginVertical: 20,
-        }}>
-        <Pressable
-          style={{backgroundColor: 'black', padding: 10, borderRadius: 100}}>
-          <Image
-            style={{width: 25, height: 25}}
-            source={require('../Images/ProfileIcon/Message.png')}
-          />
-        </Pressable>
-
-        <Pressable
-          style={{backgroundColor: 'black', padding: 10, borderRadius: 100}}>
-          <Image
-            style={{width: 25, height: 25}}
-            source={require('../Images/ProfileIcon/Video.png')}
-          />
-        </Pressable>
-
-        <Pressable
-          style={{backgroundColor: 'black', padding: 10, borderRadius: 100}}>
-          <Image
-            style={{width: 25, height: 25}}
-            source={require('../Images/ProfileIcon/Call.png')}
-          />
-        </Pressable>
-
-        <Pressable
-          style={{backgroundColor: 'black', padding: 10, borderRadius: 100}}>
-          <Image
-            style={{width: 25, height: 25}}
-            source={require('../Images/ProfileIcon/More.png')}
-          />
-        </Pressable>
-      </View>
-      <View style={{width: '100%', marginLeft: 70, marginBottom: 10}}>
-        <Text
-          style={{
-            color: 'gray',
-            fontSize: 15,
-            fontWeight: 'bold',
-            marginTop: 10,
-          }}>
-          Display Name
-        </Text>
-        <Text style={{color: 'black', fontSize: 20, marginTop: 5}}>
-          {user.fullname}
-        </Text>
-      </View>
 
       <View style={{width: '100%', marginLeft: 70, marginBottom: 10}}>
         <Text
@@ -117,25 +181,10 @@ const MyInfoScreen = ({navigation}) => {
             fontWeight: 'bold',
             marginTop: 10,
           }}>
-          Email 
+          Email
         </Text>
         <Text style={{color: 'black', fontSize: 20, marginTop: 5}}>
           {user.email}
-        </Text>
-      </View>
-
-      <View style={{width: '100%', marginLeft: 70, marginBottom: 10}}>
-        <Text
-          style={{
-            color: 'gray',
-            fontSize: 15,
-            fontWeight: 'bold',
-            marginTop: 10,
-          }}>
-          Address
-        </Text>
-        <Text style={{color: 'black', fontSize: 20, marginTop: 5}}>
-          123 Quang Trung, Phường 11, Gò Vấp, TP.HCM
         </Text>
       </View>
 
@@ -154,53 +203,32 @@ const MyInfoScreen = ({navigation}) => {
         </Text>
       </View>
       <View style={{width: '100%', marginLeft: 70, marginBottom: 10}}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <Text
-            style={{
-              color: 'gray',
-              fontSize: 15,
-              fontWeight: 'bold',
-              marginTop: 10,
-            }}>
-            Media Shared
-          </Text>
-          <Text
-            style={{
-              color: 'gray',
-              fontSize: 15,
-              fontWeight: '500',
-              marginTop: 10,
-              marginRight: 60,
-            }}>
-            View All
-          </Text>
-        </View>
-        <FlatList
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          data={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
-          renderItem={({item}) => {
-            return (
-              <View
-                style={{
-                  width: 100,
-                  height: 100,
-                  backgroundColor: 'white',
-                  margin: 10,
-                  borderRadius: 10,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Image
-                  style={{width: 95, height: 95, borderRadius: 10}}
-                  source={{
-                    uri: 'https://i.pinimg.com/564x/c1/9a/1d/c19a1d3823b60a19194fe700f0524ae6.jpg',
-                  }}
-                />
-              </View>
-            );
+        <Text
+          style={{
+            color: 'gray',
+            fontSize: 15,
+            fontWeight: 'bold',
+            marginTop: 10,
+          }}>
+          Birthday
+        </Text>
+        <Text style={{color: 'black', fontSize: 20, marginTop: 5}}>
+          {user.birthday}
+        </Text>
+      </View>
+      <View style={{width: '90%'}}>
+        <Button
+          style={{
+            marginTop: 20,
+            borderRadius: 9999,
+            justifyContent: 'center',
+            backgroundColor: '#76ABAE',
           }}
-        />
+          mode="contained"
+          labelStyle={{fontSize: 18}}
+          onPress={handleSave}>
+          Save
+        </Button>
       </View>
     </View>
   );
@@ -209,7 +237,6 @@ const MyInfoScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
     backgroundColor: 'white',
     alignItems: 'center',
     width: '100%',

@@ -26,6 +26,7 @@ const MessageScreen = ({navigation}) => {
   const handleEdit = () => {
     console.log('Edit');
     // dispatch any edit action if needed
+    navigation.navigate('SubChatScreen');
   };
 
   const handleChatPress = (chatId, chatName) => {
@@ -66,7 +67,7 @@ const MessageScreen = ({navigation}) => {
         title="Chats"
         leftIcon="menu"
         leftIconPress={handleMenu}
-        rightIcon="pencil"
+        rightIcon="plus"
         rightIconPress={handleEdit}
       />
 

@@ -1,51 +1,22 @@
 // DetailsScreen.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView } from 'react-native';
+import CustomHeader from '../components/CustomHeader';
 
-const CallScreen = () => {
+const CallScreen = ({navigation}) => {
+  const handleMenu = () => {
+    navigation.navigate('SettingScreen');
+    console.log('Menu');
+  };
   return (
     <View style={styles.container}>
-      <View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: 'white',
-        width: '100%',
-        height: 60,
-        marginTop: 20,
-        marginBottom: 20,
-        paddingLeft:20,
-        paddingRight:20,
-      }}>
-        <Pressable style={{
-          width: 37,
-          height: 37,
-          backgroundColor: 'white',
-          justifyContent: 'center',
-          alignItems: 'center',
-          borderRadius: 100,
-          borderWidth: 0.3,
-          borderColor: 'black',
-        }} onPress={() => { }}>
-          <Image source={require('../Images/Icon/Vector.png')} />
-        </Pressable>
-        <Text style={{ color: 'black', fontSize: 20 }}>Calls</Text>
-        <Pressable style={{
-          width: 37,
-          height: 37,
-          backgroundColor: 'white',
-          justifyContent: 'center',
-          alignItems: 'center',
-          borderRadius: 100,
-          borderWidth: 0.3,
-          borderColor: 'black',
-        }} onPress={() => { }}>
-          <Image source={require('../Images/Icon/call-user.png')} />
-        </Pressable>
-      </View>
+      <CustomHeader
+        title="Calls"
+        leftIcon="menu"
+        leftIconPress={handleMenu}
+      />
       <FlatList
-        style={{ width: '100%', backgroundColor: 'white', borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
+        style={{marginTop: 10, width: '100%', backgroundColor: 'white', borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
         // showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13]}

@@ -8,13 +8,15 @@ import Header from '../components/Header';
 import CustomTextInput from '../components/CustomTextInput';
 import {loginUser} from '../api/loginUser'; // Import loginUser function
 import {loginUserSuccess} from '../redux/authSlice';
+import CustomDialog from '../components/custom/CustomDialog';
+import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 
 const LoginScreen = () => {
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
   const [username, setUsername] = useState('vkmt');
-  const [password, setPassword] = useState('Vkmt@9999');
+  const [password, setPassword] = useState('@Noname007');
 
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {
@@ -24,18 +26,20 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     if (username === '' || password === '') {
-      Alert.alert('Please enter account information');
+      showDialog('Input', 'Please enter account information and password.');
       return;
     }
 
     try {
       const res = await loginUser(username, password);
       dispatch(loginUserSuccess(res));
-      console.log(res);
+      // console.log(res);
       Alert.alert('Login successfully:', res.phoneNumber);
       handleGotoChat();
     } catch (error) {
-      Alert.alert(error.message);
+      // Alert.alert(error.message);
+      showDialog("Login Fail", 'Account information or password not correct.');
+
     }
   };
 
@@ -43,25 +47,13 @@ const LoginScreen = () => {
     dispatch(changeScreen('Splash'));
   };
 
+
+  const openConfirmDialog = () => {
+    showConfirmDialog('Create new account', 'Do you want to create a new account?');
+  }
+
   const handleRegister = () => {
-    // Hiển thị hộp thoại cảnh báo
-    Alert.alert(
-      'Xác nhận',
-      'Bạn có chắc muốn chuyển trang đến trang đăng ký?',
-      [
-        {
-          text: 'Hủy',
-          style: 'cancel',
-        },
-        {
-          text: 'Đồng ý',
-          onPress: () => {
-            dispatch(changeScreen('Register'));
-          },
-        },
-      ],
-      {cancelable: false},
-    );
+      dispatch(changeScreen('Register'));
   };
 
   const handleForgottenPassword = () => {
@@ -72,6 +64,22 @@ const LoginScreen = () => {
     dispatch(changeScreen('Main'));
   };
 
+  const [visible, setVisible] = React.useState(false);
+  const showDialog = (title, message) => {
+    setVisible(true);
+    setDialogMessage({title, message});
+  };
+  const hideDialog = () => setVisible(false);
+
+  const [ConfirmVisible, setConfirmVisible] = React.useState(false);
+  const showConfirmDialog = (title, message) => {
+    setConfirmVisible(true);
+    setDialogMessage({title, message});
+  };
+  const hideConfirmDialog = () => setConfirmVisible(false);
+
+  const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
+
   return (
     <View style={{flex: 1, alignItems: 'center', backgroundColor: 'lightgrey'}}>
       <Header
@@ -79,7 +87,19 @@ const LoginScreen = () => {
         handleGoBack={handleGoBack}
         indicator={indicator}
       />
-
+      <CustomDialog
+        visible={visible}
+        title={dialogMessage.title}
+        message={dialogMessage.message}
+        hideDialog={hideDialog}
+      />
+      <CustomConfirmDialog
+        visible={ConfirmVisible}
+        title={dialogMessage.title}
+        message={dialogMessage.message}
+        hideDialog={hideConfirmDialog}
+        next={handleRegister}
+      />
       <CustomTextInput
         label="Account information"
         placeholder="Username or email or phone number"
@@ -135,7 +155,7 @@ const LoginScreen = () => {
           }}
           mode="contained"
           labelStyle={{fontSize: 18, color: '#76ABAE'}}
-          onPress={handleRegister}>
+          onPress={openConfirmDialog}>
           {i18n.t('Create new account')}
         </Button>
       </View>

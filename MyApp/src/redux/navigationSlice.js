@@ -2,7 +2,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  currentScreen: 'Splash', // Assuming 'Splash' is the initial screen
+  currentScreen: 'Splash',
 };
 
 const navigationSlice = createSlice({

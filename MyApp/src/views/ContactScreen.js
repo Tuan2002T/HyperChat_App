@@ -8,8 +8,11 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
-  Pressable
+  Pressable,
 } from 'react-native';
+import {Searchbar} from 'react-native-paper';
+import CustomHeader from '../components/CustomHeader';
+import {Drawer} from 'react-native-paper';
 
 const CONTACTS = [
   {
@@ -69,7 +72,15 @@ const CONTACTS = [
   },
 ];
 
-const ContactScreen = () => {
+const ContactScreen = ({navigation}) => {
+  
+  const handleMenu = () => {
+    navigation.navigate('SettingScreen');
+    console.log('Menu');
+  };
+
+  const [[searchText, setSearchText]] = React.useState('');
+
   const sections = React.useMemo(() => {
     const sectionsMap = CONTACTS.reduce((acc, item) => {
       const [lastName] = item.name.split(' ').reverse();
@@ -87,53 +98,34 @@ const ContactScreen = () => {
       .sort((a, b) => a.letter.localeCompare(b.letter));
   }, []);
   return (
-    <SafeAreaView style={{ backgroundColor: '#FFFFFF' }}>
-      <View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: 'white',
-        width: '100%',
-        height: 60,
-        marginTop: 20,
-        marginBottom: 20,
-        paddingLeft:20,
-        paddingRight:20,
-      }}>
-        <Pressable style={{
-          width: 37,
-          height: 37,
-          backgroundColor: 'white',
-          justifyContent: 'center',
-          alignItems: 'center',
-          borderRadius: 100,
-          borderWidth: 0.3,
-          borderColor: 'black',
-        }} onPress={() => { }}>
-          <Image source={require('../Images/Icon/Vector.png')} />
-        </Pressable>
-        <Text style={{ color: 'black', fontSize: 20 }}>Contacts</Text>
-        <Pressable style={{
-          width: 37,
-          height: 37,
-          backgroundColor: 'white',
-          justifyContent: 'center',
-          alignItems: 'center',
-          borderRadius: 100,
-          borderWidth: 0.3,
-          borderColor: 'black',
-        }} onPress={() => { }}>
-          <Image source={require('../Images/Icon/user-add.png')} />
-        </Pressable>
+    <SafeAreaView style={{backgroundColor: '#FFFFFF'}}>
+      <CustomHeader
+        title="Contacts"
+        leftIcon="menu"
+        leftIconPress={handleMenu}
+      />
+
+      <View style={{marginVertical: 10}}>
+        <Searchbar
+          style={{
+            height: 48,
+            marginHorizontal: '5%',
+            borderWidth: 1,
+            borderColor: '#76ABAE',
+            backgroundColor: 'white',
+          }}
+          placeholder="Search"
+          onChangeText={setSearchText}
+          value={searchText}
+        />
       </View>
-      <ScrollView style={{height:700}}>
-        <Text style={{marginLeft:20, color:'black', fontSize:16}}>My contact</Text>
-        {sections.map(({ letter, items }) => (
+
+      <ScrollView style={{height: 700}}>
+        {sections.map(({letter, items}) => (
           <View style={styles.section} key={letter}>
             <Text style={styles.sectionTitle}>{letter}</Text>
             <View style={styles.sectionItems}>
-              {items.map(({ img, name, phone }, index) => {
+              {items.map(({img, name, phone}, index) => {
                 return (
                   <View key={index} style={styles.cardWrapper}>
                     <TouchableOpacity
@@ -145,8 +137,9 @@ const ContactScreen = () => {
                           <Image
                             alt=""
                             resizeMode="cover"
-                            source={{ uri: img }}
-                            style={styles.cardImg} />
+                            source={{uri: img}}
+                            style={styles.cardImg}
+                          />
                         ) : (
                           <View style={[styles.cardImg, styles.cardAvatar]}>
                             <Text style={styles.cardAvatarText}>{name[0]}</Text>
@@ -240,6 +233,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#616d79',
     marginTop: 3,
-  }
+  },
 });
 export default ContactScreen;

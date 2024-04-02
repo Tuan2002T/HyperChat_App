@@ -1,22 +1,23 @@
+//src/views/SplashScreen.js
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, Image, Text} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {selectIsLoggedIn} from '../redux/authSlice';
 import {changeScreen} from '../redux/screenSlice';
 import PngIcons from '../assets/PngIcons';
 import i18n from '../i18n/i18n';
 import LanguageSelector from '../components/LanguageSelector ';
-import AnimatedCircle from '../components/AnimatedCircle';
-
+import AnimatedCircle from '../components/animated/AnimatedCircle';
+import styles from '../css/Styles';
 import {Button} from 'react-native-paper';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const SplashScreen = () => {
   const dispatch = useDispatch();
+  
   const [showButtons, setShowButtons] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState('en'); // State to store the current language
+  const [currentLanguage, setCurrentLanguage] = useState('');
 
   useEffect(() => {
     const loadLanguage = async () => {
@@ -31,7 +32,7 @@ const SplashScreen = () => {
       }
     };
     loadLanguage();
-    delay(2000).then(() => setShowButtons(true));
+    delay(1).then(() => setShowButtons(true));
   }, []);
 
   const toggleLanguage = async newLanguage => {
@@ -61,13 +62,7 @@ const SplashScreen = () => {
           </View>
           <View style={styles.buttonContainer}>
             <Button
-              style={{
-                width: '100%',
-                marginVertical: 10,
-                borderRadius: 9999,
-                justifyContent: 'center',
-                backgroundColor: '#76ABAE',
-              }}
+              style={styles.firstButton}
               mode="contained"
               labelStyle={{fontSize: 18}}
               onPress={() => {
@@ -76,13 +71,7 @@ const SplashScreen = () => {
               {i18n.t('Login')}
             </Button>
             <Button
-              style={{
-                width: '100%',
-                marginVertical: 10,
-                borderRadius: 9999,
-                justifyContent: 'center',
-                backgroundColor: '#EEE',
-              }}
+              style={styles.secondButton}
               mode="contained"
               labelStyle={{fontSize: 18, color: '#76ABAE'}}
               onPress={() => {
@@ -100,23 +89,5 @@ const SplashScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'lightgrey',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  iconContainer: {
-    width: '95%',
-    alignItems: 'flex-end',
-    padding: 10,
-  },
-  buttonContainer: {
-    width: '90%',
-    alignItems: 'center',
-  },
-});
 
 export default SplashScreen;

@@ -7,11 +7,7 @@ import i18n from '../i18n/i18n';
 import {useDispatch} from 'react-redux';
 import {changeScreen} from '../redux/screenSlice';
 import {Button, Dialog, Portal, Text, Divider} from 'react-native-paper';
-import {
-  Provider as PaperProvider,
-  DefaultTheme,
-  DarkTheme,
-} from 'react-native-paper';
+import CustomDialog from '../components/custom/CustomDialog';
 
 const ForgotPasswordScreen = () => {
   const dispatch = useDispatch();
@@ -58,34 +54,42 @@ const ForgotPasswordScreen = () => {
     // Trigger OTP generation logic
     console.log('Get OTP');
   };
-  
-  const handleContinue = () => {
-    // Check if passwords match
+
+  const checkPassword = () => {
+    if (pwd === '') {
+      showDialog('Empty Password', 'Please enter a password.');
+      return false;
+    }
+
+    if (cpwd === '') {
+      showDialog('Empty Password', 'Please enter a confirm password.');
+      return false;
+    }
     if (pwd !== cpwd) {
       showDialog('Passwords Mismatch', 'The passwords do not match.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleContinue = () => {
+    if (!validateEmail(email)) {
+      showDialog('Invalid Email', 'Please enter a valid email address.');
       return;
     }
-    // Additional validation if needed
-    // Proceed to change password logic
+    if (!checkPassword()) return;
     dispatch(changeScreen('Login'));
   };
   const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
 
   return (
     <View style={{alignItems: 'center'}}>
-      <Portal>
-        <Dialog visible={visible} onDismiss={hideDialog}>
-          <Dialog.Title>{dialogMessage.title}</Dialog.Title>
-          <Dialog.Content>
-            <Text variant="bodyMedium">{dialogMessage.message}</Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button labelStyle={{color: '#76ABAE'}} onPress={hideDialog}>
-              Done
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+      <CustomDialog
+        visible={visible}
+        title={dialogMessage.title}
+        message={dialogMessage.message}
+        hideDialog={hideDialog}
+      />
       <Header
         title={i18n.t('Forgotten Password')}
         handleGoBack={handleGoBack}

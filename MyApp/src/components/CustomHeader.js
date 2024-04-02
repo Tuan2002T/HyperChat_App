@@ -1,8 +1,14 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import {View, Text} from 'react-native';
 import {IconButton} from 'react-native-paper';
 
-const CustomHeader = ({ title, leftIcon, leftIconPress, rightIcon, rightIconPress }) => {
+const CustomHeader = ({
+  title,
+  leftIcon,
+  leftIconPress,
+  rightIcon,
+  rightIconPress,
+}) => {
   return (
     <View
       style={{
