@@ -1,5 +1,5 @@
 // MessageScreen.js
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,46 @@ import {
   Image,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {selectChat} from '../redux/chatSlice';
+import {selectChat, getListChats} from '../redux/chatSlice';
+import { listChats } from '../api/getListChats';
 import CustomHeader from '../components/CustomHeader';
 import {Searchbar} from 'react-native-paper';
-
+import { socket } from '../socket/socket';
 const MessageScreen = ({navigation}) => {
+  const id = useSelector(state => state.auth.user._id);
+  const [list, setList] = useState([]);
+  useEffect(() => {
+    listChats(id).then(data => {
+      dispatch(getListChats(data));
+      setList(data);
+    });
+  }, []);
+  //---------------------------
+
+  const currentUserId = useSelector(state => state.auth.user._id);
+  const [conversationList, setConversationList] = useState(list);
+
+  useEffect(() => {
+    // Lắng nghe sự kiện nhận danh sách cuộc trò chuyện từ server
+    socket.on('roomList', (rooms) => {
+      setConversationList(rooms);
+    });
+
+    // Cleanup khi component unmount
+    return () => {
+      socket.off('roomList');
+    };
+  }, []);
+
+  const handleChatRoomPress = (roomId, item) => {
+    // Điều hướng đến màn hình phòng chat với roomId tương ứng
+    navigation.navigate('NewMessageScreen', { roomId, currentUserId, item });
+  };
+
+  //---------------------------
+  
+  console.log("list",list);
+
   const dispatch = useDispatch();
   const [searchText, setSearchText] = useState('');
   const chats = useSelector(state => state.chat.chats);
@@ -35,7 +70,7 @@ const MessageScreen = ({navigation}) => {
   };
 
   const renderItem = ({item}) => (
-    <TouchableOpacity onPress={() => handleChatPress(item.id, item.name)}>
+    <TouchableOpacity onPress={() => handleChatRoomPress(item._id,item)}>
       <View
         style={{
           padding: 16,
@@ -45,7 +80,7 @@ const MessageScreen = ({navigation}) => {
           alignItems: 'center',
         }}>
         <Image
-          source={item.image}
+          source={{uri: item.avatar}}
           style={{width: 50, height: 50, borderRadius: 50, marginRight: 10}}
         />
         <View>
@@ -85,9 +120,9 @@ const MessageScreen = ({navigation}) => {
       </View>
 
       <FlatList
-        data={filteredChats}
+        data={list}
         renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item._id}
       />
     </View>
   );

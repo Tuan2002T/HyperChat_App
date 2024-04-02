@@ -13,8 +13,8 @@ const LoginScreen = () => {
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
-  const [username, setUsername] = useState('vkmt');
-  const [password, setPassword] = useState('Vkmt@9999');
+  const [username, setUsername] = useState('noname007');
+  const [password, setPassword] = useState('Tuan@123');
 
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {
@@ -29,6 +29,7 @@ const LoginScreen = () => {
     }
 
     try {
+      console.log("111");
       const res = await loginUser(username, password);
       dispatch(loginUserSuccess(res));
       console.log(res);
