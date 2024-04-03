@@ -13,6 +13,8 @@ const API_CONFIG = {
     verify: 'user/register/verifyOTP',
     update: 'user/update',
     listchats: 'user/getListChats',
+    sendOTPForgotPwd: 'user/sendOTPForgotPassword',
+    verifyOTPForgotPwd: 'user/verifyOTPForgotPassword',
     // Add other endpoints here as needed
   },
 };

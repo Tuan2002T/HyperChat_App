@@ -4,14 +4,19 @@ import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import {useSelector} from 'react-redux';
 import CustomHeader from '../components/CustomHeader';
 import {IconButton, Button} from 'react-native-paper';
-import { PermissionsAndroid } from 'react-native';
-import { updateUser } from '../api/updateUser';
-import { use } from 'i18next';
-
+import {PermissionsAndroid} from 'react-native';
+import {updateUser} from '../api/updateUser';
+import {getData} from '../api/loginUser';
+import {useDispatch} from 'react-redux';
+import {loginUserSuccess} from '../redux/authSlice';
+import {SharedElement} from 'react-navigation-shared-element';
 
 const MyInfoScreen = ({navigation}) => {
+  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const [avatarUri, setAvatarUri] = useState(user.avatar);
+
+  console.log('User:', user.phoneNumber);
 
   const handleEditAvatar = async () => {
     // Kiểm tra và yêu cầu quyền truy cập camera
@@ -83,7 +88,7 @@ const MyInfoScreen = ({navigation}) => {
       mediaType: 'photo',
       quality: 1,
     };
-  
+
     if (option === 'library') {
       launchImageLibrary(options, response => {
         if (response.didCancel) {
@@ -112,13 +117,13 @@ const MyInfoScreen = ({navigation}) => {
   };
 
   const [res, setRes] = useState(null);
-  
+
   const handleSave = async () => {
     try {
       const userData = {
-        userName: user.userName, 
+        userName: user.userName,
         fullname: user.fullname,
-        birthday: user.birthday, 
+        birthday: user.birthday,
         file: {
           uri: res.uri,
           type: res.type,
@@ -127,13 +132,17 @@ const MyInfoScreen = ({navigation}) => {
       };
       await updateUser(user._id, userData);
       Alert.alert('Success', 'Your profile has been updated successfully.');
+
+      getData(user.phoneNumber).then(res => {
+        console.log('res: ', res);
+        dispatch(loginUserSuccess(res));
+      });
     } catch (error) {
       Alert.alert('Error', 'Failed to update profile. Please try again later.');
       console.log('Error updating profile:', error);
     }
   };
-  
-  
+
   const handleGoBack = () => {
     navigation.goBack();
   };
@@ -143,21 +152,18 @@ const MyInfoScreen = ({navigation}) => {
         title="Profile"
         leftIcon="arrow-left"
         leftIconPress={handleGoBack}
+        rightIcon="camera"
+        rightIconPress={handleEditAvatar}
       />
       <View style={{width: '100%', height: '30%'}}>
         {avatarUri && (
-          <Image
-            style={{width: '100%', height: '100%', resizeMode: 'cover'}}
-            source={{uri: avatarUri}}
-          />
+          <SharedElement id="avatar">
+            <Image
+              style={{width: '100%', height: '100%', resizeMode: 'cover'}}
+              source={{uri: avatarUri}}
+            />
+          </SharedElement>
         )}
-        <IconButton
-          style={{position: 'absolute', right: 10, bottom: 10}}
-          icon="pencil"
-          iconColor="black"
-          size={32}
-          onPress={handleEditAvatar}
-        />
       </View>
       <Text
         style={{

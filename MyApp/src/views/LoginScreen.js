@@ -32,14 +32,10 @@ const LoginScreen = () => {
     }
 
     try {
-      console.log("111");
       const res = await loginUser(username, password);
       dispatch(loginUserSuccess(res));
-      // console.log(res);
-      Alert.alert('Login successfully:', res.phoneNumber);
       handleGotoChat();
     } catch (error) {
-      // Alert.alert(error.message);
       showDialog("Login Fail", 'Account information or password not correct.');
 
     }

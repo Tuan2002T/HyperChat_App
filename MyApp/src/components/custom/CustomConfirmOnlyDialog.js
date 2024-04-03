@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button, Dialog, Portal, Text} from 'react-native-paper';
 
-const CustomConfirmDialog = ({visible, title, message, hideDialog, next}) => {
+const CustomConfirmOnlyDialog = ({visible, title, message, next, hideDialog}) => {
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={hideDialog}>
@@ -10,10 +10,6 @@ const CustomConfirmDialog = ({visible, title, message, hideDialog, next}) => {
           <Text variant="bodyMedium">{message}</Text>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button labelStyle={{color: '#EF4040'}} onPress={hideDialog}>
-            Cancel
-          </Button>
-
           <Button labelStyle={{color: '#76ABAE'}} onPress={next}>
             Sure
           </Button>
@@ -23,4 +19,4 @@ const CustomConfirmDialog = ({visible, title, message, hideDialog, next}) => {
   );
 };
 
-export default CustomConfirmDialog;
+export default CustomConfirmOnlyDialog;

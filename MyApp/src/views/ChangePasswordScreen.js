@@ -10,14 +10,19 @@ import {Button, Divider} from 'react-native-paper';
 import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmOnlyDialog from '../components/custom/CustomConfirmOnlyDialog';
 import {sendOTPForgotPwd, verifyOTPForgotPwd} from '../api/forgotPwd';
+import {useSelector} from 'react-redux';
 
-const ForgotPasswordScreen = () => {
+const ChangePasswordScreen = ({navigation}) => {
+    const user = useSelector(state => state.auth.user);
+
+    console.log('User: ', user.email);
+
+
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
   const [pwd, setPwd] = useState('');
   const [cpwd, setCpwd] = useState('');
-  const [email, setEmail] = useState('noname007@mailnesia.com');
   const [OTP, setOTP] = useState('');
 
   const [visible, setVisible] = React.useState(false);
@@ -28,7 +33,7 @@ const ForgotPasswordScreen = () => {
   const hideDialog = () => setVisible(false);
 
   const handleGoBack = () => {
-    dispatch(changeScreen('Login'));
+    navigation.goBack();
   };
 
   const handleShowPassword = () => {
@@ -48,15 +53,8 @@ const ForgotPasswordScreen = () => {
   };
 
   const handleGetOTP = () => {
-    if (email === '') {
-      showDialog('Empty Email', 'Please enter an email address.');
-      return;
-    }
-    if (!validateEmail(email)) {
-      showDialog('Invalid Email', 'Please enter a valid email address.');
-      return;
-    }
-    sendOTPForgotPwd(email);
+    sendOTPForgotPwd(user.email);
+    showDialog('OTP Sent', 'An OTP has been sent to your email address.');
   };
 
   const checkPassword = () => {
@@ -77,15 +75,7 @@ const ForgotPasswordScreen = () => {
   };
 
   const handleContinue = () => {
-    if (email === '') {
-      showDialog('Empty Email', 'Please enter an email address.');
-      return;
-    }
 
-    if (!validateEmail(email)) {
-      showDialog('Invalid Email', 'Please enter a valid email address.');
-      return;
-    }
     if (!checkPassword()) return;
 
     if (OTP === '') {
@@ -93,9 +83,9 @@ const ForgotPasswordScreen = () => {
       return;
     }
 
-    console.log('Email: ', email, ' OTP: ', OTP, ' Password: ', pwd);
+    console.log('Email: ', user.email, ' OTP: ', OTP, ' Password: ', pwd);
 
-    const res = verifyOTPForgotPwd(email, OTP, pwd);
+    const res = verifyOTPForgotPwd(user.email, OTP, pwd);
 
     setTimeout(() => {
       console.log('res: ', res._j.status);
@@ -132,11 +122,10 @@ const ForgotPasswordScreen = () => {
         next={handleGoBack}
       />
       <Header
-        title={i18n.t('Forgotten Password')}
+        title={i18n.t('Change Password')}
         handleGoBack={handleGoBack}
         indicator={false}
       />
-      <CustomTextInput label="Email" value={email} onChangeText={setEmail} />
       <CustomTextInput
         label="New password"
         value={pwd}
@@ -208,4 +197,4 @@ const ForgotPasswordScreen = () => {
   );
 };
 
-export default ForgotPasswordScreen;
+export default ChangePasswordScreen;
