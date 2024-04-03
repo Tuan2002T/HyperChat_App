@@ -13,17 +13,16 @@ import {registerUser} from '../api/registerUser';
 import CustomDialog from '../components/custom/CustomDialog';
 
 const RegisterScreen = ({navigation}) => {
-  
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
   const showDialog = (title, message) => {
     setDialogMessage({title: title, message: message});
     setVisible(true);
-  }
+  };
   const hideDialog = () => {
     setVisible(false);
-  }
+  };
   const [isLoading, setIsLoading] = useState(false);
 
   const [showPassword, setShowPassword] = useState(true);
@@ -50,26 +49,39 @@ const RegisterScreen = ({navigation}) => {
     console.log('Register Screen');
   }, [setLog]);
 
-
   const handleContinue = async () => {
     //check not null
-    if (name === '' || email === '' || phone === '' || pwd === '' || cpwd === '') {
+    if (
+      name === '' ||
+      email === '' ||
+      phone === '' ||
+      pwd === '' ||
+      cpwd === ''
+    ) {
       showDialog('Input', 'Please enter all information.');
       return;
     }
 
     //check password
 
-
     const res = await registerUser(pwd, name, email, phone, birthday);
     if (res.status === 200) {
-      navigation.navigate('Auth');
+      //save email to async storage:
+
+      console.log(email);
+      navigation.navigate('Auth', {email});
+
+
+
+      
     }
-    // showDialog('Register', res.data.message);
+    showDialog('Register', res.data.message);
   };
 
   handleGoVerify = async () => {
-    navigation.navigate('Verify');
+    //save email to async storage
+    console.log(email);
+    navigation.navigate('Verify', {email});
   };
 
   const handleBack = () => {
@@ -93,7 +105,7 @@ const RegisterScreen = ({navigation}) => {
         handleGoBack={handleBack}
         indicator={isLoading}
       />
-            <CustomDialog
+      <CustomDialog
         visible={visible}
         title={dialogMessage.title}
         message={dialogMessage.message}

@@ -10,12 +10,16 @@ import Header from '../components/Header';
 import {Button} from 'react-native-paper';
 import {changeScreen} from '../redux/screenSlice';
 import {useDispatch} from 'react-redux';
+import API_CONFIG from '../api/apiConfig';
 
-const AuthScreen = ({navigation}) => {
+const AuthScreen = ({navigation, route}) => {
   const dispatch = useDispatch();
 
-  const [otp, setOTP] = useState('');
+  console.log(route.params);
+
   const [email, setEmail] = useState('');
+
+  const [otp, setOTP] = useState('');
   AsyncStorage.getItem('email').then(email => {
     if (email) {
       setEmail(email);
@@ -24,22 +28,22 @@ const AuthScreen = ({navigation}) => {
 
   const [timer, setTimer] = useState(10);
   const [canResend, setCanResend] = useState(false);
-    // Countdown timer effect
-    useEffect(() => {
-      const intervalId = setInterval(() => {
-        setTimer(prevTimer => {
-          if (prevTimer === 0) {
-            clearInterval(intervalId);
-            setCanResend(true);
-            return 0;
-          }
-          return prevTimer - 1;
-        });
-      }, 1000);
-  
-      // Cleanup function
-      return () => clearInterval(intervalId);
-    }, [timer]);
+  // Countdown timer effect
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTimer(prevTimer => {
+        if (prevTimer === 0) {
+          clearInterval(intervalId);
+          setCanResend(true);
+          return 0;
+        }
+        return prevTimer - 1;
+      });
+    }, 1000);
+
+    // Cleanup function
+    return () => clearInterval(intervalId);
+  }, [timer]);
 
   // handle resend OTP
   const resendOTP = async () => {
@@ -50,6 +54,27 @@ const AuthScreen = ({navigation}) => {
 
   // handle continue
   const handleContinue = async () => {
+    console.log(otp);
+
+    const x = route.params.email;
+    console.log('xx', x);
+    console.log('otp', otp);
+    console.log('API_CONFIG', API_CONFIG.baseURL + API_CONFIG.endpoints.verify);
+    try {
+      const response = await axios.post(
+        API_CONFIG.baseURL + API_CONFIG.endpoints.verify,
+        {
+          email: x,
+          userOTP: otp,
+        },
+      );
+      console.log('REGISTER:', response);
+      dispatch(changeScreen('Login'));
+      return response;
+    } catch (error) {
+      console.error(error.response?.data.error);
+    }
+
     dispatch(changeScreen('Login'));
   };
 
@@ -71,7 +96,9 @@ const AuthScreen = ({navigation}) => {
           marginTop: 20,
           alignItems: 'center',
         }}>
-        <Text style={{fontSize: 16}}>{i18n.t('The OTP code has been sent to your email')}</Text>
+        <Text style={{fontSize: 16}}>
+          {i18n.t('The OTP code has been sent to your email')}
+        </Text>
         <Text
           style={{
             fontSize: 16,
@@ -79,7 +106,7 @@ const AuthScreen = ({navigation}) => {
             color: 'black',
             marginTop: 5,
           }}>
-          ({email})
+          ({route.params.email})
         </Text>
       </View>
 
@@ -102,7 +129,12 @@ const AuthScreen = ({navigation}) => {
       <View style={{flexDirection: 'row', marginTop: 20}}>
         <Text style={{fontSize: 16}}>{i18n.t('Didn’t receive the OTP?')}</Text>
         <Pressable onPress={canResend ? resendOTP : null}>
-          <Text style={{fontSize: 16, color: canResend ? '#76ABAE' : 'gray', marginHorizontal: 5}}>
+          <Text
+            style={{
+              fontSize: 16,
+              color: canResend ? '#76ABAE' : 'gray',
+              marginHorizontal: 5,
+            }}>
             {i18n.t('Resend OTP')}
           </Text>
         </Pressable>
