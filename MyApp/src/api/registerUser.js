@@ -27,9 +27,8 @@ export const registerUser = async (pwd, name, email, phone, birthday) => {
         console.log('REGISTER:', response.data.message);
         return response;
       } catch (error) {
-        console.error(
-          'Error in handleContinue:',
-          error.response?.data || error.message,
+        console.error(error.response?.data.error,
         );
+        return error.response;
       }
 };

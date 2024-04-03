@@ -5,25 +5,21 @@ import Header from '../components/Header';
 import CustomTextInput from '../components/CustomTextInput';
 import i18n from '../i18n/i18n';
 import {useDispatch} from 'react-redux';
-import {changeScreen} from '../redux/screenSlice';
 import {Button, Divider} from 'react-native-paper';
 import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmOnlyDialog from '../components/custom/CustomConfirmOnlyDialog';
 import {sendOTPForgotPwd, verifyOTPForgotPwd} from '../api/forgotPwd';
 import {useSelector} from 'react-redux';
+import {changePassword} from '../api/changePassword';
 
 const ChangePasswordScreen = ({navigation}) => {
-    const user = useSelector(state => state.auth.user);
-
-    console.log('User: ', user.email);
-
+  const user = useSelector(state => state.auth.user);
 
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
   const [pwd, setPwd] = useState('');
   const [cpwd, setCpwd] = useState('');
-  const [OTP, setOTP] = useState('');
 
   const [visible, setVisible] = React.useState(false);
   const showDialog = (title, message) => {
@@ -46,58 +42,37 @@ const ChangePasswordScreen = ({navigation}) => {
     console.log('Show confirm password: ', showConfirmPassword);
   };
 
-  const validateEmail = email => {
-    // Simple email validation regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
-  const handleGetOTP = () => {
-    sendOTPForgotPwd(user.email);
-    showDialog('OTP Sent', 'An OTP has been sent to your email address.');
-  };
-
-  const checkPassword = () => {
+  const handleContinue = () => {
     if (pwd === '') {
       showDialog('Empty Password', 'Please enter a password.');
-      return false;
+      return;
     }
 
     if (cpwd === '') {
       showDialog('Empty Password', 'Please enter a confirm password.');
-      return false;
-    }
-    if (pwd !== cpwd) {
-      showDialog('Passwords Mismatch', 'The passwords do not match.');
-      return false;
-    }
-    return true;
-  };
-
-  const handleContinue = () => {
-
-    if (!checkPassword()) return;
-
-    if (OTP === '') {
-      showDialog('Empty OTP', 'Please enter an OTP.');
       return;
     }
 
-    console.log('Email: ', user.email, ' OTP: ', OTP, ' Password: ', pwd);
+    if (pwd === cpwd) {
+      return showDialog(
+        'Password Mismatch',
+        'New password different old password.',
+      );
+    }
 
-    const res = verifyOTPForgotPwd(user.email, OTP, pwd);
+    // const res = verifyOTPForgotPwd(user.email, OTP, pwd);
+    res = changePassword(user._id, pwd, cpwd);
 
     setTimeout(() => {
-      console.log('res: ', res._j.status);
+      const text = res._j.data.message;
+      console.log(text);
       if (res._j.status === 200) {
-        showConfirmDialog('Success', 'Password updated successfully.');
+        showConfirmDialog('Success', text);
       } else {
-        showDialog(
-          'Failed',
-          'Failed to update password. Please try again later.',
-        );
+        showDialog('Failed', text);
       }
-    }, 1000);
+    }, 500);
   };
   const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
 
@@ -126,8 +101,9 @@ const ChangePasswordScreen = ({navigation}) => {
         handleGoBack={handleGoBack}
         indicator={false}
       />
+
       <CustomTextInput
-        label="New password"
+        label="Old Password"
         value={pwd}
         onChangeText={setPwd}
         secureTextEntry={true}
@@ -135,7 +111,7 @@ const ChangePasswordScreen = ({navigation}) => {
         onPressEye={handleShowPassword}
       />
       <CustomTextInput
-        label="Confirm password"
+        label="New password"
         value={cpwd}
         onChangeText={setCpwd}
         secureTextEntry={true}
@@ -143,41 +119,6 @@ const ChangePasswordScreen = ({navigation}) => {
         onPressEye={handleShowConfirmPassword}
       />
 
-      <TextInput
-        style={{
-          width: '90%',
-          borderColor: 'grey',
-          backgroundColor: '#eee',
-          fontSize: 16,
-          marginTop: 20,
-          borderRadius: 9999,
-        }}
-        textAlign="center"
-        maxLength={6}
-        label="OTP"
-        keyboardType="numeric"
-        onChangeText={setOTP}
-        placeholder="OTP"
-      />
-
-      <View style={{width: '90%'}}>
-        <Button
-          style={{
-            width: '100%',
-            marginTop: 10,
-            borderRadius: 9999,
-            justifyContent: 'center',
-            backgroundColor: null,
-          }}
-          mode="contained"
-          labelStyle={{fontSize: 16, color: '#76ABAE'}}
-          onPress={handleGetOTP}>
-          {i18n.t('Get OTP')}
-        </Button>
-      </View>
-      <View style={{width: '90%', marginVertical: 10}}>
-        <Divider bold="true" />
-      </View>
       <View style={{width: '90%'}}>
         <Button
           style={{
