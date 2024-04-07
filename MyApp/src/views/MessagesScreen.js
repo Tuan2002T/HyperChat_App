@@ -17,6 +17,22 @@ import { socket } from '../socket/socket';
 const MessageScreen = ({navigation}) => {
   const id = useSelector(state => state.auth.user._id);
   const [list, setList] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  useEffect(() => {
+    socket.emit('userOnline',id);
+    socket.emit('listOnlineUsers');
+    // Lắng nghe sự kiện 'onlineUsers' từ máy chủ và cập nhật trạng thái của danh sách người dùng trực tuyến
+    socket.on('onlineUsers', (users) => {
+      setOnlineUsers(users);
+    });
+    return () => {
+      socket.disconnect(); 
+    }; 
+  }, []);
+
+  console.log("onlineUsers",onlineUsers);
+
+ 
   useEffect(() => {
     listChats(id).then(data => {
       dispatch(getListChats(data));
@@ -39,6 +55,11 @@ const MessageScreen = ({navigation}) => {
       socket.off('roomList');
     };
   }, []);
+
+  // useEffect(() => {
+  //   // Gửi sự kiện lấy danh sách cuộc trò chuyện đến server
+  //   socket.emit('getRoomList', currentUserId);
+  // }, [socket]);
 
   const handleChatRoomPress = (roomId, item) => {
     // Điều hướng đến màn hình phòng chat với roomId tương ứng
@@ -130,3 +151,4 @@ const MessageScreen = ({navigation}) => {
 };
 
 export default MessageScreen;
+
