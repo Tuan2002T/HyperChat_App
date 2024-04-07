@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
-  TextInput,
   FlatList,
   TouchableOpacity,
   Image,
@@ -14,7 +13,17 @@ import { listChats } from '../api/getListChats';
 import CustomHeader from '../components/CustomHeader';
 import {Searchbar} from 'react-native-paper';
 import { socket } from '../socket/socket';
+
 const MessageScreen = ({navigation}) => {
+  const dispatch = useDispatch();
+
+  const users = useSelector(state => state.user.users); // Access the user list from Redux store
+
+  // useEffect(() => {
+  //   console.log('All users:', users); // Print out the list of users
+  // }, [users]);
+
+  
   const id = useSelector(state => state.auth.user._id);
   const [list, setList] = useState([]);
   useEffect(() => {
@@ -49,7 +58,6 @@ const MessageScreen = ({navigation}) => {
   
   console.log("list",list);
 
-  const dispatch = useDispatch();
   const [searchText, setSearchText] = useState('');
   const chats = useSelector(state => state.chat.chats);
 

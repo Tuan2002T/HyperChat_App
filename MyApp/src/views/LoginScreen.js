@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, Pressable, Alert} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, Pressable } from 'react-native';
 import i18n from '../i18n/i18n';
 import {useDispatch} from 'react-redux';
 import {changeScreen} from '../redux/screenSlice';
@@ -10,14 +10,19 @@ import {loginUser} from '../api/loginUser'; // Import loginUser function
 import {loginUserSuccess} from '../redux/authSlice';
 import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
+import {allUsers} from '../api/allUser';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = () => {
+  
+  // const isLogin = true in asyncStorage
+
+
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
   const [username, setUsername] = useState('vkmt');
-  const [password, setPassword] = useState('@Noname007');
-
+  const [password, setPassword] = useState('Hien@123');
 
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {
@@ -34,10 +39,24 @@ const LoginScreen = () => {
     try {
       const res = await loginUser(username, password);
       dispatch(loginUserSuccess(res));
+
+      // Save user info to asyncStorage
+      const setIsLogin = async (value) => {
+        try {
+          await AsyncStorage.setItem('@isLogin', JSON.stringify(value))
+          await AsyncStorage.setItem('@user', JSON.stringify(username))
+          await AsyncStorage.setItem('@password', JSON.stringify(password))
+        } catch (e) {
+          // saving error
+          console.error(e);
+        }
+      }
+      
+      setIsLogin(true);
+
       handleGotoChat();
     } catch (error) {
-      showDialog("Login Fail", 'Account information or password not correct.');
-
+      showDialog('Login Fail', 'Account information or password not correct.');
     }
   };
 
@@ -45,13 +64,15 @@ const LoginScreen = () => {
     dispatch(changeScreen('Splash'));
   };
 
-
   const openConfirmDialog = () => {
-    showConfirmDialog('Create new account', 'Do you want to create a new account?');
-  }
+    showConfirmDialog(
+      'Create new account',
+      'Do you want to create a new account?',
+    );
+  };
 
   const handleRegister = () => {
-      dispatch(changeScreen('Register'));
+    dispatch(changeScreen('Register'));
   };
 
   const handleForgottenPassword = () => {
@@ -59,6 +80,7 @@ const LoginScreen = () => {
   };
 
   const handleGotoChat = () => {
+    allUsers();
     dispatch(changeScreen('Main'));
   };
 

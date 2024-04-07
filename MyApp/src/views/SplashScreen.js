@@ -1,6 +1,6 @@
 //src/views/SplashScreen.js
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, Image, Text} from 'react-native';
+import {View, Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {changeScreen} from '../redux/screenSlice';
@@ -10,19 +10,33 @@ import LanguageSelector from '../components/LanguageSelector ';
 import AnimatedCircle from '../components/animated/AnimatedCircle';
 import styles from '../css/Styles';
 import {Button} from 'react-native-paper';
+import {allUsers} from '../api/allUser';
+import { loginUser } from '../api/loginUser';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const SplashScreen = () => {
+  console.log('SplashScreen');
+
+  const [isLogin, setIsLogin] = useState(null);
+  const [user, setUser] = useState('');
+  const [password, setPassword] = useState('');
+
   const dispatch = useDispatch();
-  
+
   const [showButtons, setShowButtons] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('');
 
   useEffect(() => {
-    const loadLanguage = async () => {
+    const loadLanguageAndLoginStatus = async () => {
       try {
         const language = await AsyncStorage.getItem('language');
+        const loginStatus = await AsyncStorage.getItem('@isLogin');
+        setIsLogin(JSON.parse(loginStatus));
+        const userInfo = await AsyncStorage.getItem('@user');
+        setUser(JSON.parse(userInfo));
+        const passwordInfo = await AsyncStorage.getItem('@password');
+        setPassword(JSON.parse(passwordInfo));
         if (language) {
           setCurrentLanguage(language);
           i18n.changeLanguage(language);
@@ -31,8 +45,21 @@ const SplashScreen = () => {
         console.error('Error loading language:', error);
       }
     };
-    loadLanguage();
+    loadLanguageAndLoginStatus();
     delay(1).then(() => setShowButtons(true));
+
+    console.log('isLogin:', isLogin);
+    console.log('user:', user);
+    console.log('password: ', password);
+
+    // if (isLogin) {
+    //   loginUser(user, password);
+    
+
+    //   // dispatch(changeScreen('Main'));
+    // }
+
+    dispatch(allUsers());
   }, []);
 
   const toggleLanguage = async newLanguage => {
