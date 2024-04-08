@@ -15,6 +15,7 @@ const CallScreen = ({navigation}) => {
         leftIcon="menu"
         leftIconPress={handleMenu}
       />
+      
       <FlatList
         style={{marginTop: 10, width: '100%', backgroundColor: 'white', borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
         // showsHorizontalScrollIndicator={false}
