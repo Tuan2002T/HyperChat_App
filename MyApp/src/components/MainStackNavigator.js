@@ -1,6 +1,6 @@
 import React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
-import {createSharedElementStackNavigator} from 'react-navigation-shared-element'; // Import thư viện shared element
+import { createStackNavigator } from '@react-navigation/stack';
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element'; // Import thư viện shared element
 
 import MainTabNavigator from './MainTabNavigator';
 import ChatScreen from '../views/ChatScreen';
@@ -20,34 +20,10 @@ const MainStackNavigator = () => {
       }}>
       <Stack.Screen name="MainTabNavigator" component={MainTabNavigator} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
-      <Stack.Screen
-        name="SubChatScreen"
-        component={SubChatScreen}
-        options={{
-          gestureDirection: 'horizontal', // Thiết lập hướng chuyển trang
-          gestureEnabled: true, // Cho phép gesture
-          cardStyleInterpolator: ({current, layouts}) => {
-            return {
-              cardStyle: {
-                transform: [
-                  {
-                    translateX: current.progress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [layouts.screen.width, 0],
-                    }),
-                  },
-                ],
-              },
-            };
-          },
-        }}
-      />
+      <Stack.Screen name="SubChatScreen" component={SubChatScreen} />
       <Stack.Screen name="NewMessageScreen" component={NewMessageScreen} />
-      <Stack.Screen
-        name="ChangePasswordScreen"
-        component={ChangePasswordScreen}
-      />
-
+      <Stack.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
+      
       <Stack.Screen
         name="SettingScreen"
         component={SettingScreen}
@@ -82,7 +58,7 @@ const MainStackNavigator = () => {
               animation: 'timing',
             },
           },
-          cardStyleInterpolator: ({current, layouts}) => {
+          cardStyleInterpolator: ({ current, layouts }) => {
             return {
               cardStyle: {
                 opacity: current.progress,

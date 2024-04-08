@@ -8,7 +8,7 @@ const API_CONFIG = {
   baseURL: API_BASE_URL,
   socket: SOCKET_URL,
   endpoints: {
-    myFriends: 'user/listFriends',
+
     allUsers: 'user',
     login: 'user/login',
     getUser: 'user/id',
@@ -21,10 +21,6 @@ const API_CONFIG = {
     verifyOTPForgotPwd: 'user/verifyOTPForgotPassword',
     changePassword: 'user/changePassword',
     getRequests: 'friends/getAllSendFriendRequest',
-    accept: 'friends/acceptFriendRequest',
-    deny: 'friends/deleteFriendRequest',
-    unFriend: 'friends/unFriend',
-    sendFriendRequest: 'friends/sendFriendRequest',
   },
 };
 
