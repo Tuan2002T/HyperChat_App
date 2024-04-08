@@ -10,6 +10,8 @@ import { IconButton } from 'react-native-paper';
 import { socket } from '../socket/socket';
 import { getMessagesByChatId, sendMessage } from '../api/Message';
 import Video from 'react-native-video';
+import { showMessage, hideMessage } from "react-native-flash-message";
+import FlashMessageManager from '../components/FlashMessageManager';
 const NewMessageScreen = ({ route }) => {
   const getFileExtensionFromUrl = (url) => {
     // Tách phần mở rộng từ URL và chuyển đổi thành chữ thường
@@ -54,20 +56,19 @@ const NewMessageScreen = ({ route }) => {
       return (
         <View style={{ alignItems: 'center' }}>
           <Text style={{ color: textColor }}>{currentMessage.text}</Text>
-          {isCurrentUser && (
             <IconButton
               iconColor='white'
               onPress={() => pickerMessage()}
               icon="dots-horizontal"
               style={{ backgroundColor: 'gray', height: 20 }}
             />
-          )}
         </View>
       );
     }
 
     return null; // Trả về null nếu không có trường "text" trong currentMessage
   };
+  
 
 
   const renderMessageImage = (props) => {
@@ -106,9 +107,9 @@ const NewMessageScreen = ({ route }) => {
             iconColor='white'
             onPress={() => Linking.openURL(currentMessage.file)}
             icon="file"
-            style={{ backgroundColor: 'gray', height: 100, width: 100}}
+            style={{ backgroundColor: 'gray', height: 100, width: 100 }}
           />
-           <IconButton
+          <IconButton
             iconColor='white'
             onPress={() => pickerMessage()}
             icon="dots-horizontal"
@@ -214,14 +215,30 @@ const NewMessageScreen = ({ route }) => {
   };
 
   useEffect(() => {
+    socket.on('notification', (data) => {
+      console.log('data', data);
+      showMessage({
+        message: data,
+        description: "This is our second message",
+        type: "success",
+      })
 
+    });
+  },[socket]);
+
+  useEffect(() => {
+    socket.on('receiveNotification', (data) => {
+      showMessage({
+        message: data,
+        description: "This is our second message",
+        type: "success",
+      })
+    });
     getMessagesByChatId(roomId).then((data) => {
       const convertedMessages = data.map(convertMessageToGiftedChatMessage);
       setMessages(convertedMessages.reverse());
       console.log('convertedMessages', convertedMessages);
     });
-
-
     socket.emit('joinRoom', roomId, route.params.item.members);
     socket.on('receiveMessage', (data) => {
       const { message, senderId, createdAt, image, video, file } = data;
@@ -482,6 +499,13 @@ const NewMessageScreen = ({ route }) => {
             </TouchableHighlight>
 
             <TouchableHighlight onPress={() => pickFile()}>
+              <IconButton icon="file" />
+            </TouchableHighlight>
+            <TouchableHighlight onPress={() => showMessage({
+              message: "Hello World",
+              description: "This is our second message",
+              type: "success",
+            })}>
               <IconButton icon="file" />
             </TouchableHighlight>
           </View>
