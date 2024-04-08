@@ -12,6 +12,8 @@ import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 import {allUsers} from '../api/allUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { showMessage, hideMessage } from "react-native-flash-message";
+// import FlashMessage from "react-native-flash-message";
 
 const LoginScreen = () => {
   
@@ -53,8 +55,14 @@ const LoginScreen = () => {
       }
       
       setIsLogin(true);
+      
+      handleNotify();
 
-      handleGotoChat();
+      //delay 1s
+      setTimeout(() => {
+        handleGotoChat();
+      }, 1000);
+
     } catch (error) {
       showDialog('Login Fail', 'Account information or password not correct.');
     }
@@ -179,15 +187,23 @@ const LoginScreen = () => {
           {i18n.t('Create new account')}
         </Button>
       </View>
-
+      {/* <FlashMessage position="top" /> */}
+      
       {/*  */}
-      <View style={{position: 'absolute', top: 10, right: 100}}>
-        <Pressable onPress={handleGotoChat}>
-          <Text>goToChat</Text>
+      <View style={{position: 'absolute', bottom: 100, right: 100}}>
+        <Pressable onPress={handleNotify}>
+          <Text>notify</Text>
         </Pressable>
       </View>
     </View>
   );
 };
+
+const handleNotify = () => {
+  // showMessage({
+  //   message: "Login success!",
+  //   type: "info",
+  // });
+}
 
 export default LoginScreen;

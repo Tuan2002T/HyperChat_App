@@ -14,7 +14,6 @@ import {
 } from '../api/allUser';
 
 const ContactScreen = ({navigation}) => {
-  const dispatch = useDispatch();
   const users = useSelector(state => state.user.users);
   const me = useSelector(state => state.auth.user);
   const [requests, setRequests] = useState([]);
@@ -29,6 +28,7 @@ const ContactScreen = ({navigation}) => {
     const fetchFriends = async () => {
       try {
         const res = await getMyFriends(me._id, me.token);
+        res.sort((a, b) => a.fullname.localeCompare(b.fullname));
         const friendsWithType = res.map(friend => ({
           ...friend,
           type: 'friend',

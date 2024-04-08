@@ -1,88 +1,47 @@
-import React, {useEffect} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Pressable,
-  SectionList,
-} from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Image, SectionList } from 'react-native';
+import { Button, Searchbar } from 'react-native-paper';
+import { useSelector } from 'react-redux';
 import CustomHeader from '../components/CustomHeader';
-import {Icon, Searchbar, Button} from 'react-native-paper';
-import {useSelector} from 'react-redux';
-import {getRequests, getMyFriends} from '../api/allUser';
+import { getMyFriends } from '../api/allUser';
 
-const SubChatScreen = ({navigation}) => {
-  const users = useSelector(state => state.user.users);
+const SubChatScreen = ({ navigation }) => {
   const me = useSelector(state => state.auth.user);
 
-  const [requests, setRequests] = React.useState([]);
   const [friends, setFriends] = React.useState([]);
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  // Fetch requests on mount
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        let res = await getRequests(me._id);
-        res = res.map(request => ({...request, type: 'request'}));
-        setRequests(res);
-      } catch (error) {
-        console.error('Error caught:', error);
-      }
-    };
     const fetchFriends = async () => {
       try {
-        const res = await getMyFriends(me._id, me.token);
-        
-        // Add type attribute to each friend object
-        const friendsWithType = res.map(friend => ({ ...friend, type: 'friend' }));
-        
-        console.log('Friends:', friendsWithType);
-        setFriends(friendsWithType);
+        if (me && me._id && me.token) {
+          const res = await getMyFriends(me._id, me.token);
+          res.sort((a, b) => a.fullname.localeCompare(b.fullname));
+          setFriends(res);
+        }
       } catch (error) {
         console.error('Error caught:', error);
       }
     };
-    
 
-    fetchRequests();
     fetchFriends();
-  }, []);
+  }, [me]);
 
+  const handleCreateChat = async friendId => {
+    console.log('Create chat with:', friendId);
+  };
 
-  const handleAcceptRequest = async requestId => {
-    console.log('Accept request:', requestId);
-  }
+  const handleCreateGroupChat = () => {
+    console.log('Create group chat');
+  };
 
-  const handleDenyRequest = async requestId => {
-    console.log('Deny request:', requestId);
-  }
-
-  const handleRemoveFriend = async friendId => {
-    console.log('Remove friend:', friendId);
-  }
-
-
-
-  // Filter users, requests, and friends based on search query
-  const filteredData = [...requests, ...friends, ...users].filter(item => {
-    const isAlreadyRequested = requests.some(request => request._id === item._id);
-    const isFriend = friends.some(friend => friend._id === item._id);
-    return (
-      item._id !== me._id &&
-      !isAlreadyRequested &&
-      !isFriend &&
-      (item.fullname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.userName.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filterFriends = () => {
+    return friends.filter(
+      friend => 
+        (friend.fullname && friend.fullname.toLowerCase().includes(searchQuery.toLowerCase()))
     );
-  });
-
-const sections = [
-  { title: 'Requests', data: requests },
-  { title: 'Friends', data: friends },
-  { title: 'Suggest', data: filteredData },
-];
+  };
+  const filteredFriends = filterFriends();
 
   return (
     <View style={styles.container}>
@@ -90,8 +49,10 @@ const sections = [
         title="New message"
         leftIcon="arrow-left"
         leftIconPress={() => navigation.goBack()}
+        rightIcon="account-group"
+        rightIconPress={handleCreateGroupChat}
       />
-      <View style={{marginVertical: 10}}>
+      <View style={{ marginVertical: 10 }}>
         <Searchbar
           style={{
             marginHorizontal: '5%',
@@ -105,74 +66,27 @@ const sections = [
         />
       </View>
       <SectionList
-        sections={sections}
+        sections={filteredFriends.length ? [{ title: 'Friends', data: filteredFriends }] : []}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({item}) => (
-          <Pressable
-            onPress={() => {
-              console.log('User selected:', item._id);
-            }}>
-            <View style={styles.userContainer}>
-              <Image source={{uri: item.avatar}} style={styles.avatar} />
-              <Text>{item.fullname}</Text>
-              {item.type === 'request' ? (
-                <View style={{flexDirection: 'row', marginLeft: 'auto'}}>
-                  <Button
-                    style={{
-                      backgroundColor: null,
-                      borderWidth: 1,
-                      borderColor: 'green',
-                    }}
-                    labelStyle={{color: 'green'}}
-                    mode="contained"
-                    onPress={() => handleAcceptRequest(item._id)}>
-                    Accept
-                  </Button>
-                  <Button
-                    style={{
-                      backgroundColor: null,
-                      borderWidth: 1,
-                      borderColor: 'red',
-                      marginLeft: 5,
-                    }}
-                    labelStyle={{color: 'red'}}
-                    mode="contained"
-                    onPress={() => handleDenyRequest(item._id)}>
-                    Denied
-                  </Button>
-                </View>
-              ) : item.type === 'friend' ? (
-                <Button
-                  style={{
-                    backgroundColor: null,
-                    borderWidth: 1,
-                    borderColor: 'red',
-                    marginLeft: 'auto',
-                  }}
-                  labelStyle={{color: 'red'}}
-                  mode="contained"
-                  onPress={() => handleRemoveFriend(item._id)}>
-                  Unfriend
-                </Button>
-              ) : (
-                <Button
-                  style={{
-                    backgroundColor: null,
-                    borderWidth: 1,
-                    borderColor: '#76ABAE',
-                    marginLeft: 'auto',
-                  }}
-                  labelStyle={{color: '#76ABAE'}}
-                  mode="contained"
-                  onPress={() => console.log('Invite')}>
-                  Invite
-                </Button>
-              )}
-            </View>
-          </Pressable>
+        renderItem={({ item }) => (
+          <View style={styles.userContainer}>
+            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>{item.fullname}</Text>
+            <Button
+              style={{
+                backgroundColor: null,
+                borderWidth: 1,
+                borderColor: '#76ABAE',
+                marginLeft: 'auto',
+              }}
+              labelStyle={{ color: '#76ABAE', fontWeight: 'bold' }}
+              mode="contained"
+              onPress={() => handleCreateChat(item._id)}>
+              Chat
+            </Button>
+          </View>
         )}
-        
-        renderSectionHeader={({section: {title}}) => (
+        renderSectionHeader={({ section: { title } }) => (
           <Text style={styles.sectionHeader}>{title}</Text>
         )}
       />
@@ -198,6 +112,8 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 10,
+    borderWidth: 0.2,
+    borderColor: 'black',
   },
   sectionHeader: {
     fontSize: 16,
