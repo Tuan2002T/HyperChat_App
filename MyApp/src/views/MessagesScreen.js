@@ -14,6 +14,7 @@ import CustomHeader from '../components/CustomHeader';
 import {Searchbar} from 'react-native-paper';
 import { socket } from '../socket/socket';
 
+import { showMessage, hideMessage } from "react-native-flash-message";
 const MessageScreen = ({navigation}) => {
   const dispatch = useDispatch();
 
@@ -26,6 +27,29 @@ const MessageScreen = ({navigation}) => {
   
   const id = useSelector(state => state.auth.user._id);
   const [list, setList] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  useEffect(() => {
+    socket.on('receiveNotification', (data) => {
+      showMessage({
+        message: data,
+        description: "This is our second message",
+        type: "success",
+      })
+    });
+    socket.emit('userOnline',id);
+    socket.emit('listOnlineUsers');
+    // Lắng nghe sự kiện 'onlineUsers' từ máy chủ và cập nhật trạng thái của danh sách người dùng trực tuyến
+    socket.on('onlineUsers', (users) => {
+      setOnlineUsers(users);
+    });
+    return () => {
+      socket.disconnect(); 
+    }; 
+  }, []);
+
+  console.log("onlineUsers",onlineUsers);
+
+ 
   useEffect(() => {
     listChats(id).then(data => {
       dispatch(getListChats(data));
@@ -48,6 +72,11 @@ const MessageScreen = ({navigation}) => {
       socket.off('roomList');
     };
   }, []);
+
+  // useEffect(() => {
+  //   // Gửi sự kiện lấy danh sách cuộc trò chuyện đến server
+  //   socket.emit('getRoomList', currentUserId);
+  // }, [socket]);
 
   const handleChatRoomPress = (roomId, item) => {
     // Điều hướng đến màn hình phòng chat với roomId tương ứng
@@ -106,6 +135,7 @@ const MessageScreen = ({navigation}) => {
 
   return (
     <View style={{flex: 1, backgroundColor: 'white', width: '100%'}}>
+      {/* <FlashMessageManager /> */}
       <CustomHeader
         title="Chats"
         leftIcon="menu"
@@ -138,3 +168,4 @@ const MessageScreen = ({navigation}) => {
 };
 
 export default MessageScreen;
+

@@ -10,6 +10,7 @@ import LoginScreen from './views/LoginScreen';
 import RegisterStackNavigator from './components/RegisterStackNavigator';
 import MainStackNavigator from './components/MainStackNavigator';
 import ForgotPasswordScreen from './views/ForgotPasswordScreen';
+import FlashMessageManager from './components/FlashMessageManager';
 const App = () => {
   const currentScreen = useSelector(state => state.screen.currentScreen);
 
@@ -24,7 +25,7 @@ const App = () => {
       case 'Register':
         return <RegisterStackNavigator />;
       case 'Main':
-        return <MainStackNavigator />;
+        return <FlashMessageManager><MainStackNavigator /></FlashMessageManager>;
       default:
         return <SplashScreen />;
     }

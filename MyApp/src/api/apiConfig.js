@@ -1,4 +1,5 @@
 const SERVER_IP = '192.168.2.41';
+// const SERVER_IP = '192.168.2.40';
 // const SERVER_IP = '192.168.56.235';
 const SERVER_PORT = '5000';
 const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}/api/`;
@@ -25,6 +26,9 @@ const API_CONFIG = {
     deny: 'friends/deleteFriendRequest',
     unFriend: 'friends/unFriend',
     sendFriendRequest: 'friends/sendFriendRequest',
+    sendMessage: 'message/sendMessage',
+    getMessagesByChatId:'message/getAllMessagesByChatId',
+    // Add other endpoints here as needed
   },
 };
 
