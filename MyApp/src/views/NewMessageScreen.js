@@ -5,11 +5,38 @@ import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { io } from 'socket.io-client';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
+import { IconButton  } from 'react-native-paper';
 import { socket } from '../socket/socket';
 import { getMessagesByChatId, sendMessage } from '../api/Message';
-
+import Video from 'react-native-video';
 const NewMessageScreen = ({ route }) => {
+  const getFileExtensionFromUrl = (url) => {
+    // Tách phần mở rộng từ URL và chuyển đổi thành chữ thường
+    const parts = url.split('.');
+    const extension = parts[parts.length - 1].toLowerCase();
+    return extension;
+  };
+
+  const renderMessageVideo = (props) => {
+    const { currentMessage } = props;
+
+    // Kiểm tra xem trường "video" có tồn tại trong currentMessage hay không
+    if (currentMessage.video) {
+        return (
+            <Video
+                source={{ uri: currentMessage.video }} // Đường dẫn của video
+                style={{ width: 150, height: 150 }} // Kích thước của video
+                ref={(ref) => {
+                  this.player = ref
+                }}       
+                onBuffer={this.onBuffer}                // Callback when remote video is buffering
+       onError={this.videoError}       
+            />
+        );
+    }
+
+    return null; // Trả về null nếu không có trường "video" trong currentMessage
+};
   const [messages, setMessages] = useState([]);
   const currentUserId = route.params.currentUserId;
   const roomId = route.params.roomId;
@@ -17,44 +44,68 @@ const NewMessageScreen = ({ route }) => {
   console.log('roomId', roomId);
   const convertMessageToGiftedChatMessage = (message) => {
     const { _id, content, sender, createdAt } = message;
+    let messageType = 'text';
+    let messageContent = content.text;
+    let imageContent = '';
+    let videoContent = '';
+  
+    if (content.files.length > 0) {
+      const fileExtension = getFileExtensionFromUrl(content.files[0]);
+  
+      if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+        messageType = 'image';
+        messageContent = '';
+        imageContent = content.files[0];
+      } else if (['mp4', 'mov', 'avi'].includes(fileExtension)) {
+        messageType = 'video';
+        messageContent = '';
+        videoContent = content.files[0];
+      }
+    }
+  
     return {
       _id,
-      text: content.text,
+      text: messageContent,
+      image: imageContent,
+      video: videoContent,
       user: {
         _id: sender,
         avatar: 'https://image2403.s3.ap-southeast-1.amazonaws.com/message.1712420273857.jpg',
       },
       createdAt: new Date(createdAt),
-      image: content.files.length > 0 ? content.files[0] : null,
     };
   };
+  
   useEffect(() => {
     
       getMessagesByChatId(roomId).then((data) => {
       const convertedMessages = data.map(convertMessageToGiftedChatMessage);
       setMessages(convertedMessages.reverse());
+      console.log('convertedMessages', convertedMessages);
     });
     
 
     socket.emit('joinRoom', roomId, route.params.item.members);
     socket.on('receiveMessage', (data) => {
-      const { message, senderId, createdAt, image } = data;
+      const { message, senderId, createdAt, image, video } = data;
       setMessages((previousMessages) => {
         const existingMessage = previousMessages.find(
           (msg) => msg.text === message && msg.user._id === senderId
         );
-        return GiftedChat.append(previousMessages, [
-          {
-            _id: Math.random().toString(36).substring(7),
-            text: message,
-            createdAt: new Date(createdAt),
-            user: {
-              _id: senderId,
-              avatar: 'https://image2403.s3.ap-southeast-1.amazonaws.com/message.1712420273857.jpg',
-            },
-            image: image, // Thêm dữ liệu hình ảnh vào đây
+    
+        const newMessage = {
+          _id: Math.random().toString(36).substring(7),
+          text: message,
+          createdAt: new Date(createdAt),
+          user: {
+            _id: senderId,
+            avatar: 'https://image2403.s3.ap-southeast-1.amazonaws.com/message.1712420273857.jpg',
           },
-        ]);
+          image: image, // Thêm dữ liệu hình ảnh vào đây
+          video: video, // Thêm dữ liệu video vào đây
+        };
+    
+        return GiftedChat.append(previousMessages, [newMessage]);
       });
     });
     return () => {
@@ -64,13 +115,14 @@ const NewMessageScreen = ({ route }) => {
 
   const onSend = (newMessages = []) => {
     newMessages.forEach((newMessage) => {
-      const { text, createdAt, image } = newMessage;
+      const { text, createdAt, image, video } = newMessage;
       socket.emit('sendMessage', {
         roomId,
         message: text,
         senderId: currentUserId,
         createdAt,
         image,
+        video
       });
       sendMessage(currentUserId, text, roomId, image)
     });
@@ -98,6 +150,10 @@ const NewMessageScreen = ({ route }) => {
         {
           text: 'Choose from Library',
           onPress: () => launchImagePicker('library'),
+        },
+        {
+          text: 'Camera',
+          onPress: () => launchImagePicker('camera'),
         },
         {
           text: 'Cancel',
@@ -144,6 +200,7 @@ const NewMessageScreen = ({ route }) => {
             senderId: currentUserId,
             createdAt: new Date(),
             image: img ,
+            video: ''
           });
       
   
@@ -154,6 +211,72 @@ const NewMessageScreen = ({ route }) => {
       }
     }
   };
+
+  const pickMedia = async (mediaType) => {
+    Alert.alert(
+      'Choose Option',
+      'Pick an option to select media',
+      [
+        {
+          text: 'Choose from Library',
+          onPress: () => launchVideoPicker('library', mediaType),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+
+
+  const launchVideoPicker = (option) => {
+    let options = {
+      mediaType: 'video',
+      quality: 1,
+    };
+
+    if (option === 'library') {
+      launchImageLibrary(options, handleVideoResponse);
+    } else if (option === 'camera') {
+      launchCamera(options, handleVideoResponse);
+    }
+  };
+
+  const handleVideoResponse = async (response) => {
+    if (response.didCancel) {
+      console.log('User cancelled Video picker');
+    } else if (response.errorMessage) {
+      console.log('ImagePicker Error: ', response.errorMessage);
+    } else {
+      console.log('Video URI:', response.assets[0]);
+      const files = {
+        uri: response.assets[0].uri,
+        type: response.assets[0].type,
+        name: response.assets[0].fileName,
+      };
+  
+      try {
+        const video = await sendMessage(currentUserId, '', roomId, files);
+        console.log('video', video);
+
+          socket.emit('sendMessage', {
+            roomId,
+            senderId: currentUserId,
+            createdAt: new Date(),
+            image: '',
+            video: video ,
+          });
+        
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+  };
+
+  // ---------------------------
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -171,13 +294,14 @@ const NewMessageScreen = ({ route }) => {
         }}
         renderAvatar={renderAvatar}
         renderDay={renderDay}
+        renderMessageVideo={renderMessageVideo}
         renderActions={(props) => (
           <View style={{ flexDirection: 'row' }}>
             <TouchableHighlight onPress={() => pickImage()}>
-              <Text style={{ paddingHorizontal: 10 }}>Chọn hình ảnh</Text>
+              <IconButton icon="image"/>
             </TouchableHighlight>
-            <TouchableHighlight onPress={() => launchImagePicker('camera')}>
-              <Text style={{ paddingHorizontal: 10 }}>Chụp ảnh</Text>
+            <TouchableHighlight onPress={() => pickMedia()}>
+            <IconButton icon="file-video-outline"/>
             </TouchableHighlight>
           </View>
         )}
