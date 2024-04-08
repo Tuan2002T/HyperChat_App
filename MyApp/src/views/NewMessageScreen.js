@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { GiftedChat, Avatar, Day } from 'react-native-gifted-chat';
-import { View, TouchableHighlight, Text, Alert } from 'react-native';
+import { View, TouchableHighlight, Text, Alert, Image } from 'react-native';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { io } from 'socket.io-client';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { IconButton  } from 'react-native-paper';
+import { IconButton } from 'react-native-paper';
 import { socket } from '../socket/socket';
 import { getMessagesByChatId, sendMessage } from '../api/Message';
 import Video from 'react-native-video';
@@ -17,26 +17,108 @@ const NewMessageScreen = ({ route }) => {
     return extension;
   };
 
+
   const renderMessageVideo = (props) => {
     const { currentMessage } = props;
 
     // Kiểm tra xem trường "video" có tồn tại trong currentMessage hay không
     if (currentMessage.video) {
-        return (
-            <Video
-                source={{ uri: currentMessage.video }} // Đường dẫn của video
-                style={{ width: 150, height: 150 }} // Kích thước của video
-                ref={(ref) => {
-                  this.player = ref
-                }}       
-                onBuffer={this.onBuffer}                // Callback when remote video is buffering
-       onError={this.videoError}       
-            />
-        );
+      return (
+        <View style={{alignItems:'center'}}>
+          <Video
+            source={{ uri: currentMessage.video }} // Đường dẫn của video
+            style={{ width: 150, height: 150 }} // Kích thước của video
+            ref={(ref) => {
+              this.player = ref
+            }}
+            onBuffer={this.onBuffer}                // Callback when remote video is buffering
+            onError={this.videoError}
+          />
+          <IconButton iconColor='white' onPress={() => pickerMessage()} icon="dots-horizontal" style= {{ backgroundColor:'gray', height:20}}  />
+        </View>
+      );
     }
 
     return null; // Trả về null nếu không có trường "video" trong currentMessage
-};
+  };
+
+  const renderMessageText = (props) => {
+    const { currentMessage, user } = props;
+  
+    // Kiểm tra xem trường "text" có tồn tại trong currentMessage hay không
+    if (currentMessage.text) {
+      const isCurrentUser = currentMessage.user._id === user._id;
+      const textColor = isCurrentUser ? 'white' : 'black';
+  
+      return (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: textColor }}>{currentMessage.text}</Text>
+          {isCurrentUser && (
+            <IconButton
+              iconColor='white'
+              onPress={() => pickerMessage()}
+              icon="dots-horizontal"
+              style={{ backgroundColor: 'gray', height: 20 }}
+            />
+          )}
+        </View>
+      );
+    }
+  
+    return null; // Trả về null nếu không có trường "text" trong currentMessage
+  };
+
+
+  const renderMessageImage = (props) => {
+
+    const { currentMessage } = props;
+    // Kiểm tra xem trường "image" có tồn tại trong currentMessage hay không
+    if (currentMessage.image) {
+      return (
+        <View style={{ alignItems: 'center' }}>
+          <Image
+            source={{ uri: currentMessage.image }} // Đường dẫn của hình ảnh
+            style={{ width: 150, height: 150 }} // Kích thước của hình ảnh
+          />
+          <IconButton
+            iconColor='white'
+            onPress={() => pickerMessage()}
+            icon="dots-horizontal"
+            style={{ backgroundColor: 'gray', height: 20 }}
+          />
+        </View>
+      );
+    }
+  
+    return null; // Trả về null nếu không có trường "image" trong currentMessage
+
+  };
+  
+
+
+  const pickerMessage = async () => {
+    Alert.alert(
+      'Tuỳ chọn tin nhắn',
+      'Tuỳ chọn ',
+      [
+        {
+          text: 'Thu hồi tin nhắn',
+          onPress: () => launchImagePicker('library'),
+        },
+        {
+          text: 'Xoá tin nhắn',
+          onPress: () => launchImagePicker('camera'),
+        },
+        {
+          text: 'Chuyển tiếp tin nhắn',
+          onPress: () => launchImagePicker('camera'),
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+
   const [messages, setMessages] = useState([]);
   const currentUserId = route.params.currentUserId;
   const roomId = route.params.roomId;
@@ -48,10 +130,10 @@ const NewMessageScreen = ({ route }) => {
     let messageContent = content.text;
     let imageContent = '';
     let videoContent = '';
-  
+
     if (content.files.length > 0) {
       const fileExtension = getFileExtensionFromUrl(content.files[0]);
-  
+
       if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
         messageType = 'image';
         messageContent = '';
@@ -62,7 +144,7 @@ const NewMessageScreen = ({ route }) => {
         videoContent = content.files[0];
       }
     }
-  
+
     return {
       _id,
       text: messageContent,
@@ -75,15 +157,15 @@ const NewMessageScreen = ({ route }) => {
       createdAt: new Date(createdAt),
     };
   };
-  
+
   useEffect(() => {
-    
-      getMessagesByChatId(roomId).then((data) => {
+
+    getMessagesByChatId(roomId).then((data) => {
       const convertedMessages = data.map(convertMessageToGiftedChatMessage);
       setMessages(convertedMessages.reverse());
       console.log('convertedMessages', convertedMessages);
     });
-    
+
 
     socket.emit('joinRoom', roomId, route.params.item.members);
     socket.on('receiveMessage', (data) => {
@@ -92,7 +174,7 @@ const NewMessageScreen = ({ route }) => {
         const existingMessage = previousMessages.find(
           (msg) => msg.text === message && msg.user._id === senderId
         );
-    
+
         const newMessage = {
           _id: Math.random().toString(36).substring(7),
           text: message,
@@ -104,7 +186,7 @@ const NewMessageScreen = ({ route }) => {
           image: image, // Thêm dữ liệu hình ảnh vào đây
           video: video, // Thêm dữ liệu video vào đây
         };
-    
+
         return GiftedChat.append(previousMessages, [newMessage]);
       });
     });
@@ -189,23 +271,23 @@ const NewMessageScreen = ({ route }) => {
         type: response.assets[0].type,
         name: response.assets[0].fileName,
       };
-  
+
       try {
         const img = await sendMessage(currentUserId, '', roomId, files);
         console.log('img', img);
-  
+
         // Gửi tin nhắn hình ảnh qua socket
-          socket.emit('sendMessage', {
-            roomId,
-            senderId: currentUserId,
-            createdAt: new Date(),
-            image: img ,
-            video: ''
-          });
-      
-  
+        socket.emit('sendMessage', {
+          roomId,
+          senderId: currentUserId,
+          createdAt: new Date(),
+          image: img,
+          video: ''
+        });
+
+
         // Gọi onSend để hiển thị tin nhắn hình ảnh trong giao diện
-        
+
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -257,19 +339,19 @@ const NewMessageScreen = ({ route }) => {
         type: response.assets[0].type,
         name: response.assets[0].fileName,
       };
-  
+
       try {
         const video = await sendMessage(currentUserId, '', roomId, files);
         console.log('video', video);
 
-          socket.emit('sendMessage', {
-            roomId,
-            senderId: currentUserId,
-            createdAt: new Date(),
-            image: '',
-            video: video ,
-          });
-        
+        socket.emit('sendMessage', {
+          roomId,
+          senderId: currentUserId,
+          createdAt: new Date(),
+          image: '',
+          video: video,
+        });
+
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -295,13 +377,19 @@ const NewMessageScreen = ({ route }) => {
         renderAvatar={renderAvatar}
         renderDay={renderDay}
         renderMessageVideo={renderMessageVideo}
+        renderMessageText={renderMessageText}
+        renderMessageImage={renderMessageImage}
         renderActions={(props) => (
           <View style={{ flexDirection: 'row' }}>
             <TouchableHighlight onPress={() => pickImage()}>
-              <IconButton icon="image"/>
+              <IconButton icon="image" />
             </TouchableHighlight>
             <TouchableHighlight onPress={() => pickMedia()}>
-            <IconButton icon="file-video-outline"/>
+              <IconButton icon="file-video-outline" />
+            </TouchableHighlight>
+
+            <TouchableHighlight onPress={() => pickMedia()}>
+              <IconButton icon="file" />
             </TouchableHighlight>
           </View>
         )}
