@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { GiftedChat, Avatar, Day } from 'react-native-gifted-chat';
-import { View, TouchableHighlight, Text, Alert, Image } from 'react-native';
+import { View, TouchableHighlight, Text, Alert, Image, Linking } from 'react-native';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
+import DocumentPicker from 'react-native-document-picker';
 import { io } from 'socket.io-client';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -24,7 +25,7 @@ const NewMessageScreen = ({ route }) => {
     // Kiểm tra xem trường "video" có tồn tại trong currentMessage hay không
     if (currentMessage.video) {
       return (
-        <View style={{alignItems:'center'}}>
+        <View style={{ alignItems: 'center' }}>
           <Video
             source={{ uri: currentMessage.video }} // Đường dẫn của video
             style={{ width: 150, height: 150 }} // Kích thước của video
@@ -34,7 +35,7 @@ const NewMessageScreen = ({ route }) => {
             onBuffer={this.onBuffer}                // Callback when remote video is buffering
             onError={this.videoError}
           />
-          <IconButton iconColor='white' onPress={() => pickerMessage()} icon="dots-horizontal" style= {{ backgroundColor:'gray', height:20}}  />
+          <IconButton iconColor='white' onPress={() => pickerMessage()} icon="dots-horizontal" style={{ backgroundColor: 'gray', height: 20 }} />
         </View>
       );
     }
@@ -44,12 +45,12 @@ const NewMessageScreen = ({ route }) => {
 
   const renderMessageText = (props) => {
     const { currentMessage, user } = props;
-  
+
     // Kiểm tra xem trường "text" có tồn tại trong currentMessage hay không
     if (currentMessage.text) {
       const isCurrentUser = currentMessage.user._id === user._id;
       const textColor = isCurrentUser ? 'white' : 'black';
-  
+
       return (
         <View style={{ alignItems: 'center' }}>
           <Text style={{ color: textColor }}>{currentMessage.text}</Text>
@@ -64,7 +65,7 @@ const NewMessageScreen = ({ route }) => {
         </View>
       );
     }
-  
+
     return null; // Trả về null nếu không có trường "text" trong currentMessage
   };
 
@@ -89,11 +90,39 @@ const NewMessageScreen = ({ route }) => {
         </View>
       );
     }
-  
+
     return null; // Trả về null nếu không có trường "image" trong currentMessage
 
   };
-  
+
+  const renderMessageFile = (props) => {
+
+    const { currentMessage } = props;
+    // Kiểm tra xem trường "file" có tồn tại trong currentMessage hay không
+    if (currentMessage.file) {
+      return (
+        <View style={{ alignItems: 'center' }}>
+          <IconButton
+            iconColor='white'
+            onPress={() => Linking.openURL(currentMessage.file)}
+            icon="file"
+            style={{ backgroundColor: 'gray', height: 100, width: 100}}
+          />
+           <IconButton
+            iconColor='white'
+            onPress={() => pickerMessage()}
+            icon="dots-horizontal"
+            style={{ backgroundColor: 'gray', height: 20 }}
+          />
+        </View>
+
+      );
+    }
+
+    return null; // Trả về null nếu không có trường "file" trong currentMessage
+
+  }
+
 
 
   const pickerMessage = async () => {
@@ -118,6 +147,25 @@ const NewMessageScreen = ({ route }) => {
     );
   };
 
+  const pickFile = async () => {
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles], // Loại tệp tin có thể chọn
+      });
+
+      // Gọi hàm xử lý khi chọn tệp
+      handleFileResponse(res);
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        // Người dùng đã hủy việc chọn tệp
+      } else {
+        // Xảy ra lỗi khi chọn tệp
+        console.log(err);
+      }
+    }
+  };
+
+
 
   const [messages, setMessages] = useState([]);
   const currentUserId = route.params.currentUserId;
@@ -130,6 +178,7 @@ const NewMessageScreen = ({ route }) => {
     let messageContent = content.text;
     let imageContent = '';
     let videoContent = '';
+    let fileContent = '';
 
     if (content.files.length > 0) {
       const fileExtension = getFileExtensionFromUrl(content.files[0]);
@@ -143,6 +192,11 @@ const NewMessageScreen = ({ route }) => {
         messageContent = '';
         videoContent = content.files[0];
       }
+      else {
+        messageType = 'file';
+        messageContent = '';
+        fileContent = content.files[0];
+      }
     }
 
     return {
@@ -150,6 +204,7 @@ const NewMessageScreen = ({ route }) => {
       text: messageContent,
       image: imageContent,
       video: videoContent,
+      file: fileContent,
       user: {
         _id: sender,
         avatar: 'https://image2403.s3.ap-southeast-1.amazonaws.com/message.1712420273857.jpg',
@@ -169,7 +224,7 @@ const NewMessageScreen = ({ route }) => {
 
     socket.emit('joinRoom', roomId, route.params.item.members);
     socket.on('receiveMessage', (data) => {
-      const { message, senderId, createdAt, image, video } = data;
+      const { message, senderId, createdAt, image, video, file } = data;
       setMessages((previousMessages) => {
         const existingMessage = previousMessages.find(
           (msg) => msg.text === message && msg.user._id === senderId
@@ -185,6 +240,7 @@ const NewMessageScreen = ({ route }) => {
           },
           image: image, // Thêm dữ liệu hình ảnh vào đây
           video: video, // Thêm dữ liệu video vào đây
+          file: file, // Thêm dữ liệu file vào đây
         };
 
         return GiftedChat.append(previousMessages, [newMessage]);
@@ -197,14 +253,15 @@ const NewMessageScreen = ({ route }) => {
 
   const onSend = (newMessages = []) => {
     newMessages.forEach((newMessage) => {
-      const { text, createdAt, image, video } = newMessage;
+      const { text, createdAt, image, video, file } = newMessage;
       socket.emit('sendMessage', {
         roomId,
         message: text,
         senderId: currentUserId,
         createdAt,
         image,
-        video
+        video,
+        file
       });
       sendMessage(currentUserId, text, roomId, image)
     });
@@ -282,7 +339,8 @@ const NewMessageScreen = ({ route }) => {
           senderId: currentUserId,
           createdAt: new Date(),
           image: img,
-          video: ''
+          video: '',
+          files: ''
         });
 
 
@@ -350,6 +408,40 @@ const NewMessageScreen = ({ route }) => {
           createdAt: new Date(),
           image: '',
           video: video,
+          files: ''
+        });
+
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+  };
+
+  const handleFileResponse = async (response) => {
+    if (response.didCancel) {
+      console.log('User cancelled Video picker');
+    } else if (response.errorMessage) {
+      console.log('FilePicker Error: ', response.errorMessage);
+    } else {
+      console.log('File URI:', response[0]);
+      const files = {
+        uri: response[0].uri,
+        type: response[0].type,
+        name: response[0].name,
+      };
+      console.log('files', files);
+
+      try {
+        const file = await sendMessage(currentUserId, '', roomId, files);
+        console.log('file', file);
+
+        socket.emit('sendMessage', {
+          roomId,
+          senderId: currentUserId,
+          createdAt: new Date(),
+          image: '',
+          video: '',
+          file: file,
         });
 
       } catch (error) {
@@ -379,6 +471,7 @@ const NewMessageScreen = ({ route }) => {
         renderMessageVideo={renderMessageVideo}
         renderMessageText={renderMessageText}
         renderMessageImage={renderMessageImage}
+        renderCustomView={renderMessageFile}
         renderActions={(props) => (
           <View style={{ flexDirection: 'row' }}>
             <TouchableHighlight onPress={() => pickImage()}>
@@ -388,7 +481,7 @@ const NewMessageScreen = ({ route }) => {
               <IconButton icon="file-video-outline" />
             </TouchableHighlight>
 
-            <TouchableHighlight onPress={() => pickMedia()}>
+            <TouchableHighlight onPress={() => pickFile()}>
               <IconButton icon="file" />
             </TouchableHighlight>
           </View>
