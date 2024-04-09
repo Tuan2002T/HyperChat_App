@@ -80,6 +80,7 @@ const MessageScreen = ({navigation}) => {
 
   const handleChatRoomPress = (roomId, item) => {
     // Điều hướng đến màn hình phòng chat với roomId tương ứng
+    console.log('item',item);
     navigation.navigate('NewMessageScreen', { roomId, currentUserId, item });
   };
 
