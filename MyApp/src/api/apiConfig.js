@@ -28,6 +28,7 @@ const API_CONFIG = {
     sendFriendRequest: 'friends/sendFriendRequest',
     sendMessage: 'message/sendMessage',
     getMessagesByChatId:'message/getAllMessagesByChatId',
+    retrieveMessages: 'message/retrieveMessages',
     // Add other endpoints here as needed
   },
 };
