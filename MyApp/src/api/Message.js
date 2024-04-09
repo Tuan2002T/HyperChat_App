@@ -41,3 +41,15 @@ export const getMessagesByChatId = async (roomId) => {
     throw new Error('Error getting user data');
   }
   };
+
+export const retrieveMessages = async (messageId) => {
+  try {
+    const res = await axios.post(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.retrieveMessages + `/${messageId}`,
+    );
+    console.log('retrieveMessages:', res.data);
+    return res.data;
+  } catch (error) {
+    throw new Error('Error getting user data');
+  }
+  }

@@ -8,7 +8,7 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { IconButton } from 'react-native-paper';
 import { socket } from '../socket/socket';
-import { getMessagesByChatId, sendMessage } from '../api/Message';
+import { getMessagesByChatId, retrieveMessages, sendMessage } from '../api/Message';
 import Video from 'react-native-video';
 import { showMessage, hideMessage } from "react-native-flash-message";
 import FlashMessageManager from '../components/FlashMessageManager';
@@ -22,78 +22,89 @@ const NewMessageScreen = ({ route }) => {
 
 
   const renderMessageVideo = (props) => {
-    const { currentMessage } = props;
-
+    const { currentMessage, user } = props;
+  
     // Kiểm tra xem trường "video" có tồn tại trong currentMessage hay không
     if (currentMessage.video) {
+      const isCurrentUser = currentMessage.user._id === user._id;
+  
       return (
         <View style={{ alignItems: 'center' }}>
           <Video
-            source={{ uri: currentMessage.video }} // Đường dẫn của video
-            style={{ width: 150, height: 150 }} // Kích thước của video
-            ref={(ref) => {
-              this.player = ref
-            }}
-            onBuffer={this.onBuffer}                // Callback when remote video is buffering
+            source={{ uri: currentMessage.video }}
+            style={{ width: 150, height: 150 }}
+            ref={(ref) => { this.player = ref }}
+            onBuffer={this.onBuffer}
             onError={this.videoError}
           />
-          <IconButton iconColor='white' onPress={() => pickerMessage()} icon="dots-horizontal" style={{ backgroundColor: 'gray', height: 20 }} />
+          {isCurrentUser && (
+            <IconButton
+              iconColor='white'
+              onPress={() => pickerMessage(currentMessage)}
+              icon="dots-horizontal"
+              style={{ backgroundColor: 'gray', height: 20 }}
+            />
+          )}
         </View>
       );
     }
-
+  
     return null; // Trả về null nếu không có trường "video" trong currentMessage
   };
-
   const renderMessageText = (props) => {
     const { currentMessage, user } = props;
-
+  
     // Kiểm tra xem trường "text" có tồn tại trong currentMessage hay không
     if (currentMessage.text) {
       const isCurrentUser = currentMessage.user._id === user._id;
       const textColor = isCurrentUser ? 'white' : 'black';
-
+  
       return (
         <View style={{ alignItems: 'center' }}>
           <Text style={{ color: textColor }}>{currentMessage.text}</Text>
+          {isCurrentUser && (
             <IconButton
               iconColor='white'
-              onPress={() => pickerMessage()}
+              onPress={() => pickerMessage(currentMessage)}
               icon="dots-horizontal"
               style={{ backgroundColor: 'gray', height: 20 }}
             />
+          )}
         </View>
       );
     }
-
+  
     return null; // Trả về null nếu không có trường "text" trong currentMessage
   };
-  
+
 
 
   const renderMessageImage = (props) => {
-
-    const { currentMessage } = props;
+    const { currentMessage, user } = props;
+  
     // Kiểm tra xem trường "image" có tồn tại trong currentMessage hay không
     if (currentMessage.image) {
+      const isCurrentUser = currentMessage.user._id === user._id;
+  
       return (
         <View style={{ alignItems: 'center' }}>
           <Image
-            source={{ uri: currentMessage.image }} // Đường dẫn của hình ảnh
-            style={{ width: 150, height: 150 }} // Kích thước của hình ảnh
+            source={{ uri: currentMessage.image }}
+            style={{ width: 150, height: 150 }}
           />
-          <IconButton
-            iconColor='white'
-            onPress={() => pickerMessage()}
-            icon="dots-horizontal"
-            style={{ backgroundColor: 'gray', height: 20 }}
-          />
+          {isCurrentUser && (
+            <IconButton
+              iconColor='white'
+              onPress={() => pickerMessage(currentMessage)}
+              icon="dots-horizontal"
+              style={{ backgroundColor: 'gray', height: 20 }}
+            />
+          )}
         </View>
       );
     }
-
+  
     return null; // Trả về null nếu không có trường "image" trong currentMessage
-
   };
 
   const renderMessageFile = (props) => {
@@ -111,7 +122,7 @@ const NewMessageScreen = ({ route }) => {
           />
           <IconButton
             iconColor='white'
-            onPress={() => pickerMessage()}
+            onPress={() => pickerMessage(currentMessage)}
             icon="dots-horizontal"
             style={{ backgroundColor: 'gray', height: 20 }}
           />
@@ -126,14 +137,14 @@ const NewMessageScreen = ({ route }) => {
 
 
 
-  const pickerMessage = async () => {
+  const pickerMessage = async (id) => {
     Alert.alert(
       'Tuỳ chọn tin nhắn',
       'Tuỳ chọn ',
       [
         {
           text: 'Thu hồi tin nhắn',
-          onPress: () => launchImagePicker('library'),
+          onPress: () => checkMessage(id),
         },
         {
           text: 'Xoá tin nhắn',
@@ -224,7 +235,7 @@ const NewMessageScreen = ({ route }) => {
       })
 
     });
-  },[socket]);
+  }, [socket]);
 
   useEffect(() => {
     socket.on('receiveNotification', (data) => {
@@ -233,6 +244,10 @@ const NewMessageScreen = ({ route }) => {
         description: "This is our second message",
         type: "success",
       })
+    });
+
+    socket.on('retrievedMessageRecall', (data) => {
+      setMessages(data)
     });
     getMessagesByChatId(roomId).then((data) => {
       const convertedMessages = data.map(convertMessageToGiftedChatMessage);
@@ -466,6 +481,35 @@ const NewMessageScreen = ({ route }) => {
       }
     }
   };
+  const checkMessage = (currentMessage) => {
+    // Tìm vị trí của tin nhắn trong danh sách messages
+    const messageIndex = messages.findIndex(message => message._id === currentMessage._id);
+
+    // Kiểm tra xem tin nhắn có tồn tại trong danh sách không
+    if (messageIndex !== -1) {
+        // Sao chép tin nhắn cần cập nhật
+        const updatedMessage = { ...messages[messageIndex] };
+        // Cập nhật nội dung của tin nhắn
+        updatedMessage.text = 'Tin nhắn đã được thu hồi';
+        // Cập nhật các trường image, video, file (nếu cần)
+        updatedMessage.image = ''; // Cập nhật hình ảnh
+        updatedMessage.video = ''; // Cập nhật video
+        updatedMessage.file = ''; // Cập nhật file
+
+        // Sao chép danh sách tin nhắn và thay thế tin nhắn cũ bằng tin nhắn mới
+        const updatedMessages = [...messages];
+        updatedMessages[messageIndex] = updatedMessage;
+        socket.emit('retrieveMessages', {roomId, updatedMessages} )
+        // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
+        setMessages(updatedMessages);
+        retrieveMessages(currentMessage._id)
+        // Log toàn bộ danh sách tin nhắn đã được cập nhật
+        // console.log('Updated Messages:', updatedMessages);
+    } else {
+        console.log('Tin nhắn không tồn tại trong danh sách.');
+    }
+}
+
 
   // ---------------------------
   return (
@@ -499,13 +543,6 @@ const NewMessageScreen = ({ route }) => {
             </TouchableHighlight>
 
             <TouchableHighlight onPress={() => pickFile()}>
-              <IconButton icon="file" />
-            </TouchableHighlight>
-            <TouchableHighlight onPress={() => showMessage({
-              message: "Hello World",
-              description: "This is our second message",
-              type: "success",
-            })}>
               <IconButton icon="file" />
             </TouchableHighlight>
           </View>

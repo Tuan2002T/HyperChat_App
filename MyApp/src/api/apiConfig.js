@@ -19,6 +19,7 @@ const API_CONFIG = {
     changePassword: 'user/changePassword',
     sendMessage: 'message/sendMessage',
     getMessagesByChatId:'message/getAllMessagesByChatId',
+    retrieveMessages: 'message/retrieveMessages',
     // Add other endpoints here as needed
   },
 };
