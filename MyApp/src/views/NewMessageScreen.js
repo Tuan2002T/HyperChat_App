@@ -11,8 +11,12 @@ import { socket } from '../socket/socket';
 import { getMessagesByChatId, retrieveMessages, sendMessage } from '../api/Message';
 import Video from 'react-native-video';
 import { showMessage, hideMessage } from "react-native-flash-message";
-import FlashMessageManager from '../components/FlashMessageManager';
+import {useDispatch, useSelector} from 'react-redux';
+
 const NewMessageScreen = ({ route }) => {
+  const users = useSelector(state => state.user.users); 
+  const user = useSelector(state => state.auth.user.avatar);
+  console.log('user111111111111111111111111', user);
   const getFileExtensionFromUrl = (url) => {
     // Tách phần mở rộng từ URL và chuyển đổi thành chữ thường
     const parts = url.split('.');
@@ -23,11 +27,11 @@ const NewMessageScreen = ({ route }) => {
 
   const renderMessageVideo = (props) => {
     const { currentMessage, user } = props;
-  
+
     // Kiểm tra xem trường "video" có tồn tại trong currentMessage hay không
     if (currentMessage.video) {
       const isCurrentUser = currentMessage.user._id === user._id;
-  
+
       return (
         <View style={{ alignItems: 'center' }}>
           <Video
@@ -48,17 +52,17 @@ const NewMessageScreen = ({ route }) => {
         </View>
       );
     }
-  
+
     return null; // Trả về null nếu không có trường "video" trong currentMessage
   };
   const renderMessageText = (props) => {
     const { currentMessage, user } = props;
-  
+
     // Kiểm tra xem trường "text" có tồn tại trong currentMessage hay không
     if (currentMessage.text) {
       const isCurrentUser = currentMessage.user._id === user._id;
       const textColor = isCurrentUser ? 'white' : 'black';
-  
+
       return (
         <View style={{ alignItems: 'center' }}>
           <Text style={{ color: textColor }}>{currentMessage.text}</Text>
@@ -73,7 +77,7 @@ const NewMessageScreen = ({ route }) => {
         </View>
       );
     }
-  
+
     return null; // Trả về null nếu không có trường "text" trong currentMessage
   };
 
@@ -81,11 +85,11 @@ const NewMessageScreen = ({ route }) => {
 
   const renderMessageImage = (props) => {
     const { currentMessage, user } = props;
-  
+
     // Kiểm tra xem trường "image" có tồn tại trong currentMessage hay không
     if (currentMessage.image) {
       const isCurrentUser = currentMessage.user._id === user._id;
-  
+
       return (
         <View style={{ alignItems: 'center' }}>
           <Image
@@ -103,7 +107,7 @@ const NewMessageScreen = ({ route }) => {
         </View>
       );
     }
-  
+
     return null; // Trả về null nếu không có trường "image" trong currentMessage
   };
 
@@ -191,7 +195,13 @@ const NewMessageScreen = ({ route }) => {
     let imageContent = '';
     let videoContent = '';
     let fileContent = '';
+    users.map((item) => {
 
+      if (item._id === sender) {
+        console.log('item', item.avatar);
+      }
+
+    });
     if (content.files.length > 0) {
       const fileExtension = getFileExtensionFromUrl(content.files[0]);
 
@@ -252,18 +262,17 @@ const NewMessageScreen = ({ route }) => {
     getMessagesByChatId(roomId).then((data) => {
       const convertedMessages = data.map(convertMessageToGiftedChatMessage);
       setMessages(convertedMessages.reverse());
-      console.log('convertedMessages', convertedMessages);
     });
     socket.emit('joinRoom', roomId, route.params.item.members);
     socket.on('receiveMessage', (data) => {
-      const { message, senderId, createdAt, image, video, file } = data;
+      const { message, senderId, createdAt, image, video, file, messageId } = data;
       setMessages((previousMessages) => {
         const existingMessage = previousMessages.find(
           (msg) => msg.text === message && msg.user._id === senderId
         );
 
         const newMessage = {
-          _id: Math.random().toString(36).substring(7),
+          _id: messageId,
           text: message,
           createdAt: new Date(createdAt),
           user: {
@@ -275,6 +284,7 @@ const NewMessageScreen = ({ route }) => {
           file: file, // Thêm dữ liệu file vào đây
         };
 
+
         return GiftedChat.append(previousMessages, [newMessage]);
       });
     });
@@ -283,21 +293,32 @@ const NewMessageScreen = ({ route }) => {
     };
   }, []);
 
-  const onSend = (newMessages = []) => {
-    newMessages.forEach((newMessage) => {
-      const { text, createdAt, image, video, file } = newMessage;
-      socket.emit('sendMessage', {
-        roomId,
-        message: text,
-        senderId: currentUserId,
-        createdAt,
-        image,
-        video,
-        file
-      });
-      sendMessage(currentUserId, text, roomId, image)
-    });
+  const onSend = async (newMessages = []) => {
+    try {
+      for (const newMessage of newMessages) {
+        const { text, createdAt, image, video, file } = newMessage;
+
+        // Gửi tin nhắn và đợi nhận ID từ hàm sendMessage
+        const id = await sendMessage(currentUserId, text, roomId, image);
+        const messageId = id.id
+        console.log('messageId', id.id);
+        // Sau khi nhận được messageId, gửi tin nhắn qua socket
+        socket.emit('sendMessage', {
+          roomId,
+          message: text,
+          senderId: currentUserId,
+          createdAt,
+          image,
+          video,
+          file,
+          messageId // Truyền ID của tin nhắn
+        });
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
+
 
   const renderAvatar = (props) => {
     return (
@@ -363,14 +384,14 @@ const NewMessageScreen = ({ route }) => {
 
       try {
         const img = await sendMessage(currentUserId, '', roomId, files);
-        console.log('img', img);
+        console.log('img', img.files[0]);
 
         // Gửi tin nhắn hình ảnh qua socket
         socket.emit('sendMessage', {
           roomId,
           senderId: currentUserId,
           createdAt: new Date(),
-          image: img,
+          image: img.files[0],
           video: '',
           files: ''
         });
@@ -392,6 +413,10 @@ const NewMessageScreen = ({ route }) => {
         {
           text: 'Choose from Library',
           onPress: () => launchVideoPicker('library', mediaType),
+        },
+        {
+          text: 'Camera',
+          onPress: () => launchVideoPicker('camera'),
         },
         {
           text: 'Cancel',
@@ -481,51 +506,60 @@ const NewMessageScreen = ({ route }) => {
       }
     }
   };
-  const checkMessage = (currentMessage) => {
-    // Tìm vị trí của tin nhắn trong danh sách messages
+  const checkMessage = async (currentMessage) => {
+
     const messageIndex = messages.findIndex(message => message._id === currentMessage._id);
+    console.log('messageIndex', messageIndex);
+    console.log('Message', messages);
+    console.log('messages', messageIndex);
 
     // Kiểm tra xem tin nhắn có tồn tại trong danh sách không
     if (messageIndex !== -1) {
-        // Sao chép tin nhắn cần cập nhật
-        const updatedMessage = { ...messages[messageIndex] };
-        // Cập nhật nội dung của tin nhắn
-        updatedMessage.text = 'Tin nhắn đã được thu hồi';
-        // Cập nhật các trường image, video, file (nếu cần)
-        updatedMessage.image = ''; // Cập nhật hình ảnh
-        updatedMessage.video = ''; // Cập nhật video
-        updatedMessage.file = ''; // Cập nhật file
+      // Sao chép tin nhắn cần cập nhật
+      const updatedMessage = { ...messages[messageIndex] };
+      // Cập nhật nội dung của tin nhắn
+      updatedMessage.text = 'Tin nhắn đã được thu hồi';
+      // Cập nhật các trường image, video, file (nếu cần)
+      updatedMessage.image = ''; // Cập nhật hình ảnh
+      updatedMessage.video = ''; // Cập nhật video
+      updatedMessage.file = ''; // Cập nhật file
 
-        // Sao chép danh sách tin nhắn và thay thế tin nhắn cũ bằng tin nhắn mới
-        const updatedMessages = [...messages];
-        updatedMessages[messageIndex] = updatedMessage;
-        socket.emit('retrieveMessages', {roomId, updatedMessages} )
-        // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
-        setMessages(updatedMessages);
-        retrieveMessages(currentMessage._id)
-        // Log toàn bộ danh sách tin nhắn đã được cập nhật
-        // console.log('Updated Messages:', updatedMessages);
+      // Sao chép danh sách tin nhắn và thay thế tin nhắn cũ bằng tin nhắn mới
+      const updatedMessages = [...messages];
+      updatedMessages[messageIndex] = updatedMessage;
+      socket.emit('retrieveMessages', { roomId, updatedMessages })
+      // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
+      setMessages(updatedMessages);
+      retrieveMessages(currentMessage._id)
+      // Log toàn bộ danh sách tin nhắn đã được cập nhật
+      // console.log('Updated Messages:', updatedMessages);
     } else {
-        console.log('Tin nhắn không tồn tại trong danh sách.');
+      console.log('Tin nhắn không tồn tại trong danh sách.');
     }
-}
+  }
 
 
   // ---------------------------
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <TouchableHighlight onPress={() => { navigation.goBack(), socket.emit('leaveRoom', roomId); }}>
-          <Text style={{ paddingHorizontal: 10 }}>Quay lại</Text>
-        </TouchableHighlight>
-        <Text style={{ flex: 1, textAlign: 'center' }}>Tin nhắn mới</Text>
+    <View style={{ flex: 1 , width: '100%'} }>
+      <View style={{ flexDirection: 'row', alignItems: 'center', height: '6%',width:'100%', backgroundColor: '#149AFD', justifyContent:'space-between' }}>
+        <View style={{flexDirection:'row', alignItems:'center', width:'50%'}}>
+          <IconButton size={30} iconColor='white' icon="arrow-left" onPress={() => { navigation.goBack(), socket.emit('leaveRoom', roomId); }} />
+          <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{route.params.item.name}</Text>
+        </View>
+        <View style={{ flexDirection:'row', alignItems: 'flex-end', widthL:'50%' }}>
+          <IconButton size={25} iconColor='white' icon="phone" onPress={() => { }} />
+          <IconButton size={28} iconColor='white' icon="video-outline" onPress={() => { }} />
+          <IconButton size={30} iconColor='white' icon="menu-open" onPress={() => { }} />
+        </View>
+
       </View>
       <GiftedChat
         messages={messages}
         onSend={(newMessages) => onSend(newMessages)}
         user={{
           _id: currentUserId,
-          avatar: 'https://example.com/currentUserAvatar.png',
+          avatar: 'https://exam ple.com/currentUserAvatar.png',
         }}
         renderAvatar={renderAvatar}
         renderDay={renderDay}

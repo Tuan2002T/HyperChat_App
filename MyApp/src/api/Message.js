@@ -24,7 +24,7 @@ export const sendMessage = async (sender, messageText, chatPrivateId, files) => 
       );
   
       console.log('REGISTER:',  response.data.toString());
-      return response.data.toString();
+      return response.data;
     } catch (error) {
       console.error(error.response?.data.error);
       return error.response;
