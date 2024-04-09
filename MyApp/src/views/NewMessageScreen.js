@@ -195,13 +195,7 @@ const NewMessageScreen = ({ route }) => {
     let imageContent = '';
     let videoContent = '';
     let fileContent = '';
-    users.map((item) => {
-
-      if (item._id === sender) {
-        console.log('item', item.avatar);
-      }
-
-    });
+    
     if (content.files.length > 0) {
       const fileExtension = getFileExtensionFromUrl(content.files[0]);
 
@@ -385,7 +379,7 @@ const NewMessageScreen = ({ route }) => {
       try {
         const img = await sendMessage(currentUserId, '', roomId, files);
         console.log('img', img.files[0]);
-
+        const messageId = img.id
         // Gửi tin nhắn hình ảnh qua socket
         socket.emit('sendMessage', {
           roomId,
@@ -393,7 +387,9 @@ const NewMessageScreen = ({ route }) => {
           createdAt: new Date(),
           image: img.files[0],
           video: '',
-          files: ''
+          files: '',
+          messageId
+          
         });
 
 
@@ -458,14 +454,15 @@ const NewMessageScreen = ({ route }) => {
       try {
         const video = await sendMessage(currentUserId, '', roomId, files);
         console.log('video', video);
-
+        const messageId = video.id
         socket.emit('sendMessage', {
           roomId,
           senderId: currentUserId,
           createdAt: new Date(),
           image: '',
           video: video,
-          files: ''
+          files: '',
+          messageId
         });
 
       } catch (error) {
@@ -491,7 +488,7 @@ const NewMessageScreen = ({ route }) => {
       try {
         const file = await sendMessage(currentUserId, '', roomId, files);
         console.log('file', file);
-
+        const messageId = file.id
         socket.emit('sendMessage', {
           roomId,
           senderId: currentUserId,
@@ -499,6 +496,7 @@ const NewMessageScreen = ({ route }) => {
           image: '',
           video: '',
           file: file,
+          messageId
         });
 
       } catch (error) {
