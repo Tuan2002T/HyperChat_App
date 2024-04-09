@@ -8,7 +8,7 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { IconButton } from 'react-native-paper';
 import { socket } from '../socket/socket';
-import { getMessagesByChatId, retrieveMessages, sendMessage } from '../api/Message';
+import { deleteMessageAPI, getMessagesByChatId, retrieveMessages, sendMessage } from '../api/Message';
 import Video from 'react-native-video';
 import { showMessage, hideMessage } from "react-native-flash-message";
 import {useDispatch, useSelector} from 'react-redux';
@@ -152,7 +152,7 @@ const NewMessageScreen = ({ route }) => {
         },
         {
           text: 'Xoá tin nhắn',
-          onPress: () => launchImagePicker('camera'),
+          onPress: () => deleteMessage(id),
         },
         {
           text: 'Chuyển tiếp tin nhắn',
@@ -189,50 +189,58 @@ const NewMessageScreen = ({ route }) => {
   const navigation = useNavigation();
   console.log('roomId', roomId);
   const convertMessageToGiftedChatMessage = (message) => {
-    const { _id, content, sender, createdAt } = message;
+    const { _id, content, sender, createdAt, views } = message;
     let messageType = 'text';
     let messageContent = content.text;
     let imageContent = '';
     let videoContent = '';
     let fileContent = '';
-    users.map((item) => {
-
-      if (item._id === sender) {
-        console.log('item', item.avatar);
+    
+    if(views.includes(currentUserId)){
+      if (content.files.length > 0) {
+        const fileExtension = getFileExtensionFromUrl(content.files[0]);
+  
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+          messageType = 'image';
+          messageContent = '';
+          imageContent = content.files[0];
+        } else if (['mp4', 'mov', 'avi'].includes(fileExtension)) {
+          messageType = 'video';
+          messageContent = '';
+          videoContent = content.files[0];
+        }
+        else {
+          messageType = 'file';
+          messageContent = '';
+          fileContent = content.files[0];
+        }
       }
-
-    });
-    if (content.files.length > 0) {
-      const fileExtension = getFileExtensionFromUrl(content.files[0]);
-
-      if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-        messageType = 'image';
-        messageContent = '';
-        imageContent = content.files[0];
-      } else if (['mp4', 'mov', 'avi'].includes(fileExtension)) {
-        messageType = 'video';
-        messageContent = '';
-        videoContent = content.files[0];
-      }
-      else {
-        messageType = 'file';
-        messageContent = '';
-        fileContent = content.files[0];
-      }
+  
+      return {
+        _id,
+        text: messageContent,
+        image: imageContent,
+        video: videoContent,
+        file: fileContent,
+        user: {
+          _id: sender,
+          avatar: 'https://image2403.s3.ap-southeast-1.amazonaws.com/message.1712420273857.jpg',
+        },
+        createdAt: new Date(createdAt),
+      };
     }
-
     return {
       _id,
-      text: messageContent,
-      image: imageContent,
-      video: videoContent,
-      file: fileContent,
+      text:'',
+      image: '',
+      video: '',
+      file: '',
       user: {
         _id: sender,
-        avatar: 'https://image2403.s3.ap-southeast-1.amazonaws.com/message.1712420273857.jpg',
+        avatar: '',
       },
-      createdAt: new Date(createdAt),
-    };
+      createdAt: '',
+    }
   };
 
   useEffect(() => {
@@ -385,7 +393,7 @@ const NewMessageScreen = ({ route }) => {
       try {
         const img = await sendMessage(currentUserId, '', roomId, files);
         console.log('img', img.files[0]);
-
+        const messageId = img.id
         // Gửi tin nhắn hình ảnh qua socket
         socket.emit('sendMessage', {
           roomId,
@@ -393,7 +401,9 @@ const NewMessageScreen = ({ route }) => {
           createdAt: new Date(),
           image: img.files[0],
           video: '',
-          files: ''
+          files: '',
+          messageId
+          
         });
 
 
@@ -458,14 +468,15 @@ const NewMessageScreen = ({ route }) => {
       try {
         const video = await sendMessage(currentUserId, '', roomId, files);
         console.log('video', video);
-
+        const messageId = video.id
         socket.emit('sendMessage', {
           roomId,
           senderId: currentUserId,
           createdAt: new Date(),
           image: '',
-          video: video,
-          files: ''
+          video: video.files[0],
+          files: '',
+          messageId
         });
 
       } catch (error) {
@@ -491,14 +502,15 @@ const NewMessageScreen = ({ route }) => {
       try {
         const file = await sendMessage(currentUserId, '', roomId, files);
         console.log('file', file);
-
+        const messageId = file.id
         socket.emit('sendMessage', {
           roomId,
           senderId: currentUserId,
           createdAt: new Date(),
           image: '',
           video: '',
-          file: file,
+          file: file.files[0],
+          messageId
         });
 
       } catch (error) {
@@ -531,6 +543,39 @@ const NewMessageScreen = ({ route }) => {
       // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
       setMessages(updatedMessages);
       retrieveMessages(currentMessage._id)
+      // Log toàn bộ danh sách tin nhắn đã được cập nhật
+      // console.log('Updated Messages:', updatedMessages);
+    } else {
+      console.log('Tin nhắn không tồn tại trong danh sách.');
+    }
+  }
+
+  const deleteMessage = async (currentMessage) => {
+
+    const messageIndex = messages.findIndex(message => message._id === currentMessage._id);
+    console.log('messageIndex', messageIndex);
+    console.log('Message', messages);
+    console.log('messages', messageIndex);
+    console.log('currentMessage', currentMessage._id);
+
+    // Kiểm tra xem tin nhắn có tồn tại trong danh sách không
+    if (messageIndex !== -1) {
+      // Sao chép tin nhắn cần cập nhật
+      const updatedMessage = { ...messages[messageIndex] };
+      // Cập nhật nội dung của tin nhắn
+      updatedMessage.text = '';
+      // Cập nhật các trường image, video, file (nếu cần)
+      updatedMessage.image = ''; // Cập nhật hình ảnh
+      updatedMessage.video = ''; // Cập nhật video
+      updatedMessage.file = ''; // Cập nhật file
+      updatedMessage.createdAt = '';
+      // Sao chép danh sách tin nhắn và thay thế tin nhắn cũ bằng tin nhắn mới
+      const updatedMessages = [...messages];
+      updatedMessages[messageIndex] = updatedMessage;
+      // socket.emit('deleteMessages', { roomId, updatedMessages })
+      // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
+      setMessages(updatedMessages);
+      deleteMessageAPI(currentUserId,currentMessage._id)
       // Log toàn bộ danh sách tin nhắn đã được cập nhật
       // console.log('Updated Messages:', updatedMessages);
     } else {

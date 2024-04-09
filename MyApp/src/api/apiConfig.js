@@ -30,6 +30,7 @@ const API_CONFIG = {
     getMessagesByChatId:'message/getAllMessagesByChatId',
     retrieveMessages: 'message/retrieveMessages',
     createChat: 'chat/createChatPrivate',
+    deleteMessage: 'message/deleteMessage',
     // Add other endpoints here as needed
   },
 };
