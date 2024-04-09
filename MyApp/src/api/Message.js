@@ -56,11 +56,13 @@ export const retrieveMessages = async (messageId) => {
 }
 
 
-export const deleteMessage = async (userId, messageId) => {
+export const deleteMessageAPI = async (userId, messageId) => {
+  console.log('userId:', userId);
+  console.log('messageId:', messageId);
   try {
     const res = await axios.put(
-      API_CONFIG.baseURL + API_CONFIG.endpoints.deleteMessage + `/${messageId}`,
-      { userId, messageId } // Truyền userId và messageId vào phần thân của yêu cầu
+      API_CONFIG.baseURL + API_CONFIG.endpoints.deleteMessage,
+      { userId, messageId } 
     );
     console.log('deleteMessage:', res.data);
     return res.data;
