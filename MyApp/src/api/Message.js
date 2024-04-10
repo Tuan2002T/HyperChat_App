@@ -71,3 +71,19 @@ export const deleteMessageAPI = async (userId, messageId) => {
   }
 }
 
+export const forwardMessageAPI = async (sender, chatPrivateId, messageId) => {
+  console.log('sender:', sender);
+  console.log('chatPrivateId:', chatPrivateId);
+  console.log('messageId:', messageId);
+  try {
+    const res = await axios.post(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.forwardMessages,
+      { sender, chatPrivateId, messageId } 
+    );
+    console.log('forwardMessage:', res.data);
+    return res.data;
+  } catch (error) {
+    throw new Error('Error forwarding message');
+  }
+}
+

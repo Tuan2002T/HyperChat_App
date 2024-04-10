@@ -5,6 +5,8 @@ import {useSelector} from 'react-redux';
 import CustomHeader from '../components/CustomHeader';
 import {getMyFriends} from '../api/allUser';
 import {listChats, createNewChat} from '../api/getListChats';
+import { showMessage } from 'react-native-flash-message';
+import { socket } from '../socket/socket';
 
 
 const SubChatScreen = ({navigation}) => {
@@ -12,6 +14,16 @@ const SubChatScreen = ({navigation}) => {
 
   const [friends, setFriends] = React.useState([]);
   const [searchQuery, setSearchQuery] = React.useState('');
+
+  useEffect(() => {
+    socket.on('receiveNotification', (data) => {
+      showMessage({
+        message: data,
+        description: "This is our second message",
+        type: "success",
+      })
+    });
+  }, []);
 
   useEffect(() => {
     const fetchFriends = async () => {

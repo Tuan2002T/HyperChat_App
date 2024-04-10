@@ -11,10 +11,10 @@ import { socket } from '../socket/socket';
 import { deleteMessageAPI, getMessagesByChatId, retrieveMessages, sendMessage } from '../api/Message';
 import Video from 'react-native-video';
 import { showMessage, hideMessage } from "react-native-flash-message";
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-const NewMessageScreen = ({ route }) => {
-  const users = useSelector(state => state.user.users); 
+const NewMessageScreen = ({ navigation, route }) => {
+  const users = useSelector(state => state.user.users);
   const user = useSelector(state => state.auth.user.avatar);
   console.log('user111111111111111111111111', user);
   const getFileExtensionFromUrl = (url) => {
@@ -27,118 +27,192 @@ const NewMessageScreen = ({ route }) => {
 
   const renderMessageVideo = (props) => {
     const { currentMessage, user } = props;
-
+  
     // Kiểm tra xem trường "video" có tồn tại trong currentMessage hay không
     if (currentMessage.video) {
       const isCurrentUser = currentMessage.user._id === user._id;
-
+  
       return (
-        <View style={{ alignItems: 'center' }}>
-          <Video
-            source={{ uri: currentMessage.video }}
-            style={{ width: 150, height: 150 }}
-            ref={(ref) => { this.player = ref }}
-            onBuffer={this.onBuffer}
-            onError={this.videoError}
-          />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {isCurrentUser && (
             <IconButton
-              iconColor='white'
-              onPress={() => pickerMessage(currentMessage)}
-              icon="dots-horizontal"
-              style={{ backgroundColor: 'gray', height: 20 }}
+              iconColor="white"
+              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
+              icon="share"
+              style={{ backgroundColor: 'gray', height: 25, marginRight: 8 }}
+            />
+          )}
+          <View>
+            <Video
+              source={{ uri: currentMessage.video }}
+              style={{ width: 150, height: 150 }}
+              ref={(ref) => {
+                this.player = ref;
+              }}
+              controls={true}
+              onBuffer={this.onBuffer}
+              onError={this.videoError}
+            />
+            {isCurrentUser && (
+              <IconButton
+                iconColor="white"
+                onPress={() => pickerMessage(currentMessage)}
+                icon="dots-horizontal"
+                style={{ backgroundColor: 'gray', height: 20 }}
+              />
+            )}
+          </View>
+          {!isCurrentUser && (
+            <IconButton
+              iconColor="white"
+              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
+              icon="share"
+              style={{ backgroundColor: 'gray', height: 25, marginLeft: 8 }}
             />
           )}
         </View>
       );
     }
-
+  
     return null; // Trả về null nếu không có trường "video" trong currentMessage
   };
   const renderMessageText = (props) => {
     const { currentMessage, user } = props;
-
+  
     // Kiểm tra xem trường "text" có tồn tại trong currentMessage hay không
     if (currentMessage.text) {
       const isCurrentUser = currentMessage.user._id === user._id;
       const textColor = isCurrentUser ? 'white' : 'black';
-
+  
       return (
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: textColor }}>{currentMessage.text}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {isCurrentUser && (
             <IconButton
-              iconColor='white'
-              onPress={() => pickerMessage(currentMessage)}
-              icon="dots-horizontal"
-              style={{ backgroundColor: 'gray', height: 20 }}
+              iconColor="white"
+              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
+              icon="share"
+              style={{ backgroundColor: 'gray', height: 25, marginRight: 8 }}
+            />
+          )}
+          <View style={{flexDirection:'column', alignItems:'center'}}>
+            <Text style={{ color: textColor }}>{currentMessage.text}</Text>
+            {isCurrentUser && (
+              <IconButton
+                iconColor="white"
+                onPress={() => pickerMessage(currentMessage)}
+                icon="dots-horizontal"
+                style={{ backgroundColor: 'gray', height: 20 }}
+              />
+            )}
+          </View>
+          {!isCurrentUser && (
+            <IconButton
+              iconColor="white"
+              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
+              icon="share"
+              style={{ backgroundColor: 'gray', height: 25, marginLeft: 8 }}
             />
           )}
         </View>
       );
     }
-
+  
     return null; // Trả về null nếu không có trường "text" trong currentMessage
   };
 
 
-
   const renderMessageImage = (props) => {
     const { currentMessage, user } = props;
-
+  
     // Kiểm tra xem trường "image" có tồn tại trong currentMessage hay không
     if (currentMessage.image) {
       const isCurrentUser = currentMessage.user._id === user._id;
-
+  
       return (
-        <View style={{ alignItems: 'center' }}>
-          <Image
-            source={{ uri: currentMessage.image }}
-            style={{ width: 150, height: 150 }}
-          />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {isCurrentUser && (
             <IconButton
-              iconColor='white'
-              onPress={() => pickerMessage(currentMessage)}
-              icon="dots-horizontal"
-              style={{ backgroundColor: 'gray', height: 20 }}
+              iconColor="white"
+              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
+              icon="share"
+              style={{ backgroundColor: 'gray', height: 25, marginRight: 8 }}
+            />
+          )}
+          <View>
+            <Image
+              source={{ uri: currentMessage.image }}
+              style={{ width: 150, height: 150 }}
+            />
+            {isCurrentUser && (
+              <IconButton
+                iconColor="white"
+                onPress={() => pickerMessage(currentMessage)}
+                icon="dots-horizontal"
+                style={{ backgroundColor: 'gray', height: 20 }}
+              />
+            )}
+          </View>
+          {!isCurrentUser && (
+            <IconButton
+              iconColor="white"
+              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
+              icon="share"
+              style={{ backgroundColor: 'gray', height: 25, marginLeft: 8 }}
             />
           )}
         </View>
       );
     }
-
+  
     return null; // Trả về null nếu không có trường "image" trong currentMessage
   };
 
   const renderMessageFile = (props) => {
-
-    const { currentMessage } = props;
+    const { currentMessage, user } = props;
+    const isCurrentUser = currentMessage.user._id === user._id;
+  
     // Kiểm tra xem trường "file" có tồn tại trong currentMessage hay không
     if (currentMessage.file) {
       return (
-        <View style={{ alignItems: 'center' }}>
-          <IconButton
-            iconColor='white'
-            onPress={() => Linking.openURL(currentMessage.file)}
-            icon="file"
-            style={{ backgroundColor: 'gray', height: 100, width: 100 }}
-          />
-          <IconButton
-            iconColor='white'
-            onPress={() => pickerMessage(currentMessage)}
-            icon="dots-horizontal"
-            style={{ backgroundColor: 'gray', height: 20 }}
-          />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {isCurrentUser && (
+            <IconButton
+              iconColor="white"
+              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
+              icon="share"
+              style={{ backgroundColor: 'gray', height: 25, marginRight: 8 }}
+            />
+          )}
+          <View>
+            <IconButton
+              iconColor="white"
+              onPress={() => Linking.openURL(currentMessage.file)}
+              icon="file"
+              style={{ backgroundColor: 'gray', height: 100, width: 100 }}
+            />
+            {isCurrentUser && (
+              <IconButton
+                iconColor="white"
+                onPress={() => pickerMessage(currentMessage)}
+                icon="dots-horizontal"
+                style={{ backgroundColor: 'gray', height: 20 }}
+              />
+            )}
+          </View>
+          {!isCurrentUser && (
+            <IconButton
+              iconColor="white"
+              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
+              icon="share"
+              style={{ backgroundColor: 'gray', height: 25, marginLeft: 8 }}
+            />
+          )}
         </View>
-
       );
     }
-
+  
     return null; // Trả về null nếu không có trường "file" trong currentMessage
-
-  }
-
+  };
 
 
   const pickerMessage = async (id) => {
@@ -155,8 +229,8 @@ const NewMessageScreen = ({ route }) => {
           onPress: () => deleteMessage(id),
         },
         {
-          text: 'Chuyển tiếp tin nhắn',
-          onPress: () => launchImagePicker('camera'),
+          text: 'Cancel',
+          style: 'cancel',
         },
       ],
       { cancelable: true },
@@ -186,7 +260,6 @@ const NewMessageScreen = ({ route }) => {
   const [messages, setMessages] = useState([]);
   const currentUserId = route.params.currentUserId;
   const roomId = route.params.roomId;
-  const navigation = useNavigation();
   console.log('roomId', roomId);
   const convertMessageToGiftedChatMessage = (message) => {
     const { _id, content, sender, createdAt, views } = message;
@@ -195,11 +268,11 @@ const NewMessageScreen = ({ route }) => {
     let imageContent = '';
     let videoContent = '';
     let fileContent = '';
-    
-    if(views.includes(currentUserId)){
+
+    if (views.includes(currentUserId)) {
       if (content.files.length > 0) {
         const fileExtension = getFileExtensionFromUrl(content.files[0]);
-  
+
         if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
           messageType = 'image';
           messageContent = '';
@@ -215,7 +288,7 @@ const NewMessageScreen = ({ route }) => {
           fileContent = content.files[0];
         }
       }
-  
+      console.log(users.find((user) => user._id === sender).avatar);
       return {
         _id,
         text: messageContent,
@@ -224,14 +297,14 @@ const NewMessageScreen = ({ route }) => {
         file: fileContent,
         user: {
           _id: sender,
-          avatar: 'https://image2403.s3.ap-southeast-1.amazonaws.com/message.1712420273857.jpg',
+          avatar: users.find((user) => user._id === sender).avatar,
         },
         createdAt: new Date(createdAt),
       };
     }
     return {
       _id,
-      text:'',
+      text: '',
       image: '',
       video: '',
       file: '',
@@ -285,7 +358,7 @@ const NewMessageScreen = ({ route }) => {
           createdAt: new Date(createdAt),
           user: {
             _id: senderId,
-            avatar: 'https://image2403.s3.ap-southeast-1.amazonaws.com/message.1712420273857.jpg',
+            avatar: users.find((user) => user._id === senderId).avatar,
           },
           image: image, // Thêm dữ liệu hình ảnh vào đây
           video: video, // Thêm dữ liệu video vào đây
@@ -403,7 +476,7 @@ const NewMessageScreen = ({ route }) => {
           video: '',
           files: '',
           messageId
-          
+
         });
 
 
@@ -575,7 +648,7 @@ const NewMessageScreen = ({ route }) => {
       // socket.emit('deleteMessages', { roomId, updatedMessages })
       // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
       setMessages(updatedMessages);
-      deleteMessageAPI(currentUserId,currentMessage._id)
+      deleteMessageAPI(currentUserId, currentMessage._id)
       // Log toàn bộ danh sách tin nhắn đã được cập nhật
       // console.log('Updated Messages:', updatedMessages);
     } else {
@@ -586,13 +659,13 @@ const NewMessageScreen = ({ route }) => {
 
   // ---------------------------
   return (
-    <View style={{ flex: 1 , width: '100%'} }>
-      <View style={{ flexDirection: 'row', alignItems: 'center', height: '6%',width:'100%', backgroundColor: '#149AFD', justifyContent:'space-between' }}>
-        <View style={{flexDirection:'row', alignItems:'center', width:'50%'}}>
+    <View style={{ flex: 1, width: '100%' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', height: '6%', width: '100%', backgroundColor: '#149AFD', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '50%' }}>
           <IconButton size={30} iconColor='white' icon="arrow-left" onPress={() => { navigation.goBack(), socket.emit('leaveRoom', roomId); }} />
           <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{route.params.item.name}</Text>
         </View>
-        <View style={{ flexDirection:'row', alignItems: 'flex-end', widthL:'50%' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', widthL: '50%' }}>
           <IconButton size={25} iconColor='white' icon="phone" onPress={() => { }} />
           <IconButton size={28} iconColor='white' icon="video-outline" onPress={() => { }} />
           <IconButton size={30} iconColor='white' icon="menu-open" onPress={() => { }} />

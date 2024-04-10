@@ -12,6 +12,8 @@ import {
   unFriend,
   addFriend,
 } from '../api/allUser';
+import { showMessage } from 'react-native-flash-message';
+import { socket } from '../socket/socket';
 
 const ContactScreen = ({navigation}) => {
   const users = useSelector(state => state.user.users);
@@ -23,6 +25,17 @@ const ContactScreen = ({navigation}) => {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
   const [btnType, setBtnType] = useState('');
+
+  useEffect(() => {
+    socket.on('receiveNotification', (data) => {
+      showMessage({
+        message: data,
+        description: "This is our second message",
+        type: "success",
+      })
+    });
+  }, []);
+
 
   useEffect(() => {
     const fetchFriends = async () => {

@@ -9,6 +9,7 @@ import NewMessageScreen from '../views/NewMessageScreen';
 import SettingScreen from '../views/SettingScreen';
 import MyInfoScreen from '../views/MyInfoScreen';
 import ChangePasswordScreen from '../views/ChangePasswordScreen';
+import forwardMessages from '../views/forwardMessages';
 
 const Stack = createSharedElementStackNavigator();
 
@@ -91,6 +92,8 @@ const MainStackNavigator = () => {
           },
         }}
       />
+
+      <Stack.Screen name="forwardMessages" component={forwardMessages} />
     </Stack.Navigator>
   );
 };

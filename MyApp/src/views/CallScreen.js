@@ -1,13 +1,27 @@
 // DetailsScreen.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView } from 'react-native';
 import CustomHeader from '../components/CustomHeader';
+import { showMessage } from 'react-native-flash-message';
+import { socket } from '../socket/socket';
 
 const CallScreen = ({navigation}) => {
   const handleMenu = () => {
     navigation.navigate('SettingScreen');
     console.log('Menu');
   };
+
+
+  useEffect(() => {
+    socket.on('receiveNotification', (data) => {
+      showMessage({
+        message: data,
+        description: "This is our second message",
+        type: "success",
+      })
+    });
+  }, []);
+
   return (
     <View style={styles.container}>
       <CustomHeader

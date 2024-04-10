@@ -1,5 +1,5 @@
 //scr/views/ForgotPasswordScreen.js
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, TextInput} from 'react-native';
 import Header from '../components/Header';
 import CustomTextInput from '../components/CustomTextInput';
@@ -10,8 +10,20 @@ import {Button, Divider} from 'react-native-paper';
 import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmOnlyDialog from '../components/custom/CustomConfirmOnlyDialog';
 import {sendOTPForgotPwd, verifyOTPForgotPwd} from '../api/forgotPwd';
+import { socket } from '../socket/socket';
+import { showMessage } from 'react-native-flash-message';
 
 const ForgotPasswordScreen = () => {
+  useEffect(() => {
+    socket.on('receiveNotification', (data) => {
+      showMessage({
+        message: data,
+        description: "This is our second message",
+        type: "success",
+      })
+    });
+  }, []);
+
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
