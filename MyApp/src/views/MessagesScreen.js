@@ -19,11 +19,6 @@ const MessageScreen = ({navigation}) => {
   const dispatch = useDispatch();
 
   const users = useSelector(state => state.user.users); // Access the user list from Redux store
-
-  // useEffect(() => {
-  //   console.log('All users:', users); // Print out the list of users
-  // }, [users]);
-
   
   const id = useSelector(state => state.auth.user._id);
   const [list, setList] = useState([]);
@@ -36,15 +31,19 @@ const MessageScreen = ({navigation}) => {
         type: "success",
       })
     });
-    socket.emit('userOnline',id);
-    socket.emit('listOnlineUsers');
-    // Lắng nghe sự kiện 'onlineUsers' từ máy chủ và cập nhật trạng thái của danh sách người dùng trực tuyến
-    socket.on('onlineUsers', (users) => {
-      setOnlineUsers(users);
-    });
-    return () => {
-      socket.disconnect(); 
-    }; 
+    if (id) {
+      socket.emit('userOnline', id);
+      socket.emit('listOnlineUsers');
+  
+      // Lắng nghe sự kiện 'onlineUsers' từ máy chủ và cập nhật trạng thái của danh sách người dùng trực tuyến
+      socket.on('onlineUsers', (users) => {
+        setOnlineUsers(users);
+      });
+    }
+  
+    // return () => {
+    //   socket.disconnect(); 
+    // }; 
   }, []);
 
   console.log("onlineUsers",onlineUsers);
@@ -56,7 +55,7 @@ const MessageScreen = ({navigation}) => {
       setList(data);
     });
   }, []);
-  //---------------------------
+
 
   const currentUserId = useSelector(state => state.auth.user._id);
   const [conversationList, setConversationList] = useState(list);
@@ -73,21 +72,16 @@ const MessageScreen = ({navigation}) => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   // Gửi sự kiện lấy danh sách cuộc trò chuyện đến server
-  //   socket.emit('getRoomList', currentUserId);
-  // }, [socket]);
-
   const handleChatRoomPress = (roomId, item) => {
     // Điều hướng đến màn hình phòng chat với roomId tương ứng
     console.log('item',item);
+    if (item.admin) {
+        navigation.navigate('messageChatGroup', { roomId, currentUserId, item });
+    }
+    else {
     navigation.navigate('NewMessageScreen', { roomId, currentUserId, item });
+    }
   };
-
-  //---------------------------
-  
-  console.log("list",list);
-
   const [searchText, setSearchText] = useState('');
   const chats = useSelector(state => state.chat.chats);
 
@@ -136,7 +130,6 @@ const MessageScreen = ({navigation}) => {
 
   return (
     <View style={{flex: 1, backgroundColor: 'white', width: '100%'}}>
-      {/* <FlashMessageManager /> */}
       <CustomHeader
         title="Chats"
         leftIcon="menu"

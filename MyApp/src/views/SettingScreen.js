@@ -6,6 +6,7 @@ import { changeScreen } from '../redux/screenSlice';
 import CustomHeader from '../components/CustomHeader';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 import { SharedElement } from 'react-navigation-shared-element';
+import { socket } from '../socket/socket';
 
 const SettingScreen = ({ navigation }) => {
   const user = useSelector(state => state.auth.user);
@@ -26,6 +27,7 @@ const SettingScreen = ({ navigation }) => {
   const handleLogout = () => {
     console.log('Perform logout from the application');
     dispatch(changeScreen('Splash'));
+    socket.emit('userOffline', user._id);
   };
 
   const handleGoBack = () => {

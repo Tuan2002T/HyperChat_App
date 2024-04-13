@@ -1,5 +1,5 @@
 import React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import {TransitionSpecs, createStackNavigator} from '@react-navigation/stack';
 import {createSharedElementStackNavigator} from 'react-navigation-shared-element'; // Import thư viện shared element
 
 import MainTabNavigator from './MainTabNavigator';
@@ -10,6 +10,8 @@ import SettingScreen from '../views/SettingScreen';
 import MyInfoScreen from '../views/MyInfoScreen';
 import ChangePasswordScreen from '../views/ChangePasswordScreen';
 import forwardMessages from '../views/forwardMessages';
+import MessageChatGroup from '../views/MessageChatGroup';
+import ChatInformation from '../views/ChatInformation';
 
 const Stack = createSharedElementStackNavigator();
 
@@ -94,6 +96,33 @@ const MainStackNavigator = () => {
       />
 
       <Stack.Screen name="forwardMessages" component={forwardMessages} />
+      <Stack.Screen name="messageChatGroup" component={MessageChatGroup} />
+      <Stack.Screen name="ChatInformation" component={ChatInformation}
+      
+      options={{
+        transitionSpec: {
+          open: TransitionSpecs.TransitionIOSSpec,
+          close: TransitionSpecs.TransitionIOSSpec,
+        },
+        cardStyleInterpolator: ({ current, layouts }) => {
+          return {
+            cardStyle: {
+              transform: [
+                {
+                  translateX: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [layouts.screen.width, 0],
+                  }),
+                },
+              ],
+            },
+            containerStyle: {
+              backgroundColor: 'transparent',
+            },
+          };
+        },
+      }} 
+      />
     </Stack.Navigator>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {Provider} from 'react-redux';
 import {useSelector} from 'react-redux';
 import {NavigationContainer} from '@react-navigation/native';
@@ -11,7 +11,15 @@ import RegisterStackNavigator from './components/RegisterStackNavigator';
 import MainStackNavigator from './components/MainStackNavigator';
 import ForgotPasswordScreen from './views/ForgotPasswordScreen';
 import FlashMessageManager from './components/FlashMessageManager';
+import { use } from 'i18next';
+import { socket } from './socket/socket';
 const App = () => {
+
+  useEffect(() => {
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   const currentScreen = useSelector(state => state.screen.currentScreen);
 
   const renderScreen = () => {

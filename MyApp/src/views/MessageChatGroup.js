@@ -3,20 +3,16 @@ import { GiftedChat, Avatar, Day } from 'react-native-gifted-chat';
 import { View, TouchableHighlight, Text, Alert, Image, Linking } from 'react-native';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import DocumentPicker from 'react-native-document-picker';
-import { io } from 'socket.io-client';
-import { PermissionsAndroid, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { IconButton } from 'react-native-paper';
 import { socket } from '../socket/socket';
-import { deleteMessageAPI, getMessagesByChatId, retrieveMessages, sendMessage } from '../api/Message';
+import { deleteMessageAPI, getMessagesByChatId, retrieveMessages, sendMessageGroup } from '../api/Message';
 import Video from 'react-native-video';
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { useDispatch, useSelector } from 'react-redux';
 
-const NewMessageScreen = ({ navigation, route }) => {
+const MessageChatGroup = ({ navigation, route }) => {
   const users = useSelector(state => state.user.users);
   const user = useSelector(state => state.auth.user.avatar);
-  // console.log('user111111111111111111111111', user);
   const getFileExtensionFromUrl = (url) => {
     // Tách phần mở rộng từ URL và chuyển đổi thành chữ thường
     const parts = url.split('.');
@@ -87,14 +83,6 @@ const NewMessageScreen = ({ navigation, route }) => {
   
       return (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          {isCurrentUser && (
-            <IconButton
-              iconColor="white"
-              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
-              icon="share"
-              style={{ backgroundColor: 'gray', height: 25, marginRight: 8 }}
-            />
-          )}
           <View style={{flexDirection:'column', alignItems:'center'}}>
             <Text style={{ color: textColor }}>{currentMessage.text}</Text>
             {isCurrentUser && (
@@ -106,14 +94,6 @@ const NewMessageScreen = ({ navigation, route }) => {
               />
             )}
           </View>
-          {!isCurrentUser && (
-            <IconButton
-              iconColor="white"
-              onPress={() => navigation.navigate('forwardMessages', {id: currentMessage._id})}
-              icon="share"
-              style={{ backgroundColor: 'gray', height: 25, marginLeft: 8 }}
-            />
-          )}
         </View>
       );
     }
@@ -381,7 +361,7 @@ const NewMessageScreen = ({ navigation, route }) => {
         const { text, createdAt, image, video, file } = newMessage;
 
         // Gửi tin nhắn và đợi nhận ID từ hàm sendMessage
-        const id = await sendMessage(currentUserId, text, roomId, image);
+        const id = await sendMessageGroup(currentUserId, text, roomId, image);
         const messageId = id.id
         console.log('messageId', id.id);
         // Sau khi nhận được messageId, gửi tin nhắn qua socket
@@ -465,7 +445,7 @@ const NewMessageScreen = ({ navigation, route }) => {
       };
 
       try {
-        const img = await sendMessage(currentUserId, '', roomId, files);
+        const img = await sendMessageGroup(currentUserId, '', roomId, files);
         console.log('img', img.files[0]);
         const messageId = img.id
         // Gửi tin nhắn hình ảnh qua socket
@@ -540,7 +520,7 @@ const NewMessageScreen = ({ navigation, route }) => {
       };
 
       try {
-        const video = await sendMessage(currentUserId, '', roomId, files);
+        const video = await sendMessageGroup(currentUserId, '', roomId, files);
         console.log('video', video);
         const messageId = video.id
         socket.emit('sendMessage', {
@@ -574,7 +554,7 @@ const NewMessageScreen = ({ navigation, route }) => {
       console.log('files', files);
 
       try {
-        const file = await sendMessage(currentUserId, '', roomId, files);
+        const file = await sendMessageGroup(currentUserId, '', roomId, files);
         console.log('file', file);
         const messageId = file.id
         socket.emit('sendMessage', {
@@ -669,7 +649,7 @@ const NewMessageScreen = ({ navigation, route }) => {
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', widthL: '50%' }}>
           <IconButton size={25} iconColor='white' icon="phone" onPress={() => { }} />
           <IconButton size={28} iconColor='white' icon="video-outline" onPress={() => { }} />
-          <IconButton size={30} iconColor='white' icon="menu-open" onPress={() => { }} />
+          <IconButton size={30} iconColor='white' icon="menu-open" onPress={() => { navigation.navigate('ChatInformation') }} />
         </View>
 
       </View>
@@ -705,4 +685,4 @@ const NewMessageScreen = ({ navigation, route }) => {
   );
 };
 
-export default NewMessageScreen;
+export default MessageChatGroup;
