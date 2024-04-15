@@ -118,6 +118,8 @@ const ContactScreen = ({navigation}) => {
     try {
       const res = await acceptRequest(requestId, me._id);
       console.log('Accept request:', res);
+      fetchFriends();
+      fetchRequests();
     } catch (error) {
       console.error('Error caught:', error);
     }

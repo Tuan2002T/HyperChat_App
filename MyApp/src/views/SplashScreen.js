@@ -11,19 +11,15 @@ import AnimatedCircle from '../components/animated/AnimatedCircle';
 import styles from '../css/Styles';
 import {Button} from 'react-native-paper';
 import {allUsers} from '../api/allUser';
-import { loginUser } from '../api/loginUser';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const SplashScreen = () => {
-  console.log('SplashScreen');
-
-  const [isLogin, setIsLogin] = useState(null);
+  console.log('[SPLASH]');
+  const dispatch = useDispatch();
+  const [isLogin, setIsLogin] = useState(false);
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
-
-  const dispatch = useDispatch();
-
   const [showButtons, setShowButtons] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('');
 
@@ -31,8 +27,8 @@ const SplashScreen = () => {
     const loadLanguageAndLoginStatus = async () => {
       try {
         const language = await AsyncStorage.getItem('language');
-        const loginStatus = await AsyncStorage.getItem('@isLogin');
-        setIsLogin(JSON.parse(loginStatus));
+        const isLogin = await AsyncStorage.getItem('@isLogin');
+        setIsLogin(JSON.parse(isLogin));
         const userInfo = await AsyncStorage.getItem('@user');
         setUser(JSON.parse(userInfo));
         const passwordInfo = await AsyncStorage.getItem('@password');
@@ -48,16 +44,14 @@ const SplashScreen = () => {
     loadLanguageAndLoginStatus();
     delay(1).then(() => setShowButtons(true));
 
-    console.log('isLogin:', isLogin);
-    console.log('user:', user);
-    console.log('password: ', password);
-
-    // if (isLogin) {
-    //   loginUser(user, password);
-    
-
-    //   // dispatch(changeScreen('Main'));
-    // }
+    console.log(
+      '[SPLASH] isLogin:',
+      isLogin,
+      '-user:',
+      user,
+      '-pwd:',
+      password,
+    );
 
     dispatch(allUsers());
   }, []);
@@ -65,8 +59,9 @@ const SplashScreen = () => {
   const toggleLanguage = async newLanguage => {
     try {
       await AsyncStorage.setItem('language', newLanguage);
-      setCurrentLanguage(newLanguage);
       i18n.changeLanguage(newLanguage);
+      setCurrentLanguage(newLanguage);
+      console.log('[SPLASH] Language changed to:', newLanguage);
     } catch (error) {
       console.error('Error toggling language:', error);
     }
