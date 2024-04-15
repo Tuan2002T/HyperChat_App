@@ -1,26 +1,67 @@
-// DetailsScreen.tsx
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView } from 'react-native';
+import React, {useEffect} from 'react';
+import {View, Text, StyleSheet, Image, SectionList} from 'react-native';
+import {Button, Searchbar} from 'react-native-paper';
+import {useSelector} from 'react-redux';
 import CustomHeader from '../components/CustomHeader';
-import { showMessage } from 'react-native-flash-message';
-import { socket } from '../socket/socket';
+import {getMyFriends} from '../api/allUser';
+import {listChats, createNewChat} from '../api/getListChats';
+import {showMessage} from 'react-native-flash-message';
+import {socket} from '../socket/socket';
 
 const CallScreen = ({navigation}) => {
+  const me = useSelector(state => state.auth.user);
+
+  const [friends, setFriends] = React.useState([]);
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  useEffect(() => {
+    socket.on('receiveNotification', data => {
+      showMessage({
+        message: data,
+        description: 'This is our second message',
+        type: 'success',
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        if (me && me._id && me.token) {
+          const res = await getMyFriends(me._id, me.token);
+          res.sort((a, b) => a.fullname.localeCompare(b.fullname));
+          setFriends(res);
+        }
+      } catch (error) {
+        console.error('Error caught:', error);
+      }
+    };
+
+    fetchFriends();
+  }, [me]);
+
+
+  const handleCall = friendId => {
+    console.log('Call to friend:', friendId);
+  };
+
+  const handleVideoCall = friendId => {
+    console.log('Video call to friend:', friendId);
+  };
+
+  const filterFriends = () => {
+    return friends.filter(
+      friend =>
+        friend.fullname &&
+        friend.fullname.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  };
+  const filteredFriends = filterFriends();
+
   const handleMenu = () => {
     navigation.navigate('SettingScreen');
     console.log('Menu');
   };
-
-
-  useEffect(() => {
-    socket.on('receiveNotification', (data) => {
-      showMessage({
-        message: data,
-        description: "This is our second message",
-        type: "success",
-      })
-    });
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -28,39 +69,58 @@ const CallScreen = ({navigation}) => {
         title="Calls"
         leftIcon="menu"
         leftIconPress={handleMenu}
+        rightIcon="plus"
       />
-      
-      <FlatList
-        style={{marginTop: 10, width: '100%', backgroundColor: 'white', borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
-        // showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-        data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13]}
-        renderItem={({ item }) => {
-          return (
-            <Pressable style={{ width: '100%', height: 50, backgroundColor: 'white', marginVertical:5 }}
-              onPress={() => { console.log('Pressed') 
+      <View style={{marginVertical: 10}}>
+        <Searchbar
+          style={{
+            marginHorizontal: '5%',
+            borderWidth: 1,
+            borderColor: '#76ABAE',
+            backgroundColor: 'white',
+          }}
+          placeholder="Search"
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+        />
+      </View>
+      <SectionList
+        sections={
+          filteredFriends.length
+            ? [{title: 'Friends', data: filteredFriends}]
+            : []
+        }
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({item}) => (
+          <View style={styles.userContainer}>
+            <Image source={{uri: item.avatar}} style={styles.avatar} />
+            <Text style={{fontSize: 16, fontWeight: 'bold', color: 'black'}}>
+              {item.fullname}
+            </Text>
+            <Button
+              icon={'phone'}
+              style={{
+                backgroundColor: null,
+                borderWidth: 1,
+                borderColor: '#76ABAE',
+                marginLeft: 'auto',
               }}
-            >
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems:'center' }}>
-                <View style={{ flexDirection: 'row' }}>
-                  <Image style={{ width: 45, height: 45, borderRadius: 100, marginRight:10, marginLeft:20 }} source={{ uri: 'https://thegioiso.edu.vn/wp-content/uploads/2023/11/hinh-anh-gai-xinh-cute-1.jpg' }} />
-                  <View>
-                    <Text style={{ color: 'black' }}>Tên</Text>
-                    <Text style={{ color: 'gray', fontWeight: 'bold' }}>Today, 09:30 AM</Text>
-                  </View>
-                </View>
-                <View style={{ alignItems:'center', flexDirection:'row'}}>
-                  <Pressable>
-                    <Image source={require('../Images/Icon/Call.png')} />
-                  </Pressable>
-                  <Pressable style = {{marginLeft:20, marginRight:20}}>
-                    <Image source={require('../Images/Icon/Video.png')} />
-                  </Pressable>
-                </View>
-              </View>
-            </Pressable>
-          );
-        }}
+              labelStyle={{color: '#76ABAE', fontWeight: 'bold'}}
+              onPress={() => handleCall(item._id)}
+            />
+            <Button
+              icon={'video'}
+              style={{
+                backgroundColor: null,
+                borderWidth: 1,
+                borderColor: '#76ABAE',
+                marginLeft: 10,
+              }}
+              labelStyle={{color: '#76ABAE', fontWeight: 'bold'}}
+              onPress={() => handleVideoCall(item._id)}
+            />
+          </View>
+        )}
       />
     </View>
   );
@@ -69,14 +129,31 @@ const CallScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
     backgroundColor: 'white',
-    alignItems: 'center',
     width: '100%',
   },
-  text: {
-    fontSize: 20,
+  userContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+    borderWidth: 0.2,
+    borderColor: 'black',
+  },
+  sectionHeader: {
+    fontSize: 16,
     fontWeight: 'bold',
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
 });
 

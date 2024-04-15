@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, Pressable } from 'react-native';
+import {View, Text, Pressable} from 'react-native';
 import i18n from '../i18n/i18n';
 import {useDispatch} from 'react-redux';
 import {changeScreen} from '../redux/screenSlice';
@@ -12,19 +12,26 @@ import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 import {allUsers} from '../api/allUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { showMessage, hideMessage } from "react-native-flash-message";
+import {showMessage, hideMessage} from 'react-native-flash-message';
 // import FlashMessage from "react-native-flash-message";
 
 const LoginScreen = () => {
-  
   // const isLogin = true in asyncStorage
 
+  const handleNotify = () => {
+    setUsername('noname008');
+    setPassword('@Noname008');
+    showMessage({
+      message: 'Login success',
+      type: 'success',
+    });
+  };
 
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
-  const [username, setUsername] = useState('noname001');
-  const [password, setPassword] = useState('Tuan@123');
+  const [username, setUsername] = useState('vkmt');
+  const [password, setPassword] = useState('Hien@123');
 
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {
@@ -43,26 +50,25 @@ const LoginScreen = () => {
       dispatch(loginUserSuccess(res));
 
       // Save user info to asyncStorage
-      const setIsLogin = async (value) => {
+      const setIsLogin = async value => {
         try {
-          await AsyncStorage.setItem('@isLogin', JSON.stringify(value))
-          await AsyncStorage.setItem('@user', JSON.stringify(username))
-          await AsyncStorage.setItem('@password', JSON.stringify(password))
+          await AsyncStorage.setItem('@isLogin', JSON.stringify(value));
+          await AsyncStorage.setItem('@user', JSON.stringify(username));
+          await AsyncStorage.setItem('@password', JSON.stringify(password));
         } catch (e) {
           // saving error
           console.error(e);
         }
-      }
-      
+      };
+
       setIsLogin(true);
-      
+
       handleNotify();
 
       //delay 1s
       setTimeout(() => {
         handleGotoChat();
       }, 1000);
-
     } catch (error) {
       showDialog('Login Fail', 'Account information or password not correct.');
     }
@@ -188,7 +194,7 @@ const LoginScreen = () => {
         </Button>
       </View>
       {/* <FlashMessage position="top" /> */}
-      
+
       {/*  */}
       <View style={{position: 'absolute', bottom: 100, right: 100}}>
         <Pressable onPress={handleNotify}>
@@ -198,12 +204,5 @@ const LoginScreen = () => {
     </View>
   );
 };
-
-const handleNotify = () => {
-  // showMessage({
-  //   message: "Login success!",
-  //   type: "info",
-  // });
-}
 
 export default LoginScreen;
