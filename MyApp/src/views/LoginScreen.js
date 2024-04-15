@@ -16,16 +16,7 @@ import {showMessage, hideMessage} from 'react-native-flash-message';
 // import FlashMessage from "react-native-flash-message";
 
 const LoginScreen = () => {
-  // const isLogin = true in asyncStorage
-
-  const handleNotify = () => {
-    setUsername('noname008');
-    setPassword('@Noname008');
-    showMessage({
-      message: 'Login success',
-      type: 'success',
-    });
-  };
+  console.log('[LOGIN]');
 
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
@@ -36,7 +27,7 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
-    console.log('Show password: ', showPassword);
+    console.log('[LOGIN] Show password:', showPassword);
   };
 
   const handleLogin = async () => {
@@ -48,24 +39,19 @@ const LoginScreen = () => {
     try {
       const res = await loginUser(username, password);
       dispatch(loginUserSuccess(res));
+      try {
+        await AsyncStorage.setItem('isLogin', 'true');
+        await AsyncStorage.setItem('@user', JSON.stringify(username));
+        await AsyncStorage.setItem('@password', JSON.stringify(password));
+      } catch (e) {
+        console.error(e);
+      }
 
-      // Save user info to asyncStorage
-      const setIsLogin = async value => {
-        try {
-          await AsyncStorage.setItem('@isLogin', JSON.stringify(value));
-          await AsyncStorage.setItem('@user', JSON.stringify(username));
-          await AsyncStorage.setItem('@password', JSON.stringify(password));
-        } catch (e) {
-          // saving error
-          console.error(e);
-        }
-      };
+      setIndicator(true);
 
-      setIsLogin(true);
+      const isLogin = await AsyncStorage.getItem('isLogin');
+      console.log('[LOGIN] isLogin:', isLogin);
 
-      handleNotify();
-
-      //delay 1s
       setTimeout(() => {
         handleGotoChat();
       }, 1000);
@@ -193,14 +179,7 @@ const LoginScreen = () => {
           {i18n.t('Create new account')}
         </Button>
       </View>
-      {/* <FlashMessage position="top" /> */}
-
-      {/*  */}
-      <View style={{position: 'absolute', bottom: 100, right: 100}}>
-        <Pressable onPress={handleNotify}>
-          <Text>notify</Text>
-        </Pressable>
-      </View>
+      <View style={{position: 'absolute', bottom: 100, right: 100}}></View>
     </View>
   );
 };
