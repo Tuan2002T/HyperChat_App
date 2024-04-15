@@ -1,17 +1,12 @@
 // MessageScreen.js
 import React, {useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, TouchableWithoutFeedback } from 'react-native';
+
 import {useDispatch, useSelector} from 'react-redux';
 import {selectChat, getListChats} from '../redux/chatSlice';
 import { listChats } from '../api/getListChats';
 import CustomHeader from '../components/CustomHeader';
-import {Searchbar} from 'react-native-paper';
+import { Searchbar, Menu, Divider } from 'react-native-paper';
 import { socket } from '../socket/socket';
 
 import { showMessage, hideMessage } from "react-native-flash-message";
@@ -23,6 +18,8 @@ const MessageScreen = ({navigation}) => {
   const id = useSelector(state => state.auth.user._id);
   const [list, setList] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [visible, setVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   
   useEffect(() => {
     socket.on('receiveNotification', (data) => {
@@ -100,22 +97,15 @@ const MessageScreen = ({navigation}) => {
     navigation.navigate('NewMessageScreen');
   };
 
-  const renderItem = ({item}) => (
-    <TouchableOpacity onPress={() => handleChatRoomPress(item._id,item)}>
-      <View
-        style={{
-          padding: 16,
-          borderBottomWidth: 0.5,
-          borderBottomColor: '#ccc',
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <Image
-          source={{uri: item.avatar}}
-          style={{width: 50, height: 50, borderRadius: 50, marginRight: 10}}
-        />
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      onLongPress={() => { setVisible(true); setSelectedItem(item); }}
+      onPress={() => handleChatRoomPress(item._id, item)}
+    >
+      <View style={{ padding: 16, borderBottomWidth: 0.5, borderBottomColor: '#ccc', flexDirection: 'row', alignItems: 'center' }}>
+        <Image source={{ uri: item.avatar }} style={{ width: 50, height: 50, borderRadius: 50, marginRight: 10 }} />
         <View>
-          <Text style={{fontWeight: 700}}>{item.name}</Text>
+          <Text style={{ fontWeight: 700 }}>{item.name}</Text>
           <Text>Message - Time</Text>
         </View>
       </View>
@@ -155,6 +145,20 @@ const MessageScreen = ({navigation}) => {
         renderItem={renderItem}
         keyExtractor={item => item._id}
       />
+      <Menu
+      style={{position: 'absolute', bottom: 0, right: 0, left: 0}}
+        visible={visible}
+        onDismiss={() => setVisible(false)}
+        anchor={
+          <TouchableOpacity onPress={() => setVisible(true)}>
+            <Text></Text>
+          </TouchableOpacity>
+        }
+      >
+        <Menu.Item onPress={handleEdit} title="Edit" />
+        <Divider />
+        <Menu.Item onPress={() => { /* handle other actions */ }} title="Other Action" />
+      </Menu>
     </View>
   );
 };

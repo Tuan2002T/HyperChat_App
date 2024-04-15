@@ -4,14 +4,13 @@ import {View, Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
 import {changeScreen} from '../redux/screenSlice';
-import PngIcons from '../assets/PngIcons';
 import i18n from '../i18n/i18n';
 import LanguageSelector from '../components/LanguageSelector ';
 import AnimatedCircle from '../components/animated/AnimatedCircle';
 import styles from '../css/Styles';
 import {Button} from 'react-native-paper';
 import {allUsers} from '../api/allUser';
-import {loginUser} from '../api/loginUser'; // Import loginUser function
+import {loginUser} from '../api/loginUser';
 import {loginUserSuccess} from '../redux/authSlice';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -44,13 +43,6 @@ const SplashScreen = () => {
       }
     };
     loadLanguageAndLoginStatus();
-
-    if (!isLogin) {
-      
-    }
-
-    delay(1).then(() => setShowButtons(true));
-
     dispatch(allUsers());
   }, []);
 
@@ -61,6 +53,9 @@ const SplashScreen = () => {
       handleLogin();
       console.log('[SPLASH] Auto login');
     }
+    delay(2000).then(() => {
+      setShowButtons(true);
+    });
   }, [isLogin, user, password]);
 
   const handleLogin = async () => {
@@ -89,21 +84,12 @@ const SplashScreen = () => {
     }
   };
 
-  const renderIcon = iconSource => {
-    return currentLanguage === iconSource ? (
-      <Image source={PngIcons[iconSource]} style={{width: 50, height: 50}} />
-    ) : null;
-  };
-
   return (
     <View style={styles.container}>
       <AnimatedCircle />
       {showButtons && (
         <>
-          <View style={styles.iconContainer}>
-            {renderIcon('vi')}
-            {renderIcon('en')}
-          </View>
+          <View style={styles.iconContainer}></View>
           <View style={styles.buttonContainer}>
             <Button
               style={styles.firstButton}

@@ -1,19 +1,22 @@
+//scr/view/NewGroupScreen.js
 import React, {useEffect} from 'react';
 import {View, Text, StyleSheet, Image, SectionList} from 'react-native';
 import {Button, Searchbar, Checkbox, TextInput} from 'react-native-paper';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import CustomHeader from '../components/CustomHeader';
 import {getMyFriends} from '../api/allUser';
 import {showMessage} from 'react-native-flash-message';
 import {socket} from '../socket/socket';
 import CustomTextInput from '../components/CustomTextInput';
 import {createGroupChat} from '../api/getListChats';
+import {selectChat, getListChats} from '../redux/chatSlice';
+import {listChats} from '../api/getListChats';
 
 const NewGroupScreen = ({navigation}) => {
+  const dispatch = useDispatch();
+
   const me = useSelector(state => state.auth.user);
-
   const [name, setName] = React.useState('');
-
   const [checkboxStates, setCheckboxStates] = React.useState({});
 
   const handleCheckboxChange = (friendId, isChecked) => {
@@ -41,11 +44,12 @@ const NewGroupScreen = ({navigation}) => {
         type: 'warning',
       });
     } else {
-      //create array me._id and friendIds
       const newGroup = [me._id, ...selectedFriends.map(friend => friend._id)];
 
       const res = await createGroupChat(name, newGroup);
       console.log('Create group chat:', res);
+
+      navigation.navigate('MainTabNavigator');
     }
   };
 
