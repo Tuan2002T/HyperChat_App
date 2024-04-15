@@ -35,14 +35,23 @@ export const sendMessage = async (sender, messageText, chatPrivateId, files) => 
 export const sendMessageGroup = async (sender, messageText, chatGroupId, files) => {
   try {
     const formData = new FormData();
-    if (messageText !== '') {
 
+    if (messageText !== '') {
       formData.append('messageText', messageText);
     }
+
     formData.append('sender', sender);
     formData.append('chatGroupId', chatGroupId);
 
-    formData.append('files', files);
+    if (files) {
+      if (Array.isArray(files)) {
+        files.forEach((file) => {
+          formData.append('files', file);
+        });
+      } else {
+        formData.append('files', files);
+      }
+    }
 
     const response = await axios.post(
       API_CONFIG.baseURL + API_CONFIG.endpoints.sendMessage,
@@ -57,7 +66,7 @@ export const sendMessageGroup = async (sender, messageText, chatGroupId, files) 
     console.log('REGISTER:', response.data.toString());
     return response.data;
   } catch (error) {
-    console.error(error.response?.data.error);
+    console.error('errrrrrrr', error.response?.data.error);
     return error.response;
   }
 };
