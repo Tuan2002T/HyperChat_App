@@ -2,7 +2,7 @@
 import React, {useState, useEffect} from 'react';
 import {View, Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {changeScreen} from '../redux/screenSlice';
 import PngIcons from '../assets/PngIcons';
 import i18n from '../i18n/i18n';
@@ -11,13 +11,15 @@ import AnimatedCircle from '../components/animated/AnimatedCircle';
 import styles from '../css/Styles';
 import {Button} from 'react-native-paper';
 import {allUsers} from '../api/allUser';
+import {loginUser} from '../api/loginUser'; // Import loginUser function
+import {loginUserSuccess} from '../redux/authSlice';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const SplashScreen = () => {
   console.log('[SPLASH]');
   const dispatch = useDispatch();
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState('');
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [showButtons, setShowButtons] = useState(false);
@@ -27,8 +29,8 @@ const SplashScreen = () => {
     const loadLanguageAndLoginStatus = async () => {
       try {
         const language = await AsyncStorage.getItem('language');
-        const isLogin = await AsyncStorage.getItem('@isLogin');
-        setIsLogin(JSON.parse(isLogin));
+        const isLogin = await AsyncStorage.getItem('isLogin');
+        setIsLogin(isLogin);
         const userInfo = await AsyncStorage.getItem('@user');
         setUser(JSON.parse(userInfo));
         const passwordInfo = await AsyncStorage.getItem('@password');
@@ -42,19 +44,39 @@ const SplashScreen = () => {
       }
     };
     loadLanguageAndLoginStatus();
-    delay(1).then(() => setShowButtons(true));
 
-    console.log(
-      '[SPLASH] isLogin:',
-      isLogin,
-      '-user:',
-      user,
-      '-pwd:',
-      password,
-    );
+    if (!isLogin) {
+      
+    }
+
+    delay(1).then(() => setShowButtons(true));
 
     dispatch(allUsers());
   }, []);
+
+  console.log('[SPLASH] isLogin:', isLogin, '-user:', user, '-pwd:', password);
+
+  useEffect(() => {
+    if (isLogin === 'true' && user && password) {
+      handleLogin();
+      console.log('[SPLASH] Auto login');
+    }
+  }, [isLogin, user, password]);
+
+  const handleLogin = async () => {
+    try {
+      const res = await loginUser(user, password);
+      dispatch(loginUserSuccess(res));
+
+      handleGotoChat();
+    } catch (error) {
+      console.error('Error login:', error);
+    }
+  };
+
+  const handleGotoChat = () => {
+    dispatch(changeScreen('Main'));
+  };
 
   const toggleLanguage = async newLanguage => {
     try {

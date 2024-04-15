@@ -7,6 +7,7 @@ import CustomHeader from '../components/CustomHeader';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 import { SharedElement } from 'react-navigation-shared-element';
 import { socket } from '../socket/socket';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingScreen = ({ navigation }) => {
   const user = useSelector(state => state.auth.user);
@@ -26,6 +27,9 @@ const SettingScreen = ({ navigation }) => {
 
   const handleLogout = () => {
     console.log('Perform logout from the application');
+
+    AsyncStorage.setItem('isLogin', 'false');
+
     dispatch(changeScreen('Splash'));
     socket.emit('userOffline', user._id);
   };
