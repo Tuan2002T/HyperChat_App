@@ -1,27 +1,64 @@
 import React, {useEffect} from 'react';
 import {View, Text, StyleSheet, Image, SectionList} from 'react-native';
-import {Button, Searchbar} from 'react-native-paper';
+import {Button, Searchbar, Checkbox, TextInput} from 'react-native-paper';
 import {useSelector} from 'react-redux';
 import CustomHeader from '../components/CustomHeader';
 import {getMyFriends} from '../api/allUser';
-import {listChats, createNewChat} from '../api/getListChats';
-import { showMessage } from 'react-native-flash-message';
-import { socket } from '../socket/socket';
+import {showMessage} from 'react-native-flash-message';
+import {socket} from '../socket/socket';
+import CustomTextInput from '../components/CustomTextInput';
+import {createGroupChat} from '../api/getListChats';
 
-
-const SubChatScreen = ({navigation}) => {
+const NewGroupScreen = ({navigation}) => {
   const me = useSelector(state => state.auth.user);
+
+  const [name, setName] = React.useState('');
+
+  const [checkboxStates, setCheckboxStates] = React.useState({});
+
+  const handleCheckboxChange = (friendId, isChecked) => {
+    setCheckboxStates(prevState => ({
+      ...prevState,
+      [friendId]: isChecked,
+    }));
+  };
+
+  const handleCreateGroupChat = async () => {
+    if (name === '') {
+      showMessage({
+        message: 'Please enter group name',
+        type: 'warning',
+      });
+      return;
+    }
+
+    const selectedFriends = friends.filter(
+      friend => checkboxStates[friend._id],
+    );
+    if (selectedFriends.length < 2) {
+      showMessage({
+        message: 'Please select at least 2 friends',
+        type: 'warning',
+      });
+    } else {
+      //create array me._id and friendIds
+      const newGroup = [me._id, ...selectedFriends.map(friend => friend._id)];
+
+      const res = await createGroupChat(name, newGroup);
+      console.log('Create group chat:', res);
+    }
+  };
 
   const [friends, setFriends] = React.useState([]);
   const [searchQuery, setSearchQuery] = React.useState('');
 
   useEffect(() => {
-    socket.on('receiveNotification', (data) => {
+    socket.on('receiveNotification', data => {
       showMessage({
         message: data,
-        description: "This is our second message",
-        type: "success",
-      })
+        description: 'This is our second message',
+        type: 'success',
+      });
     });
   }, []);
 
@@ -41,39 +78,6 @@ const SubChatScreen = ({navigation}) => {
     fetchFriends();
   }, [me]);
 
-  const handleCreateChat = async friendId => {
-    const res = await listChats(me._id);
-    console.log('List chats:', res);
-
-    console.log('Me:', me._id, '- Friend:', friendId);
-
-    // Kiểm tra xem có cuộc trò chuyện nào đã tồn tại giữa me._id và friendId (friendId) không
-    const existingChat = res.find(chat => chat.members.includes(friendId));
-
-    if (existingChat) {
-      console.log('Existing chat found with friend:', existingChat);
-      const roomId = existingChat._id;
-      const currentUserId = me._id;
-      const item = existingChat;
-      // Code để mở cuộc trò chuyện đã tồn tại với friendId
-      navigation.navigate('NewMessageScreen', {
-        roomId,
-        currentUserId,
-        item,
-      });
-    } else {
-      console.log('No existing chat found with friend. Creating a new one...');
-      const newChat = await createNewChat(me._id, friendId);
-      console.log('New chat created:', newChat);
-    
-    }
-  };
-
-  const handleCreateGroupChat = () => {
-    navigation.navigate('NewGroup');
-    console.log('Create group chat');
-  };
-
   const filterFriends = () => {
     return friends.filter(
       friend =>
@@ -86,12 +90,21 @@ const SubChatScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <CustomHeader
-        title="New message"
+        title="New group"
         leftIcon="arrow-left"
         leftIconPress={() => navigation.goBack()}
-        rightIcon="account-group"
-        rightIconPress={handleCreateGroupChat}
       />
+
+      {/* Input group name */}
+      <View style={{alignItems: 'center', marginBottom: 10}}>
+        <CustomTextInput
+          label="Group name"
+          placeholder="Your group name"
+          value={name}
+          onChangeText={setName}
+        />
+      </View>
+
       <View style={{marginVertical: 10}}>
         <Searchbar
           style={{
@@ -105,6 +118,7 @@ const SubChatScreen = ({navigation}) => {
           value={searchQuery}
         />
       </View>
+
       <SectionList
         sections={
           filteredFriends.length
@@ -118,24 +132,44 @@ const SubChatScreen = ({navigation}) => {
             <Text style={{fontSize: 16, fontWeight: 'bold', color: 'black'}}>
               {item.fullname}
             </Text>
-            <Button
-              style={{
-                backgroundColor: null,
-                borderWidth: 1,
-                borderColor: '#76ABAE',
-                marginLeft: 'auto',
-              }}
-              labelStyle={{color: '#76ABAE', fontWeight: 'bold'}}
-              mode="contained"
-              onPress={() => handleCreateChat(item._id)}>
-              Chat
-            </Button>
+            <View style={{marginLeft: 'auto', marginRight: 10}}>
+              <Checkbox
+                uncheckedColor="#76ABAE"
+                color="#76ABAE"
+                // Truyền giá trị của checkbox từ state tương ứng
+                status={checkboxStates[item._id] ? 'checked' : 'unchecked'}
+                // Khi checkbox thay đổi trạng thái, cập nhật state tương ứng
+                onPress={() => {
+                  handleCheckboxChange(item._id, !checkboxStates[item._id]);
+                }}
+              />
+            </View>
           </View>
         )}
         renderSectionHeader={({section: {title}}) => (
           <Text style={styles.sectionHeader}>{title}</Text>
         )}
       />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          width: '100%',
+        }}>
+        <Button
+          style={{
+            marginHorizontal: '5%',
+            marginVertical: 10,
+            backgroundColor: '#76ABAE',
+          }}
+          labelStyle={{color: 'white', fontWeight: 'bold'}}
+          mode="contained"
+          onPress={() => {
+            handleCreateGroupChat();
+          }}>
+          Create group
+        </Button>
+      </View>
     </View>
   );
 };
@@ -171,4 +205,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SubChatScreen;
+export default NewGroupScreen;

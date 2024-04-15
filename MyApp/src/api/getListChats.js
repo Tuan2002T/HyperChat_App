@@ -31,5 +31,23 @@ const createNewChat = async (id, friendId) => {
   }
 }
 
+const createGroupChat = async (name, members) => {
+  try {
+    const res = await axios.post(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.createGroupChat,
+      {
+        "admin": members[0],
+        "name": name,
+        "members": members,
+      }
+    );
+    console.log('createChat:', res.data);
+    return res.data;
+  }
+  catch (error) {
+    //throw new Error message
+    throw new Error(error.response.data.message);
+  }
+}
 
-export {listChats, createNewChat};
+export {listChats, createNewChat, createGroupChat };

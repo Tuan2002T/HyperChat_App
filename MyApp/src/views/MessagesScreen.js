@@ -23,6 +23,7 @@ const MessageScreen = ({navigation}) => {
   const id = useSelector(state => state.auth.user._id);
   const [list, setList] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  
   useEffect(() => {
     socket.on('receiveNotification', (data) => {
       showMessage({
@@ -40,10 +41,7 @@ const MessageScreen = ({navigation}) => {
         setOnlineUsers(users);
       });
     }
-  
-    // return () => {
-    //   socket.disconnect(); 
-    // }; 
+
   }, []);
 
   console.log("onlineUsers",onlineUsers);

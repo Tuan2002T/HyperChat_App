@@ -12,8 +12,8 @@ import {
   unFriend,
   addFriend,
 } from '../api/allUser';
-import { showMessage } from 'react-native-flash-message';
-import { socket } from '../socket/socket';
+import {showMessage} from 'react-native-flash-message';
+import {socket} from '../socket/socket';
 
 const ContactScreen = ({navigation}) => {
   const users = useSelector(state => state.user.users);
@@ -26,42 +26,56 @@ const ContactScreen = ({navigation}) => {
   const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
   const [btnType, setBtnType] = useState('');
 
+  const fetchFriends = async () => {
+    try {
+      const res = await getMyFriends(me._id, me.token);
+      res.sort((a, b) => a.fullname.localeCompare(b.fullname));
+      const friendsWithType = res.map(friend => ({
+        ...friend,
+        type: 'friend',
+      }));
+      setFriends(friendsWithType);
+    } catch (error) {
+      console.error('Error caught:', error);
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      let res = await getRequests(me._id);
+      res = res.map(request => ({...request, type: 'request'}));
+      setRequests(res);
+    } catch (error) {
+      console.error('Error caught:', error);
+    }
+  };
+
   useEffect(() => {
-    socket.on('receiveNotification', (data) => {
+    socket.on('receiveNotification', data => {
       showMessage({
         message: data,
-        description: "This is our second message",
-        type: "success",
-      })
+        description: 'This is our second message',
+        type: 'success',
+      });
     });
+    
+
   }, []);
 
+  useEffect(() => {
+    socket.on('receiveFriendRequest', senderId => {
+      // Handle received friend request here
+      console.log(`Received friend request from user ${senderId}`);
+      const fr = users.find(user => user._id === senderId);
+      // You might want to update your state to reflect the new friend request
+      setRequests([...requests, {...fr, type: 'request'}]);
+    });
+  }
+  , [socket]);
 
   useEffect(() => {
-    const fetchFriends = async () => {
-      try {
-        const res = await getMyFriends(me._id, me.token);
-        res.sort((a, b) => a.fullname.localeCompare(b.fullname));
-        const friendsWithType = res.map(friend => ({
-          ...friend,
-          type: 'friend',
-        }));
-        setFriends(friendsWithType);
-      } catch (error) {
-        console.error('Error caught:', error);
-      }
-    };
-    fetchFriends();
-    const fetchRequests = async () => {
-      try {
-        let res = await getRequests(me._id);
-        res = res.map(request => ({...request, type: 'request'}));
-        setRequests(res);
-      } catch (error) {
-        console.error('Error caught:', error);
-      }
-    };
     fetchRequests();
+    fetchFriends();
   }, []);
 
   const handleNext = async () => {
@@ -124,6 +138,11 @@ const ContactScreen = ({navigation}) => {
   const handleInviteFriend = async friendId => {
     console.log('Invite friend:', friendId);
     try {
+      // Gửi lời mời kết bạn và cập nhật state nếu cần
+      socket.emit('sendFriendRequest', {
+        senderId: me._id,
+        receiverId: friendId,
+      });
       const res = await addFriend(me._id, friendId);
       console.log('Invite friend:', res);
     } catch (error) {

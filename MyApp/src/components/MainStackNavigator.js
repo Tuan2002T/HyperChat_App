@@ -12,6 +12,7 @@ import ChangePasswordScreen from '../views/ChangePasswordScreen';
 import forwardMessages from '../views/forwardMessages';
 import MessageChatGroup from '../views/MessageChatGroup';
 import ChatInformation from '../views/ChatInformation';
+import NewGroup from '../views/NewGroupScreen';
 
 const Stack = createSharedElementStackNavigator();
 
@@ -97,8 +98,8 @@ const MainStackNavigator = () => {
 
       <Stack.Screen name="forwardMessages" component={forwardMessages} />
       <Stack.Screen name="messageChatGroup" component={MessageChatGroup} />
+      <Stack.Screen name="NewGroup" component={NewGroup} />
       <Stack.Screen name="ChatInformation" component={ChatInformation}
-      
       options={{
         transitionSpec: {
           open: TransitionSpecs.TransitionIOSSpec,
