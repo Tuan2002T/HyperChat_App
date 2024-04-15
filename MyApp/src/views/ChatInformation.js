@@ -1,9 +1,9 @@
-// DetailsScreen.tsx
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 import { IconButton } from 'react-native-paper';
 
-const ChatInformation = ({ navigation }) => {
+const ChatInformation = ({ navigation, route }) => {
+    console.log(route.params.item.members);
     return (
         <View style={styles.container}>
             <View style={{
@@ -18,62 +18,86 @@ const ChatInformation = ({ navigation }) => {
                 <IconButton size={30} iconColor='white' icon="arrow-left" onPress={() => { navigation.goBack() }} />
                 <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginLeft: 5 }}>Tuỳ chọn</Text>
             </View>
-            <Image style={{ width: 150, height: 150, borderRadius: 100 }} source={{ uri: 'https://i.pinimg.com/564x/c1/9a/1d/c19a1d3823b60a19194fe700f0524ae6.jpg' }} />
-            <Text style={{ color: 'black', fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>Test Chat Group</Text>
-            <View style={{ flexDirection: 'row', width: '70%', justifyContent: 'space-around', marginVertical: 20 }}>
-                <Pressable style={{ backgroundColor: 'black', padding: 10, borderRadius: 100 }}>
-                    <Image style={{ width: 25, height: 25 }} source={require('../Images/ProfileIcon/Message.png')} />
-                </Pressable>
+            <View style={{ alignItems:'center',width:'100%', backgroundColor:'white', marginBottom:10}} >
+                <Image style={{ width: 150, height: 150, borderRadius: 100 }} source={{ uri: route.params.item.avatar }} />
+                <Text style={{ color: 'black', fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>{route.params.item.name}</Text>
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-around',
+                    width: '70%',
+                }}>
+                    <IconButton
+                        icon="message"
+                        color="white"
+                        size={25}
+                        style={styles.actionButton}
+                        onPress={() => {
+                            // Xử lý sự kiện khi nhấn vào nút tin nhắn
+                        }}
+                    />
 
-                <Pressable style={{ backgroundColor: 'black', padding: 10, borderRadius: 100 }}>
-                    <Image style={{ width: 25, height: 25 }} source={require('../Images/ProfileIcon/Video.png')} />
-                </Pressable>
+                    <IconButton
+                        icon="account-multiple-plus"
+                        color="white"
+                        size={30}
+                        style={styles.actionButton}
+                        onPress={() => {
+                            navigation.navigate('AddMembersGroup', {item : route.params.item})
+                        }}
+                    />
 
-                <Pressable style={{ backgroundColor: 'black', padding: 10, borderRadius: 100 }}>
-                    <Image style={{ width: 25, height: 25 }} source={require('../Images/ProfileIcon/Call.png')} />
-                </Pressable>
+                    <IconButton
+                        icon="phone"
+                        color="white"
+                        size={25}
+                        style={styles.actionButton}
+                        onPress={() => {
+                            // Xử lý sự kiện khi nhấn vào nút cuộc gọi
+                        }}
+                    />
 
-                <Pressable style={{ backgroundColor: 'black', padding: 10, borderRadius: 100 }}>
-                    <Image style={{ width: 25, height: 25 }} source={require('../Images/ProfileIcon/More.png')} />
-                </Pressable>
-            </View>
-            <View style={{ width: '100%', marginLeft: 70, marginBottom: 10 }}>
-                <Text style={{ color: 'gray', fontSize: 15, fontWeight: 'bold', marginTop: 10 }}>Name</Text>
-                <Text style={{ color: 'black', fontSize: 20, marginTop: 5 }}>Trương Văn Tuấn</Text>
-            </View>
-
-            <View style={{ width: '100%', marginLeft: 70, marginBottom: 10 }}>
-                <Text style={{ color: 'gray', fontSize: 15, fontWeight: 'bold', marginTop: 10 }}>Thành viên </Text>
-                <Text style={{ color: 'black', fontSize: 20, marginTop: 5 }}>truongvantuanIUH@gmail.com</Text>
-            </View>
-
-            <View style={{ width: '100%', marginLeft: 70, marginBottom: 10 }}>
-                <Text style={{ color: 'gray', fontSize: 15, fontWeight: 'bold', marginTop: 10 }}>Address</Text>
-                <Text style={{ color: 'black', fontSize: 20, marginTop: 5 }}>123 Quang Trung, Phường 11, Gò Vấp, TP.HCM</Text>
-            </View>
-
-            <View style={{ width: '100%', marginLeft: 70, marginBottom: 10 }}>
-                <Text style={{ color: 'gray', fontSize: 15, fontWeight: 'bold', marginTop: 10 }}>Phone number</Text>
-                <Text style={{ color: 'black', fontSize: 20, marginTop: 5 }}>+(84) 345231231</Text>
-            </View>
-            <View style={{ width: '100%', marginLeft: 70, marginBottom: 10 }}>
-                <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-                    <Text style={{ color: 'gray', fontSize: 15, fontWeight: 'bold', marginTop: 10 }}>Media Shared</Text>
-                    <Text style={{ color: 'gray', fontSize: 15, fontWeight: '500', marginTop: 10 ,marginRight:60}}>View All</Text>
+                    <IconButton
+                        icon="dots-vertical"
+                        color="white"
+                        size={25}
+                        style={styles.actionButton}
+                        onPress={() => {
+                            // Xử lý sự kiện khi nhấn vào nút tùy chọn
+                        }}
+                    />
                 </View>
-                <FlatList
-                    horizontal={true}
-                    showsHorizontalScrollIndicator={false}
-                    data={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
-                    renderItem={({ item }) => {
-                        return (
-                            <View style={{ width: 100, height: 100, backgroundColor: 'white', margin: 10, borderRadius: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                <Image style={{ width: 95, height: 95, borderRadius: 10 }} source={{ uri: 'https://i.pinimg.com/564x/c1/9a/1d/c19a1d3823b60a19194fe700f0524ae6.jpg' }} />
-                            </View>
-                        );
-                    }}
-                />
             </View>
+            <TouchableOpacity 
+                onPress={() => { navigation.navigate('MediaMessage', {roomId: route.params.roomId}) }}
+                style={{ width: '100%', marginBottom: 10, backgroundColor: 'white', height: '6%', justifyContent: 'center', }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <IconButton icon="folder-multiple-image" color="black" size={25} />
+                    <Text style={{ color: 'gray', fontSize: 15, fontWeight: 'bold' }}>Ảnh, File, Video ...</Text>
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity 
+                onPress={() => { navigation.navigate('MembersChat', {roomId: route.params.roomId, item: route.params.item}) }}
+                style={{ width: '100%', marginBottom: 10, backgroundColor: 'white', height: '6%', justifyContent: 'center', }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <IconButton icon="account-group" color="black" size={25} />
+                    <Text style={{ color: 'gray', fontSize: 15, fontWeight: 'bold' }}>Thành viên</Text>
+                </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={{ width: '100%', marginBottom: 10, backgroundColor: 'white', height: '6%', justifyContent: 'center', }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <IconButton icon="delete-sweep-outline" color="black" size={25} />
+                    <Text style={{ color: 'red', fontSize: 15, fontWeight: 'bold' }}>Giản tán nhóm</Text>
+                </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={{ width: '100%', marginBottom: 10, backgroundColor: 'white', height: '6%', justifyContent: 'center', }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <IconButton icon="exit-to-app" color="black" size={25} />
+                    <Text style={{ color: 'red', fontSize: 15, fontWeight: 'bold' }}>Rời nhóm</Text>
+                </View>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -82,7 +106,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         // justifyContent: 'center',
-        backgroundColor: 'white',
+        backgroundColor: '#F3F4F6',
         alignItems: 'center',
         width: '100%',
     },
