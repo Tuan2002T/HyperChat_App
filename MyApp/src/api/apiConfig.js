@@ -35,7 +35,10 @@ const API_CONFIG = {
     createChat: 'chat/createChatPrivate',
     deleteMessage: 'message/deleteMessage',
     forwardMessages: 'message/forwadMessages',
-    // Add other endpoints here as needed
+    // ChatGroup
+    addMembersToChatGroup: 'chat/addMembersToChatGroup',
+    findChatGroupById: 'chat/findChatGroupById',
+    allFriendRequestSent: 'user/allFriendRequestSent',
   },
 };
 

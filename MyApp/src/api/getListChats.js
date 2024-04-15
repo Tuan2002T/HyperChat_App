@@ -27,7 +27,7 @@ const createNewChat = async (id, friendId) => {
   }
   catch (error) {
     console.log('Error:', error);
-    throw new Error('Error getting user data');
+   return error.response;
   }
 }
 

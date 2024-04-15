@@ -127,6 +127,31 @@ const addFriend = async (from, to) => {
   }
 };
 
+const allFriendRequestSent = async userId => {
+  try {
+    const res = await axios.get(
+      `${API_CONFIG.baseURL}${API_CONFIG.endpoints.allFriendRequestSent}/${userId}`,
+    );
+    return res.data;
+  } catch (error) {
+    console.error('Error caught:', error);
+    throw error.response ? error.response.data.message : error.message;
+  }
+};
+
+const  getAllSendFriendRequest = async userId => {
+  try {
+    const res = await axios.get(
+      `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getRequests}/${userId}`,
+    );
+    return res.data;
+  }
+  catch (error) {
+    console.error('Error caught:', error);
+    throw error.response ? error.response.data.message : error.message;
+  }
+}
+
 export {
   allUsers,
   getRequests,
@@ -135,4 +160,6 @@ export {
   denyRequest,
   unFriend,
   addFriend,
+  allFriendRequestSent,
+  getAllSendFriendRequest
 };

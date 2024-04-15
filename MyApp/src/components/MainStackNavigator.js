@@ -12,6 +12,9 @@ import ChangePasswordScreen from '../views/ChangePasswordScreen';
 import forwardMessages from '../views/forwardMessages';
 import MessageChatGroup from '../views/MessageChatGroup';
 import ChatInformation from '../views/ChatInformation';
+import MediaMessage from '../views/Chat/MediaMessage';
+import MembersChat from '../views/Chat/MembersChat';
+import AddMembersGroup from '../views/Chat/AddMembersGroup';
 
 const Stack = createSharedElementStackNavigator();
 
@@ -123,6 +126,9 @@ const MainStackNavigator = () => {
         },
       }} 
       />
+      <Stack.Screen name="MediaMessage" component={MediaMessage} />
+      <Stack.Screen name="MembersChat" component={MembersChat} />
+      <Stack.Screen name="AddMembersGroup" component={AddMembersGroup} />
     </Stack.Navigator>
   );
 };
