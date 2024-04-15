@@ -1,5 +1,5 @@
-const SERVER_IP = '192.168.2.41';
-// const SERVER_IP = '192.168.2.40';
+// const SERVER_IP = '192.168.2.41';
+const SERVER_IP = '192.168.2.40';
 // const SERVER_IP = '172.28.77.93';
 // const SERVER_IP = '192.168.56.235';
 const SERVER_PORT = '5000';

@@ -15,6 +15,7 @@ import {Searchbar} from 'react-native-paper';
 import { socket } from '../socket/socket';
 
 import { showMessage, hideMessage } from "react-native-flash-message";
+import { findChatGroupById } from '../api/chatGroup';
 const MessageScreen = ({navigation}) => {
   const dispatch = useDispatch();
 
@@ -23,7 +24,23 @@ const MessageScreen = ({navigation}) => {
   const id = useSelector(state => state.auth.user._id);
   const [list, setList] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  
+
+
+  useEffect(() => {
+    socket.on('addChatGroupForMember', (data) => {
+        findChatGroupById(data).then(d => {
+          setList(prevList => [...prevList, d]);
+        }
+        
+        );
+        showMessage({
+          message: 'Bạn đã được thêm vào nhóm chat' + data,
+        })
+  });
+
+  }, []);
+
+  console.log("list",list);
   useEffect(() => {
     socket.on('receiveNotification', (data) => {
       showMessage({
