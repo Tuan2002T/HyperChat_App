@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { addMembersToChatGroup, findChatGroupById } from '../../api/chatGroup';
 import { listChats } from '../../api/getListChats';
 import { chatGroup, getListChats } from '../../redux/chatSlice';
+import { socket } from '../../socket/socket';
 
 const AddMembersGroup = ({ navigation, route }) => {
   // console.log(route.params.item.members);
@@ -46,7 +47,7 @@ const AddMembersGroup = ({ navigation, route }) => {
   const addMembers = async (members, chatGroupId, userId, token) => {
     if (route.params.item.admin.includes(userId)) {
       await addMembersToChatGroup(members, chatGroupId, userId, token)
-
+      socket.emit('addMemberChatGroup', { roomId: chatGroupId , members: members });
       await findChatGroupById(chatGroupId).then(data => {
         console.log('data', data);
         dispatch(chatGroup(data));

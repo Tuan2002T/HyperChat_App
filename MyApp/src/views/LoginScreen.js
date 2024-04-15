@@ -19,8 +19,8 @@ const LoginScreen = () => {
   // const isLogin = true in asyncStorage
 
   const handleNotify = () => {
-    setUsername('noname008');
-    setPassword('@Noname008');
+    setUsername('noname001');
+    setPassword('Tuan@123');
     showMessage({
       message: 'Login success',
       type: 'success',
@@ -30,8 +30,8 @@ const LoginScreen = () => {
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
-  const [username, setUsername] = useState('vkmt');
-  const [password, setPassword] = useState('Hien@123');
+  const [username, setUsername] = useState('noname001');
+  const [password, setPassword] = useState('Tuan@123');
 
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {

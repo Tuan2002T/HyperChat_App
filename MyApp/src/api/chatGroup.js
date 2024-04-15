@@ -49,6 +49,7 @@ export const findChatGroupById = async (chatGroupId) => {
         const response = await axios.get(
             API_CONFIG.baseURL + API_CONFIG.endpoints.findChatGroupById + `/${chatGroupId}`
         );
+        console.log("datadddddddddddddddddddddddddddddddddd", response.data);
         return response.data;
     } catch (error) {
         console.error(error.response?.data.error);
