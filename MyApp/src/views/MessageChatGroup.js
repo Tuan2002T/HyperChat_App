@@ -15,6 +15,8 @@ import { chatGroup } from '../redux/chatSlice';
 const MessageChatGroup = ({ navigation, route }) => {
   const users = useSelector(state => state.user.users);
   const user = useSelector(state => state.auth.user.avatar);
+  const idSend = useSelector(state => state.auth.user._id);
+  let chat = useSelector(state => state.chat.chat);
   const getFileExtensionFromUrl = (url) => {
     // Tách phần mở rộng từ URL và chuyển đổi thành chữ thường
     const parts = url.split('.');
@@ -25,8 +27,17 @@ const MessageChatGroup = ({ navigation, route }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    socket.on('deletedChatGroupForMember',(members ) => {
+      navigation.navigate('Chats');
+    });
+
+    socket.on('deletedGroup', (data) => {
+      navigation.navigate('Chats');
+    });
+  }, []);
+
+  useEffect(() => {
     findChatGroupById(roomId).then(data => {
-      // console.log('data', data);
       dispatch(chatGroup(data));
     });
   }, []);
@@ -119,7 +130,6 @@ const MessageChatGroup = ({ navigation, route }) => {
 
     return null;
   };
-
 
   const renderMessageFile = ({ currentMessage, user }) => {
     if (currentMessage.file) {
@@ -329,25 +339,28 @@ const MessageChatGroup = ({ navigation, route }) => {
 
   const onSend = async (newMessages = []) => {
     try {
-      for (const newMessage of newMessages) {
-        const { text, createdAt, image, video, file } = newMessage;
 
-        // Gửi tin nhắn và đợi nhận ID từ hàm sendMessage
-        const id = await sendMessageGroup(currentUserId, text, roomId, image);
-        const messageId = id.id
-        console.log('messageId', id.id);
-        // Sau khi nhận được messageId, gửi tin nhắn qua socket
-        socket.emit('sendMessage', {
-          roomId,
-          message: text,
-          senderId: currentUserId,
-          createdAt,
-          image,
-          video,
-          file,
-          messageId // Truyền ID của tin nhắn
-        });
-      }
+        for (const newMessage of newMessages) {
+          const { text, createdAt, image, video, file } = newMessage;
+  
+          // Gửi tin nhắn và đợi nhận ID từ hàm sendMessage
+          const id = await sendMessageGroup(currentUserId, text, roomId, image);
+          const messageId = id.id
+          console.log('messageId', id.id);
+          // Sau khi nhận được messageId, gửi tin nhắn qua socket
+          socket.emit('sendMessage', {
+            roomId,
+            message: text,
+            senderId: currentUserId,
+            createdAt,
+            image,
+            video,
+            file,
+            messageId // Truyền ID của tin nhắn
+          });
+        }
+
+      
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -683,7 +696,7 @@ const MessageChatGroup = ({ navigation, route }) => {
 
       </View>
       <GiftedChat
-        messages={[...messages, systemMessage]}
+        messages={messages}
         onSend={(newMessages) => onSend(newMessages)}
         user={{
           _id: currentUserId,

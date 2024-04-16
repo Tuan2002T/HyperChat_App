@@ -39,6 +39,11 @@ const API_CONFIG = {
     findChatGroupById: 'chat/findChatGroupById',
     allFriendRequestSent: 'user/allFriendRequestSent',
     createGroupChat: 'chat/createChatGroup',
+    addAdminToChatGroup: 'chat/addAdminToChatGroup',
+    deleteAdminToChatGroup: 'chat/deleteAdminToChatGroup',
+    deleteMembersChatGroup: 'chat/deleteMembersChatGroup',
+    outChatGroup: 'chat/outChatGroup',
+    deleteChatGroup: 'chat/deleteChatGroup',
     // Add other endpoints here as needed
   },
 };

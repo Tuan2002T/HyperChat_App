@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
 import { IconButton, TouchableRipple } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { addFriend, allFriendRequestSent, getAllSendFriendRequest, getRequests } from '../../api/allUser';
+import { addAdminToChatGroup, addMembersToChatGroup, deleteAdminToChatGroup, deleteMembersChatGroup, findChatGroupById } from '../../api/chatGroup';
+import { chatGroup } from '../../redux/chatSlice';
+import { socket } from '../../socket/socket';
+import { showMessage } from 'react-native-flash-message';
 
 const MembersChat = ({ navigation, route }) => {
     const users = useSelector(state => state.user.users); // Access the user list from Redux store
@@ -13,8 +17,31 @@ const MembersChat = ({ navigation, route }) => {
     const members = useSelector(state => state.chat.chat.members);
     const [friendSent, setFriendSent] = useState([]);
     const [friendRequest, setFriendRequest] = useState([]);
-
+    let chat1 = useSelector(state => state.chat.chat);
+    const [chat, setChat] = useState(chat1);
+    const dispatch = useDispatch();
     useEffect(() => {
+        socket.on('addAdminChatGroupForMember', (data) => {
+            setChat(data);
+        })
+        socket.on('deleteAdminChatGroupForMember', (data) => {
+            setChat(data);
+        });
+        const liss = []
+        socket.on('addChatGroupForMemberShow', (data) => {
+            console.log('dataadasdasdasdasdasdr', data);
+            members.forEach(member => {
+                const user = users.find(user => user._id === member);
+                liss.push(user);
+            });
+            data.forEach(d => {
+                const us = users.find(user => user._id === d);
+                liss.push(us);
+            }
+            );
+            setListMember(list);
+        });
+        
         allFriendRequestSent(id).then(data => setFriendSent(data));
         getAllSendFriendRequest(id).then(data => setFriendRequest(data));
         const listMember = [];
@@ -24,10 +51,11 @@ const MembersChat = ({ navigation, route }) => {
         });
         setListMember(listMember);
     }, []);
-
     const [modalVisible, setModalVisible] = useState(false);
-    const toggleModal = () => {
+    const [currentU, setCurrentU] = useState({});
+    const toggleModal = (currentMessage) => {
         setModalVisible(true);
+        setCurrentU(currentMessage);
     };
     const closeModal = () => {
         setModalVisible(false);
@@ -55,6 +83,111 @@ const MembersChat = ({ navigation, route }) => {
         }
     };
 
+    const addAdmin = async (current, chatGroupId) => {
+        if (chat.admin.includes(current._id)) {
+            Alert.alert('Người này đã là admin rồi');
+        } else if (current._id === currentUser._id) {
+            Alert.alert('Bạn không thể tự thêm mình làm admin');
+        } else if (!chat.admin.includes(currentUser._id)) {
+            Alert.alert('Bạn không phải admin của nhóm này');
+        } else {
+            const res = await addAdminToChatGroup(
+                chatGroupId,
+                currentUser._id,
+                current._id,
+                currentUser.token
+            );
+
+            Alert.alert(
+                'Thông báo',
+                'Thêm admin thành công',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.goBack(),
+                    },
+                ],
+                { cancelable: false }
+            );
+            const add = await findChatGroupById(chatGroupId).then(data => {
+                dispatch(chatGroup(data));
+                socket.emit('addAdmin', {roomId:chatGroupId, members : [current._id], chat: data});
+            });
+            // socket.emit('addAdmin', {roomId:chatGroupId, members : [current._id], chat: add});
+        }
+
+    };
+
+    const retriveAdmin = async (current, chatGroupId) => {
+        if (!chat.admin.includes(current._id)) {
+            Alert.alert('Người này không là phải admin');
+        } else if (!chat.admin.includes(currentUser._id)) {
+            Alert.alert('Bạn không phải admin của nhóm này');
+        } else {
+            const res = await deleteAdminToChatGroup(
+                chatGroupId,
+                currentUser._id,
+                current._id,
+                currentUser.token
+            );
+
+            Alert.alert(
+                'Thông báo',
+                'Xoá admin thành công',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.goBack(),
+                    },
+                ],
+                { cancelable: false }
+            );
+
+            await findChatGroupById(chatGroupId).then(data => {
+                dispatch(chatGroup(data));
+                socket.emit('deleteAdmin', {roomId:chatGroupId, members : [current._id], chat: data});
+            });
+        }
+
+    }
+
+    const deleteMember = async (current, chatGroupId) => {
+
+        if (current._id === currentUser._id) {
+            Alert.alert('Bạn không thể tự xoá mình');
+        }
+        else if (!chat.members.includes(current._id)) {
+            Alert.alert('Người này không phải thành viên của nhóm');
+        } else if (!chat.admin.includes(currentUser._id)) {
+            Alert.alert('Bạn không phải admin của nhóm này');
+        } else {
+            const res = await deleteMembersChatGroup(
+                current._id,
+                chatGroupId,
+                currentUser._id,
+                currentUser.token
+            );
+
+            Alert.alert(
+                'Thông báo',
+                'Xoá thành viên thành công',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.goBack(),
+                    },
+                ],
+                { cancelable: false }
+            );
+            socket.emit('deleteMemberChatGroup', { roomId: chatGroupId, members: [current._id] });
+            await findChatGroupById(chatGroupId).then(data => {
+                console.log('data', data);
+                dispatch(chatGroup(data));
+            });
+        }
+    }
+
+
     return (
         <View style={styles.container}>
             <View style={{
@@ -75,7 +208,7 @@ const MembersChat = ({ navigation, route }) => {
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        onLongPress={() => toggleModal()}
+                        onLongPress={() => toggleModal(item)}
                         style={{
                             flexDirection: 'row',
                             width: '100%',
@@ -99,21 +232,7 @@ const MembersChat = ({ navigation, route }) => {
                         >
                             {item.fullname}
                         </Text>
-                        {friendRequest.some(sent => sent.receiver === item._id) ? (
-                            <IconButton
-                                icon="account-arrow-left"
-                                color="black"
-                                size={25}
-                                style={{ position: 'absolute', right: 20 }}
-                            />
-                        ) : friendSent.some(sent => sent.sender === item._id) ? (
-                            <IconButton
-                                icon="account-arrow-right"
-                                color="black"
-                                size={25}
-                                style={{ position: 'absolute', right: 20 }}
-                            />
-                        ) : !isFriend(item._id) ? (
+                        {!isFriend(item._id) ? (
                             <IconButton
                                 onPress={() => console.log('Thêm thành viên')}
                                 icon="account-plus"
@@ -138,7 +257,7 @@ const MembersChat = ({ navigation, route }) => {
                             borderRadius: 20,
                             height: '20%'
                         }}>
-                            <TouchableOpacity onPress={() => { console.log('Bổ nhiệm') }} style={{ alignItems: 'center', width: '100%', flexDirection: 'row', alignContent: 'center' }}>
+                            <TouchableOpacity onPress={() => { addAdmin(currentU, route.params.item._id) }} style={{ alignItems: 'center', width: '100%', flexDirection: 'row', alignContent: 'center' }}>
                                 <IconButton icon="account-arrow-up-outline" size={30} />
                                 <Text
                                     style={{
@@ -147,7 +266,7 @@ const MembersChat = ({ navigation, route }) => {
                                     }}
                                 >Bổ nhiệm lên cùng làm trưởng nhóm</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => console.log('Thu hồi')} style={{ alignItems: 'center', width: '100%', flexDirection: 'row' }}>
+                            <TouchableOpacity onPress={() => { retriveAdmin(currentU, route.params.item._id) }} style={{ alignItems: 'center', width: '100%', flexDirection: 'row' }}>
                                 <IconButton icon="account-arrow-down-outline" size={30} />
                                 <Text
                                     style={{
@@ -156,7 +275,7 @@ const MembersChat = ({ navigation, route }) => {
                                     }}
                                 >Thu hồi quyền trưởng nhóm</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => { console.log('Xoá khỏi nhóm') }} style={{ alignItems: 'center', width: '100%', flexDirection: 'row' }}>
+                            <TouchableOpacity onPress={() => { deleteMember(currentU, route.params.item._id) }} style={{ alignItems: 'center', width: '100%', flexDirection: 'row' }}>
                                 <IconButton icon="close-box-outline" size={25} />
                                 <Text
                                     style={{
@@ -177,7 +296,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F3F4F6',
-        alignItems: 'center',width: '100%',
+        alignItems: 'center', width: '100%',
     },
     text: {
         fontSize: 20,

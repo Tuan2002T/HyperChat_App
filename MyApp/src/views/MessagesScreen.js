@@ -1,9 +1,9 @@
 // MessageScreen.js
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, TouchableWithoutFeedback } from 'react-native';
 
-import {useDispatch, useSelector} from 'react-redux';
-import {selectChat, getListChats} from '../redux/chatSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectChat, getListChats } from '../redux/chatSlice';
 import { listChats } from '../api/getListChats';
 import CustomHeader from '../components/CustomHeader';
 import { Searchbar, Menu, Divider } from 'react-native-paper';
@@ -11,34 +11,71 @@ import { socket } from '../socket/socket';
 
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { findChatGroupById } from '../api/chatGroup';
-const MessageScreen = ({navigation}) => {
+const MessageScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const users = useSelector(state => state.user.users); // Access the user list from Redux store
-  
+
   const id = useSelector(state => state.auth.user._id);
   const [list, setList] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [visible, setVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  
+
+  useEffect(() => {
+    socket.on('addAdminChatGroup', (data) => {
+      showMessage({
+        message: 'Người dùng ' + data.roomId + ' đã được bổ nhiệm làm admin nhóm ',
+        type: 'success',
+      });
+    });
+
+    socket.on('deleteAdminChatGroup', (data) => {
+      console.log('data', data.members[0]);
+      showMessage({
+        message: 'Người dùng ' + data.members[0] + ' đã bị thu hồi quyền admin nhóm' + data.roomId,
+        type: 'success',
+      });
+    });
+  }, []);
 
 
   useEffect(() => {
     socket.on('addChatGroupForMember', (data) => {
-        findChatGroupById(data).then(d => {
-          setList(prevList => [...prevList, d]);
-        }
-        
-        );
-        showMessage({
-          message: 'Bạn đã được thêm vào nhóm chat' + data,
-        })
-  });
+      findChatGroupById(data).then(d => {
+        setList(prevList => [...prevList, d]);
+      }
 
+      );
+      showMessage({
+        message: 'Bạn đã được thêm vào nhóm chat' + data,
+      })
+    });
+    socket.on('deleteChatGroupForMember', (roomId) => {
+      setList(prevList => prevList.filter(item => item._id !== roomId));
+      showMessage({
+        message: 'Bạn đã bị xóa khỏi nhóm chat ' + roomId,
+      });
+    });
+    socket.on('outedGroup', (data) => {
+      console.log('data6666666666666666666666666666666666666666666', data);
+      setList(prevList => prevList.filter(item => item._id !== data));
+      showMessage({
+        message: 'Bạn đã rời khỏi nhóm chat ' + data.roomId,
+        type: 'success',
+      });
+    });
+
+    socket.on('deletedGroupForMember', (data) => {
+      setList(prevList => prevList.filter(item => item._id !== data));
+      showMessage({
+        message: 'Nhóm chat ' + data + ' đã bị xóa',
+        type: 'success',
+      });
+    });
   }, []);
 
-  console.log("list",list);
+  // console.log("list", list);
   useEffect(() => {
     socket.on('receiveNotification', (data) => {
       showMessage({
@@ -50,7 +87,7 @@ const MessageScreen = ({navigation}) => {
     if (id) {
       socket.emit('userOnline', id);
       socket.emit('listOnlineUsers');
-  
+
       // Lắng nghe sự kiện 'onlineUsers' từ máy chủ và cập nhật trạng thái của danh sách người dùng trực tuyến
       socket.on('onlineUsers', (users) => {
         setOnlineUsers(users);
@@ -59,9 +96,9 @@ const MessageScreen = ({navigation}) => {
 
   }, []);
 
-  console.log("onlineUsers",onlineUsers);
+  console.log("onlineUsers", onlineUsers);
 
- 
+
   useEffect(() => {
     listChats(id).then(data => {
       dispatch(getListChats(data));
@@ -87,12 +124,12 @@ const MessageScreen = ({navigation}) => {
 
   const handleChatRoomPress = (roomId, item) => {
     // Điều hướng đến màn hình phòng chat với roomId tương ứng
-    console.log('item',item);
+    console.log('item', item);
     if (item.admin) {
-        navigation.navigate('messageChatGroup', { roomId, currentUserId, item });
+      navigation.navigate('messageChatGroup', { roomId, currentUserId, item });
     }
     else {
-    navigation.navigate('NewMessageScreen', { roomId, currentUserId, item });
+      navigation.navigate('NewMessageScreen', { roomId, currentUserId, item });
     }
   };
   const [searchText, setSearchText] = useState('');
@@ -110,7 +147,7 @@ const MessageScreen = ({navigation}) => {
   };
 
   const handleChatPress = (chatId, chatName) => {
-    dispatch(selectChat({id: chatId, name: chatName}));
+    dispatch(selectChat({ id: chatId, name: chatName }));
     // Navigate to ChatScreen
     navigation.navigate('NewMessageScreen');
   };
@@ -135,7 +172,7 @@ const MessageScreen = ({navigation}) => {
   );
 
   return (
-    <View style={{flex: 1, backgroundColor: 'white', width: '100%'}}>
+    <View style={{ flex: 1, backgroundColor: 'white', width: '100%' }}>
       <CustomHeader
         title="Chats"
         leftIcon="menu"
@@ -144,7 +181,7 @@ const MessageScreen = ({navigation}) => {
         rightIconPress={handleEdit}
       />
 
-      <View style={{marginVertical: 10}}>
+      <View style={{ marginVertical: 10 }}>
         <Searchbar
           style={{
             marginHorizontal: '5%',
@@ -164,7 +201,7 @@ const MessageScreen = ({navigation}) => {
         keyExtractor={item => item._id}
       />
       <Menu
-      style={{position: 'absolute', bottom: 0, right: 0, left: 0}}
+        style={{ position: 'absolute', bottom: 0, right: 0, left: 0 }}
         visible={visible}
         onDismiss={() => setVisible(false)}
         anchor={

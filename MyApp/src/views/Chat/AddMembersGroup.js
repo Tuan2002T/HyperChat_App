@@ -12,6 +12,7 @@ import { socket } from '../../socket/socket';
 const AddMembersGroup = ({ navigation, route }) => {
   // console.log(route.params.item.members);
   const a = useSelector(state => state.chat.chat);
+  const [chat, setChat] = useState(a);
   const [existingMembers, setExistingMembers] = useState(useSelector(state => state.chat.chat.members));
   const users = useSelector(state => state.user.users);
   const me = useSelector(state => state.auth.user);
@@ -19,6 +20,16 @@ const AddMembersGroup = ({ navigation, route }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
+
+
+  useEffect(() => {
+    socket.on('addAdminChatGroupForMember', (data) => {
+      setChat(data);
+    })
+    socket.on('deleteAdminChatGroupForMember', (data) => {
+      setChat(data);
+    });
+  }, []);
 
   const toggleItem = (itemId) => {
     if (selectedItems.includes(itemId)) {
@@ -45,9 +56,9 @@ const AddMembersGroup = ({ navigation, route }) => {
   console.log('listFriends', existingMembers);
 
   const addMembers = async (members, chatGroupId, userId, token) => {
-    if (route.params.item.admin.includes(userId)) {
+    if (chat.admin.includes(userId)) {
       await addMembersToChatGroup(members, chatGroupId, userId, token)
-      socket.emit('addMemberChatGroup', { roomId: chatGroupId , members: members });
+      socket.emit('addMemberChatGroup', { roomId: chatGroupId, members: members });
       await findChatGroupById(chatGroupId).then(data => {
         console.log('data', data);
         dispatch(chatGroup(data));
@@ -77,7 +88,7 @@ const AddMembersGroup = ({ navigation, route }) => {
     { title: 'Bạn bè', data: listFriends },
   ];
 
-  
+
 
   return (
     <View style={styles.container}>
@@ -111,7 +122,7 @@ const AddMembersGroup = ({ navigation, route }) => {
         )}
       /> */}
       <SectionList
-        style={{ width: '100%', marginTop:20 }}
+        style={{ width: '100%', marginTop: 20 }}
         sections={sections}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
