@@ -613,12 +613,20 @@ const MessageChatGroup = ({ navigation, route }) => {
     }
   };
   const checkMessage = async (currentMessage) => {
-
     const messageIndex = messages.findIndex(message => message._id === currentMessage._id);
     console.log('messageIndex', messageIndex);
     console.log('Message', messages);
     console.log('messages', messageIndex);
-
+    console.log('currentMessage', currentMessage.user._id);
+    console.log('currentUserId', currentUserId);
+  
+    // Kiểm tra xem người gửi tin nhắn có phải là người dùng hiện tại hay không
+    if (currentMessage.user._id !== currentUserId) {
+      // Hiển thị thông báo khi người dùng cố gắng thu hồi tin nhắn của mình
+      closeModal();
+      return Alert.alert('Thông báo', 'Bạn không thể thu hồi tin nhắn của người khác.');
+    }
+  
     // Kiểm tra xem tin nhắn có tồn tại trong danh sách không
     if (messageIndex !== -1) {
       // Sao chép tin nhắn cần cập nhật
@@ -629,22 +637,27 @@ const MessageChatGroup = ({ navigation, route }) => {
       updatedMessage.image = ''; // Cập nhật hình ảnh
       updatedMessage.video = ''; // Cập nhật video
       updatedMessage.file = ''; // Cập nhật file
-
+  
       // Sao chép danh sách tin nhắn và thay thế tin nhắn cũ bằng tin nhắn mới
       const updatedMessages = [...messages];
       updatedMessages[messageIndex] = updatedMessage;
-      socket.emit('retrieveMessages', { roomId, updatedMessages })
+  
+      // Gửi sự kiện thông báo server về việc cập nhật tin nhắn
+      socket.emit('retrieveMessages', { roomId, updatedMessages });
+  
       // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
       setMessages(updatedMessages);
-      retrieveMessages(currentMessage._id)
-      // Log toàn bộ danh sách tin nhắn đã được cập nhật
-      // console.log('Updated Messages:', updatedMessages);
+  
+      // Gọi hàm retrieveMessages để lấy tin nhắn mới nhất
+      retrieveMessages(currentMessage._id);
+  
+      // Đóng modal sau khi đã xử lý xong
       closeModal();
     } else {
       console.log('Tin nhắn không tồn tại trong danh sách.');
     }
-  }
-
+  };
+  
   const deleteMessage = async (currentMessage) => {
 
     const messageIndex = messages.findIndex(message => message._id === currentMessage._id);

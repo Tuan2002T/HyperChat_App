@@ -73,6 +73,13 @@ const MessageScreen = ({ navigation }) => {
         type: 'success',
       });
     });
+    socket.on('createdGroup', (data) => {
+      setList(prevList => [...prevList, data]);
+      showMessage({
+        message: 'Nhóm chat ' + data.name + ' đã được tạo',
+        type: 'success',
+      });
+    });
   }, []);
 
   // console.log("list", list);

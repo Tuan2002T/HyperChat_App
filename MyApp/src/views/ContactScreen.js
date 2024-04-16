@@ -68,10 +68,35 @@ const ContactScreen = ({navigation}) => {
       console.log(`Received friend request from user ${senderId}`);
       const fr = users.find(user => user._id === senderId);
       // You might want to update your state to reflect the new friend request
+      fetchRequests()
       setRequests([...requests, {...fr, type: 'request'}]);
+      filteredData.filter(item => item._id !== senderId);
     });
   }
   , [socket]);
+
+  useEffect(() => {
+    socket.on('acceptedFriendRequest', (data) => {
+      // Handle accepted friend request here
+      console.log('data', data);
+      console.log(`Accepted friend request from user ${data.senderId}`);
+      const fr = users.find(user => user._id === data);
+      console.log('fr', fr);
+      // You might want to update your state to reflect the new friend request
+      fetchFriends()
+      setFriends([...friends, {...fr, type: 'friend'}]);
+      filteredData.filter(item => item._id !== data);
+    });
+
+
+    socket.on('undedFriend', (data) => {
+      console.log('data', data);
+      const fr = users.find(user => user._id === data);
+      console.log('fr', fr);
+      fetchFriends();
+      setFriends(prevFriends => prevFriends.filter(item => item._id !== data));
+  });
+  }, []);
 
   useEffect(() => {
     fetchRequests();
@@ -120,6 +145,7 @@ const ContactScreen = ({navigation}) => {
       console.log('Accept request:', res);
       fetchFriends();
       fetchRequests();
+      socket.emit('acceptFriendRequest', {senderId: requestId, receiverId: me._id});
     } catch (error) {
       console.error('Error caught:', error);
     }
@@ -133,6 +159,7 @@ const ContactScreen = ({navigation}) => {
 
   const handleRemoveFriend = async friendId => {
     setSelectedId(friendId);
+    socket.emit('unFriend', {senderId: me._id, receiverId: friendId})
     setBtnType('remove');
     showDialog('Remove friend', 'Do you want to remove this friend?');
   };

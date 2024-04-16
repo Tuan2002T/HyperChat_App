@@ -23,21 +23,25 @@ const SubChatScreen = ({navigation}) => {
         type: "success",
       })
     });
+
+    socket.on('undedFriend', (data) => {
+      console.log('data', data);
+          // fetchFriends();
+          setFriends(friends.filter(friend => friend._id !== data));
+    });
   }, []);
-
-  useEffect(() => {
-    const fetchFriends = async () => {
-      try {
-        if (me && me._id && me.token) {
-          const res = await getMyFriends(me._id, me.token);
-          res.sort((a, b) => a.fullname.localeCompare(b.fullname));
-          setFriends(res);
-        }
-      } catch (error) {
-        console.error('Error caught:', error);
+  const fetchFriends = async () => {
+    try {
+      if (me && me._id && me.token) {
+        const res = await getMyFriends(me._id, me.token);
+        res.sort((a, b) => a.fullname.localeCompare(b.fullname));
+        setFriends(res);
       }
-    };
-
+    } catch (error) {
+      console.error('Error caught:', error);
+    }
+  };
+  useEffect(() => {
     fetchFriends();
   }, [me]);
 

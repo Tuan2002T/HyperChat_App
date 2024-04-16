@@ -47,6 +47,7 @@ const NewGroupScreen = ({navigation}) => {
       const newGroup = [me._id, ...selectedFriends.map(friend => friend._id)];
 
       const res = await createGroupChat(name, newGroup);
+      socket.emit('createGroup', {newGroup:res});
       console.log('Create group chat:', res);
 
       navigation.navigate('MainTabNavigator');
