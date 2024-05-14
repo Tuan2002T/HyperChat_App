@@ -21,6 +21,9 @@ const MembersChat = ({ navigation, route }) => {
     const [chat, setChat] = useState(chat1);
     const dispatch = useDispatch();
     useEffect(() => {
+        findChatGroupById(chat1._id).then(data => {
+            dispatch(chatGroup(data));
+        });
         socket.on('addAdminChatGroupForMember', (data) => {
             setChat(data);
         })
@@ -29,7 +32,6 @@ const MembersChat = ({ navigation, route }) => {
         });
         const liss = []
         socket.on('addChatGroupForMemberShow', (data) => {
-            console.log('dataadasdasdasdasdasdr', data);
             members.forEach(member => {
                 const user = users.find(user => user._id === member);
                 liss.push(user);
@@ -39,7 +41,12 @@ const MembersChat = ({ navigation, route }) => {
                 liss.push(us);
             }
             );
-            setListMember(list);
+            setListMember(liss);
+        });
+        socket.on('deleteChatGroupForMemberShow', (data) => {
+            console.log('datadekekekekekekekekek', data);
+            const lisss = listMember.filter(member => member._id !== data[0]);
+            setListMember(lisss);
         });
         
         allFriendRequestSent(id).then(data => setFriendSent(data));
@@ -181,7 +188,7 @@ const MembersChat = ({ navigation, route }) => {
             );
             socket.emit('deleteMemberChatGroup', { roomId: chatGroupId, members: [current._id] });
             await findChatGroupById(chatGroupId).then(data => {
-                console.log('data', data);
+                console.log('dataCấndasdasdasdasdasdasd', data);
                 dispatch(chatGroup(data));
             });
         }

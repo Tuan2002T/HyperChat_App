@@ -7,7 +7,7 @@ import { listChats, createNewChat } from '../api/getListChats';
 import { getListChats } from '../redux/chatSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconButton } from 'react-native-paper';
-import { forwardMessageAPI } from '../api/Message';
+import { forwardMessageAPI, forwardMessageAPIGroup } from '../api/Message';
 import { socket } from '../socket/socket';
 import { showMessage } from 'react-native-flash-message';
 
@@ -49,7 +49,8 @@ const ForwardMessages = ({ navigation, route }) => {
     return extension;
   };
 
-  const handleCreateChat = async friendId => {
+  const handleCreateChat = async (friendId, chat) => {
+    console.log('Chacacscsc',chat);
     try {
       // Gửi tin nhắn
       let messageType = 'text';
@@ -57,7 +58,14 @@ const ForwardMessages = ({ navigation, route }) => {
       let imageContent = '';
       let videoContent = '';
       let fileContent = '';
-      const mes = await forwardMessageAPI(id, friendId, route.params.id);
+      let mes = [];
+      if(chat.admin){
+       mes = await forwardMessageAPIGroup(id, friendId, route.params.id);
+        console.log("Mess", mes);
+      } else {
+         mes = await forwardMessageAPI(id, friendId, route.params.id);
+         console.log("Mess", mes);
+      }
       console.log("Message", mes);
       if (mes.files.length > 0) {
         const fileExtension = getFileExtensionFromUrl(mes.files[0]);
@@ -98,6 +106,64 @@ const ForwardMessages = ({ navigation, route }) => {
     };
 
 
+    const handleCreateChatG = async friendId => {
+    try {
+      // Gửi tin nhắn
+      let messageType = 'text';
+      let messageContent = '';
+      let imageContent = '';
+      let videoContent = '';
+      let fileContent = '';
+      const mes = await forwardMessageAPI(id, friendId, route.params.id);
+      console.log("Message", mes);
+      if (mes.files.length > 0) {
+        const fileExtension = getFileExtensionFromUrl(mes.files[0]);
+        console.log("FileExtension", fileExtension);
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+          messageType = 'image';
+          messageContent = '';
+          imageContent = mes.files[0];
+        } else if (['mp4', 'mov', 'avi'].includes(fileExtension)) {
+          messageType = 'video';
+          messageContent = '';
+          videoContent = mes.files[0];
+        }
+        else {
+          messageType = 'file';
+          messageContent = '';
+          fileContent = mes.files[0];
+        }
+        console.log('friendId', friendId);
+        console.log('mes.text', mes.text);
+        console.log('id', id);
+        console.log('new Date().toISOString()', new Date().toISOString());
+        console.log('imageContent', imageContent);
+        console.log('videoContent', videoContent);
+        console.log('fileContent', fileContent);
+        console.log('mes.id', mes.id);
+      }
+
+        socket.emit('sendMessage', {
+          roomId: friendId,
+          message: mes.text,
+          senderId: id,
+          createdAt : new Date().toISOString(),
+          image: imageContent,
+          video: videoContent,
+          file: fileContent,
+          messageId: mes.id // Truyền ID của tin nhắn
+        });
+        // Cập nhật trạng thái đã gửi cho mục tương ứng
+        setSentMessages(prevState => ({
+          ...prevState,
+          [friendId]: true
+        }));
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    };
+
+
     const renderItem = ({ item }) => (
       <TouchableOpacity>
         <View
@@ -125,7 +191,7 @@ const ForwardMessages = ({ navigation, route }) => {
             }}
             labelStyle={{ color: '#76ABAE', fontWeight: 'bold' }}
             mode="contained"
-            onPress={() => handleCreateChat(item._id)}
+            onPress={() => handleCreateChat(item._id, item)}
             disabled={sentMessages[item._id]} // Disable button if message is already sent
           >
             {sentMessages[item._id] ? 'Đã gửi' : 'Gửi'}

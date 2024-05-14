@@ -126,3 +126,19 @@ export const forwardMessageAPI = async (sender, chatPrivateId, messageId) => {
   }
 }
 
+export const forwardMessageAPIGroup = async (sender, chatGroupId, messageId) => {
+  console.log('sender:', sender);
+  console.log('chatGroupId:', chatGroupId);
+  console.log('messageId:', messageId);
+  try {
+    const res = await axios.post(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.forwardMessages,
+      { sender, chatGroupId, messageId } 
+    );
+    console.log('forwardMessage:', res.data);
+    return res.data;
+  } catch (error) {
+    throw new Error('Error forwarding message');
+  }
+}
+
