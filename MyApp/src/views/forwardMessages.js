@@ -50,23 +50,36 @@ const ForwardMessages = ({ navigation, route }) => {
   };
 
   const handleCreateChat = async (friendId, chat) => {
-    console.log('Chacacscsc',chat);
+    console.log('Chacacscsc', chat);
+    socket.emit('listRooms');
+    socket.on('rooms', (data) => {
+      let found = false;
+      data.forEach(element => {
+        if (element.roomId.includes(friendId) && element.members.includes(id)) {
+          console.log('Có rooms');
+          found = true;
+        }
+      });
+      if (!found) {
+        socket.emit('joinRoom', friendId, chat.members);
+      }
+    });
+  
     try {
-      // Gửi tin nhắn
       let messageType = 'text';
       let messageContent = '';
       let imageContent = '';
       let videoContent = '';
       let fileContent = '';
       let mes = [];
-      if(chat.admin){
-       mes = await forwardMessageAPIGroup(id, friendId, route.params.id);
+      if (chat.admin) {
+        mes = await forwardMessageAPIGroup(id, friendId, route.params.id);
         console.log("Mess", mes);
       } else {
-         mes = await forwardMessageAPI(id, friendId, route.params.id);
-         console.log("Mess", mes);
+        mes = await forwardMessageAPI(id, friendId, route.params.id);
+        console.log("Mess", mes);
       }
-      console.log("Message", mes);
+      console.log("Message", mes.text);
       if (mes.files.length > 0) {
         const fileExtension = getFileExtensionFromUrl(mes.files[0]);
         console.log("FileExtension", fileExtension);
@@ -78,32 +91,33 @@ const ForwardMessages = ({ navigation, route }) => {
           messageType = 'video';
           messageContent = '';
           videoContent = mes.files[0];
-        }
-        else {
+        } else {
           messageType = 'file';
           messageContent = '';
           fileContent = mes.files[0];
         }
-
-        socket.emit('sendMessage', {
-          roomId: friendId,
-          message: mes.text,
-          senderId: id,
-          createdAt : new Date().toISOString(),
-          image: imageContent,
-          video: videoContent,
-          file: fileContent,
-          messageId: mes.id // Truyền ID của tin nhắn
-        });
-        // Cập nhật trạng thái đã gửi cho mục tương ứng
-        setSentMessages(prevState => ({
-          ...prevState,
-          [friendId]: true
-        }));
-      }} catch (error) {
-        console.error('Error sending message:', error);
       }
-    };
+      socket.emit('sendMessage', {
+        roomId: friendId,
+        message: mes.text,
+        senderId: id,
+        createdAt: new Date().toISOString(),
+        image: imageContent,
+        video: videoContent,
+        file: fileContent,
+        messageId: mes.id // Truyền ID của tin nhắn
+      });
+  
+      // Cập nhật trạng thái đã gửi cho mục tương ứng
+      const key = `${friendId}-${mes.id}`;
+      setSentMessages(prevState => ({
+        ...prevState,
+        [friendId]: true
+      }));
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
 
 
     const handleCreateChatG = async friendId => {

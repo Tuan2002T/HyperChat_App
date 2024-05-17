@@ -4,7 +4,7 @@ import { IconButton, TouchableRipple } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { addFriend, allFriendRequestSent, getAllSendFriendRequest, getRequests } from '../../api/allUser';
-import { addAdminToChatGroup, addMembersToChatGroup, deleteAdminToChatGroup, deleteMembersChatGroup, findChatGroupById } from '../../api/chatGroup';
+import { addAdminToChatGroup, addMembersToChatGroup, deleteAdminToChatGroup, deleteMembersChatGroup, findChatGroupById, notificationMessage } from '../../api/chatGroup';
 import { chatGroup } from '../../redux/chatSlice';
 import { socket } from '../../socket/socket';
 import { showMessage } from 'react-native-flash-message';
@@ -104,6 +104,13 @@ const MembersChat = ({ navigation, route }) => {
                 current._id,
                 currentUser.token
             );
+            const us = users.find(user => user._id === current._id);
+            await notificationMessage(chatGroupId, currentUser._id, `${us.fullname} đã được bổ nhiệm làm trưởng nhóm`, currentUser.token);
+            socket.emit('sendNotification', { 
+                roomId: chatGroupId,
+                senderId : id,
+                text: `${us.fullname} đã được bổ nhiệm làm trưởng nhóm`,
+            })
 
             Alert.alert(
                 'Thông báo',
@@ -137,6 +144,14 @@ const MembersChat = ({ navigation, route }) => {
                 current._id,
                 currentUser.token
             );
+
+            const us = users.find(user => user._id === current._id);
+            await notificationMessage(chatGroupId, currentUser._id,  `${us.fullname} đã bị thu hồi quyền trưởng nhóm`, currentUser.token);
+            socket.emit('sendNotification', { 
+                roomId: chatGroupId,
+                senderId : id,
+                text: `${us.fullname} đã bị thu hồi quyền trưởng nhóm`,
+            })
 
             Alert.alert(
                 'Thông báo',
@@ -174,6 +189,13 @@ const MembersChat = ({ navigation, route }) => {
                 currentUser._id,
                 currentUser.token
             );
+            const us = users.find(user => user._id === current._id);
+            await notificationMessage(chatGroupId, currentUser._id, `${us.fullname} đã bị xoá khỏi nhóm`, currentUser.token);
+            socket.emit('sendNotification', { 
+                roomId: chatGroupId,
+                senderId : id,
+                text: `${us.fullname} đã bị xoá khỏi nhóm`,
+            })
 
             Alert.alert(
                 'Thông báo',

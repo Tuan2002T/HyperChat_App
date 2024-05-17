@@ -183,3 +183,29 @@ export const deleteChatGroup = async (chatGroup, userId, token) => {
         return error.response;
     }
 }
+
+export const notificationMessage = async (chatGroupId, userId, notification, token) => {
+    try {
+        console.log("chatGroupId", chatGroupId);
+        console.log("userId", userId);
+        console.log("notification", notification);
+        const response = await axios.post(
+            `${API_CONFIG.baseURL}${API_CONFIG.endpoints.notificationMessage}`,
+            {
+                    chatGroupId,
+                    userId,
+                    notification
+            },
+            {
+                headers: {
+                    Authorization: token,
+                }
+            }
+        );
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error(error.response?.data.error);
+        return error.response;
+    }
+};

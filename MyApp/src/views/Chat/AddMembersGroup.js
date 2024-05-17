@@ -59,6 +59,7 @@ const AddMembersGroup = ({ navigation, route }) => {
     if (chat.admin.includes(userId)) {
       await addMembersToChatGroup(members, chatGroupId, userId, token)
       socket.emit('addMemberChatGroup', { roomId: chatGroupId, members: members });
+      socket.emit('sendNotification', { roomId: chatGroupId, senderId : me._id, text: 'đã thêm 1 thành viên vào nhóm'})
       await findChatGroupById(chatGroupId).then(data => {
         console.log('data', data);
         dispatch(chatGroup(data));

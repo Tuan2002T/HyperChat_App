@@ -214,13 +214,27 @@ const MessageChatGroup = ({ navigation, route }) => {
   };
 
   const convertMessageToGiftedChatMessage = (message) => {
-    const { _id, content, sender, createdAt, views } = message;
+    const { _id, content, sender, createdAt, views, notification } = message;
     let messageType = 'text';
     let messageContent = content.text;
     let imageContent = '';
     let videoContent = '';
     let fileContent = '';
 
+   if(notification === true){
+      const ramdom = Math.floor(Math.random() * 1000000);
+      return {
+        _id,
+        text: messageContent,
+        createdAt: new Date(),
+        system: true,
+        user: {
+          _id: ramdom,
+          avatar: users.find((user) => user._id === sender).avatar,
+        },
+      }
+   }
+   else {
     if (views.includes(currentUserId)) {
       if (content.files.length > 0) {
         const fileExtension = getFileExtensionFromUrl(content.files[0]);
@@ -266,6 +280,7 @@ const MessageChatGroup = ({ navigation, route }) => {
       },
       createdAt: '',
     }
+   }
   };
 
   const systemMessage = {
@@ -329,6 +344,22 @@ const MessageChatGroup = ({ navigation, route }) => {
         };
 
 
+        return GiftedChat.append(previousMessages, [newMessage]);
+      });
+    });
+    socket.on('receiveMessageNotification', (data) => {
+      const {senderId, text} = data;
+      setMessages((previousMessages) => {
+        const newMessage = {
+          _id: senderId,
+          text: text,
+          createdAt: new Date(),
+          system: true,
+          user: {
+            _id: senderId,
+            name: 'Hệ thống',
+          },
+        };
         return GiftedChat.append(previousMessages, [newMessage]);
       });
     });
