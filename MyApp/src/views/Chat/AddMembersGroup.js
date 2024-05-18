@@ -4,7 +4,7 @@ import { Checkbox, IconButton, TouchableRipple } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 import { allUsers, getMyFriends } from '../../api/allUser';
 import { useDispatch } from 'react-redux';
-import { addMembersToChatGroup, findChatGroupById } from '../../api/chatGroup';
+import { addMembersToChatGroup, findChatGroupById, notificationMessage } from '../../api/chatGroup';
 import { listChats } from '../../api/getListChats';
 import { chatGroup, getListChats } from '../../redux/chatSlice';
 import { socket } from '../../socket/socket';
@@ -59,7 +59,17 @@ const AddMembersGroup = ({ navigation, route }) => {
     if (chat.admin.includes(userId)) {
       await addMembersToChatGroup(members, chatGroupId, userId, token)
       socket.emit('addMemberChatGroup', { roomId: chatGroupId, members: members });
-      socket.emit('sendNotification', { roomId: chatGroupId, senderId : me._id, text: 'đã thêm 1 thành viên vào nhóm'})
+      let list = '';
+      members.forEach(member => {
+        const name = users.find(user => user._id === member).fullname;
+           list = list + name + ', ';
+      });
+      await notificationMessage(chatGroupId, me._id, `${list} đã được thêm vào nhóm`, me.token)
+      socket.emit('sendNotification',
+        { roomId: chatGroupId,
+          senderId : me._id,
+          text: list + 'đã được thêm vào nhóm'
+        })
       await findChatGroupById(chatGroupId).then(data => {
         console.log('data', data);
         dispatch(chatGroup(data));

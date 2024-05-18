@@ -67,13 +67,14 @@ const ContactScreen = ({navigation}) => {
       // Handle received friend request here
       console.log(`Received friend request from user ${senderId}`);
       const fr = users.find(user => user._id === senderId);
+      console.log('senderId', fr);
       // You might want to update your state to reflect the new friend request
-      fetchRequests()
+      // fetchRequests()
       setRequests([...requests, {...fr, type: 'request'}]);
-      filteredData.filter(item => item._id !== senderId);
     });
   }
   , [socket]);
+  console.log('requests', requests);
 
   useEffect(() => {
     socket.on('acceptedFriendRequest', (data) => {

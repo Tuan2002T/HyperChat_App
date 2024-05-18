@@ -108,7 +108,7 @@ const MembersChat = ({ navigation, route }) => {
             await notificationMessage(chatGroupId, currentUser._id, `${us.fullname} đã được bổ nhiệm làm trưởng nhóm`, currentUser.token);
             socket.emit('sendNotification', { 
                 roomId: chatGroupId,
-                senderId : id,
+                senderId : id + Math.floor(Math.random() * 1000000),
                 text: `${us.fullname} đã được bổ nhiệm làm trưởng nhóm`,
             })
 

@@ -282,18 +282,7 @@ const MessageChatGroup = ({ navigation, route }) => {
     }
    }
   };
-
-  const systemMessage = {
-    _id: 'system-message-id',
-    text: 'Đây là thông báo hệ thống',
-    createdAt: new Date(),
-    system: true,
-    user: {
-      _id: 'system',
-      name: 'Hệ thống',
-    },
-  };
-
+  
   useEffect(() => {
     socket.on('notification', (data) => {
       console.log('data', data);
@@ -351,12 +340,12 @@ const MessageChatGroup = ({ navigation, route }) => {
       const {senderId, text} = data;
       setMessages((previousMessages) => {
         const newMessage = {
-          _id: senderId,
+          _id: Math.floor(Math.random() * 1000000),
           text: text,
           createdAt: new Date(),
           system: true,
           user: {
-            _id: senderId,
+            _id: Math.floor(Math.random() * 1000000),
             name: 'Hệ thống',
           },
         };
