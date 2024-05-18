@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, Pressable} from 'react-native';
 import i18n from '../i18n/i18n';
 import {useDispatch} from 'react-redux';
@@ -17,8 +17,22 @@ const LoginScreen = () => {
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
-  const [username, setUsername] = useState('noname001');
-  const [password, setPassword] = useState('Tuan@123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    const setData = async () => {
+      try {
+        const userInfo = await AsyncStorage.getItem('@user');
+        setUsername(JSON.parse(userInfo));
+        const passwordInfo = await AsyncStorage.getItem('@password');
+        setPassword(JSON.parse(passwordInfo));
+      } catch (error) {
+        console.error('Error loading language:', error);
+      }
+    };
+    setData();
+  }, []);
 
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {
