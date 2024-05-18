@@ -1,6 +1,6 @@
-const SERVER_IP = '192.168.2.41';
-// const SERVER_IP = '192.168.2.40';
-// const SERVER_IP = '172.28.77.93';
+// const SERVER_IP = '192.168.2.41';
+const SERVER_IP = '192.168.2.15';
+// const SERVER_IP = '172.28.117.195';
 // const SERVER_IP = '192.168.56.235';
 const SERVER_PORT = '5000';
 const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}/api/`;

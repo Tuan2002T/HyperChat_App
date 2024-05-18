@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, Pressable} from 'react-native';
 import i18n from '../i18n/i18n';
 import {useDispatch} from 'react-redux';
@@ -13,25 +13,29 @@ import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 import {allUsers} from '../api/allUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage, hideMessage} from 'react-native-flash-message';
+import {use} from 'i18next';
 // import FlashMessage from "react-native-flash-message";
 
 const LoginScreen = () => {
-  // const isLogin = true in asyncStorage
-
-  const handleNotify = () => {
-    setUsername('noname008');
-    setPassword('@Noname008');
-    showMessage({
-      message: 'Login success',
-      type: 'success',
-    });
-  };
-
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
-  const [username, setUsername] = useState('vkmt');
-  const [password, setPassword] = useState('Hien@123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    const setData = async () => {
+      try {
+        const userInfo = await AsyncStorage.getItem('@user');
+        setUsername(JSON.parse(userInfo));
+        const passwordInfo = await AsyncStorage.getItem('@password');
+        setPassword(JSON.parse(passwordInfo));
+      } catch (error) {
+        console.error('Error loading language:', error);
+      }
+    };
+    setData();
+  }, []);
 
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {

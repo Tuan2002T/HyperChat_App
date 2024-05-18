@@ -138,7 +138,6 @@ const ContactScreen = ({navigation}) => {
   const handleInviteFriend = async friendId => {
     console.log('Invite friend:', friendId);
     try {
-      // Gửi lời mời kết bạn và cập nhật state nếu cần
       socket.emit('sendFriendRequest', {
         senderId: me._id,
         receiverId: friendId,
@@ -146,7 +145,11 @@ const ContactScreen = ({navigation}) => {
       const res = await addFriend(me._id, friendId);
       console.log('Invite friend:', res);
     } catch (error) {
-      console.error('Error caught:', error);
+      showMessage({
+        message: 'Kết bạn thất bại!',
+        description: 'Đã gửi lời mời kết bạn',
+        type: 'warning',
+      });
     }
   };
 
