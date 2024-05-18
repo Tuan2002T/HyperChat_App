@@ -83,7 +83,6 @@ const ContactScreen = ({navigation}) => {
       console.log(`Accepted friend request from user ${data.senderId}`);
       const fr = users.find(user => user._id === data);
       console.log('fr', fr);
-      // You might want to update your state to reflect the new friend request
       fetchFriends()
       setFriends([...friends, {...fr, type: 'friend'}]);
       filteredData.filter(item => item._id !== data);

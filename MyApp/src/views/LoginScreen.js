@@ -12,21 +12,8 @@ import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 import {allUsers} from '../api/allUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {showMessage, hideMessage} from 'react-native-flash-message';
-// import FlashMessage from "react-native-flash-message";
 
 const LoginScreen = () => {
-  // const isLogin = true in asyncStorage
-
-  const handleNotify = () => {
-    setUsername('noname001');
-    setPassword('Tuan@123');
-    showMessage({
-      message: 'Login success',
-      type: 'success',
-    });
-  };
-
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
@@ -63,7 +50,7 @@ const LoginScreen = () => {
 
       setTimeout(() => {
         handleGotoChat();
-      }, 1000);
+      }, 300);
     } catch (error) {
       showDialog('Login Fail', 'Account information or password not correct.');
     }
