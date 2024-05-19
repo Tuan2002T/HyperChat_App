@@ -139,18 +139,29 @@ const allFriendRequestSent = async userId => {
   }
 };
 
-const  getAllSendFriendRequest = async userId => {
+const getAllSendFriendRequest = async userId => {
   try {
     const res = await axios.get(
       `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getRequests}/${userId}`,
     );
     return res.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Error caught:', error);
     throw error.response ? error.response.data.message : error.message;
   }
-}
+};
+
+const getUserById = async userId => {
+  try {
+    const res = await axios.get(
+      `${API_CONFIG.baseURL}${API_CONFIG.endpoints.getUser}/${userId}`,
+    );
+    return res.data;
+  } catch (error) {
+    console.error('Error caught:', error);
+    throw error.response ? error.response.data.message : error.message;
+  }
+};
 
 export {
   allUsers,
@@ -161,5 +172,6 @@ export {
   unFriend,
   addFriend,
   allFriendRequestSent,
-  getAllSendFriendRequest
+  getAllSendFriendRequest,
+  getUserById
 };

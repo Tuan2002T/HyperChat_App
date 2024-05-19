@@ -8,9 +8,10 @@ import Header from '../components/Header';
 import CustomTextInput from '../components/CustomTextInput';
 import {loginUser} from '../api/loginUser'; // Import loginUser function
 import {loginUserSuccess} from '../redux/authSlice';
+import {setMe, setFriends, setFriendRequests} from '../redux/socialSlice';
 import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
-import {allUsers} from '../api/allUser';
+import {allUsers, getRequests, getMyFriends} from '../api/allUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = () => {
@@ -49,6 +50,8 @@ const LoginScreen = () => {
     try {
       const res = await loginUser(username, password);
       dispatch(loginUserSuccess(res));
+      dispatch(setMe(res));
+
       try {
         await AsyncStorage.setItem('isLogin', 'true');
         await AsyncStorage.setItem('@user', JSON.stringify(username));
@@ -56,6 +59,12 @@ const LoginScreen = () => {
       } catch (e) {
         console.error(e);
       }
+
+      const requests = await getRequests(res._id);
+      dispatch(setFriendRequests(requests));
+
+      const friends = await getMyFriends(res._id, res.token);
+      dispatch(setFriends(friends));
 
       setIndicator(true);
 
@@ -107,7 +116,6 @@ const LoginScreen = () => {
     setDialogMessage({title, message});
   };
   const hideConfirmDialog = () => setConfirmVisible(false);
-
   const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
 
   return (

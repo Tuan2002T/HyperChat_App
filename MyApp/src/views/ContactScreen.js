@@ -1,54 +1,104 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Image, SectionList} from 'react-native';
+import {View, Text, StyleSheet, Image, FlatList} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Button, Searchbar} from 'react-native-paper';
+import {Button, Searchbar, SegmentedButtons} from 'react-native-paper';
 import CustomHeader from '../components/CustomHeader';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 import {
-  getRequests,
-  getMyFriends,
   acceptRequest,
   denyRequest,
   unFriend,
   addFriend,
+  getRequests,
+  getMyFriends,
 } from '../api/allUser';
 import {showMessage} from 'react-native-flash-message';
 import {socket} from '../socket/socket';
+import SearchModal from '../components/custom/SearchModal';
+import {setFriends, setFriendRequests} from '../redux/socialSlice';
 
 const ContactScreen = ({navigation}) => {
-  const users = useSelector(state => state.user.users);
-  const me = useSelector(state => state.auth.user);
-  const [requests, setRequests] = useState([]);
-  const [friends, setFriends] = useState([]);
+  const me = useSelector(state => state.social.me);
+  const friends = useSelector(state => state.social.friends);
+  const requests = useSelector(state => state.social.friendRequests);
+
+  console.log('Me:', me);
+  console.log('Friends:', friends);
+  console.log('Requests:', requests);
+
+  const dispatch = useDispatch();
+  const [value, setValue] = React.useState('');
+
+  useEffect(() => {
+    socket.on('acceptedFriendRequest', async data => {
+      setTimeout(async () => {
+        try {
+          const fRes = await getMyFriends(me._id, me.token);
+          dispatch(setFriends(fRes));
+        } catch (error) {
+          console.error('Error fetching friend requests:', error);
+        }
+      }, 1000);
+      showMessage({
+        message: data,
+        description: 'This is our second message',
+        type: 'success',
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    socket.on('undedFriend', async data => {
+      setTimeout(async () => {
+        try {
+          const fRes = await getMyFriends(me._id, me.token);
+          dispatch(setFriends(fRes));
+        } catch (error) {
+          console.error('Error fetching friend requests:', error);
+        }
+      }, 1000);
+
+    });
+  }, []);
+
+  useEffect(() => {
+    socket.on('receiveFriendRequest', async data => {
+      console.log('Me:', me._id);
+      console.log('Receive friend request:', data);
+
+      setTimeout(async () => {
+        try {
+          const res = await getRequests(me._id);
+          console.log('Friend requests:', res);
+          dispatch(setFriendRequests(res));
+        } catch (error) {
+          console.error('Error fetching friend requests:', error);
+          // Xử lý lỗi ở đây nếu cần thiết
+        }
+      }, 1000);
+
+      showMessage({
+        message: data,
+        description: 'This is our second message',
+        type: 'success',
+      });
+    });
+  }, []);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const handleRightIconPress = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
   const [btnType, setBtnType] = useState('');
-
-  const fetchFriends = async () => {
-    try {
-      const res = await getMyFriends(me._id, me.token);
-      res.sort((a, b) => a.fullname.localeCompare(b.fullname));
-      const friendsWithType = res.map(friend => ({
-        ...friend,
-        type: 'friend',
-      }));
-      setFriends(friendsWithType);
-    } catch (error) {
-      console.error('Error caught:', error);
-    }
-  };
-
-  const fetchRequests = async () => {
-    try {
-      let res = await getRequests(me._id);
-      res = res.map(request => ({...request, type: 'request'}));
-      setRequests(res);
-    } catch (error) {
-      console.error('Error caught:', error);
-    }
-  };
 
   useEffect(() => {
     socket.on('receiveNotification', data => {
@@ -58,49 +108,6 @@ const ContactScreen = ({navigation}) => {
         type: 'success',
       });
     });
-    
-
-  }, []);
-
-  useEffect(() => {
-    socket.on('receiveFriendRequest', senderId => {
-      // Handle received friend request here
-      console.log(`Received friend request from user ${senderId}`);
-      const fr = users.find(user => user._id === senderId);
-      console.log('senderId', fr);
-      // You might want to update your state to reflect the new friend request
-      // fetchRequests()
-      setRequests([...requests, {...fr, type: 'request'}]);
-    });
-  }
-  , [socket]);
-  console.log('requests', requests);
-
-  useEffect(() => {
-    socket.on('acceptedFriendRequest', (data) => {
-      // Handle accepted friend request here
-      console.log('data', data);
-      console.log(`Accepted friend request from user ${data.senderId}`);
-      const fr = users.find(user => user._id === data);
-      console.log('fr', fr);
-      fetchFriends()
-      setFriends([...friends, {...fr, type: 'friend'}]);
-      filteredData.filter(item => item._id !== data);
-    });
-
-
-    socket.on('undedFriend', (data) => {
-      console.log('data', data);
-      const fr = users.find(user => user._id === data);
-      console.log('fr', fr);
-      fetchFriends();
-      setFriends(prevFriends => prevFriends.filter(item => item._id !== data));
-  });
-  }, []);
-
-  useEffect(() => {
-    fetchRequests();
-    fetchFriends();
   }, []);
 
   const handleNext = async () => {
@@ -108,24 +115,28 @@ const ContactScreen = ({navigation}) => {
     if (btnType === 'deny') {
       try {
         const res = await denyRequest(selectedId, me._id);
-        const updatedRequests = requests.filter(
-          request => request._id !== selectedId,
-        );
-        setRequests(updatedRequests);
+        const fRRes = await getRequests(me._id);
+        dispatch(setFriendRequests(fRRes));
       } catch (error) {
         console.error('Error caught:', error);
       }
     }
     if (btnType === 'remove') {
+      socket.emit('unFriend', {senderId: me._id, receiverId: selectedId});
+
       try {
         const res = await unFriend(selectedId, me._id);
-        const updatedFriends = friends.filter(
-          friend => friend._id !== selectedId,
-        );
-        setFriends(updatedFriends);
       } catch (error) {
         console.error('Error caught:', error);
       }
+      setTimeout(async () => {
+        try {
+          const fRes = await getMyFriends(me._id, me.token);
+          dispatch(setFriends(fRes));
+        } catch (error) {
+          console.error('Error fetching friend requests:', error);
+        }
+      }, 1000);
     }
   };
 
@@ -142,10 +153,17 @@ const ContactScreen = ({navigation}) => {
     console.log('Accept request:', requestId);
     try {
       const res = await acceptRequest(requestId, me._id);
+      const fRRes = await getRequests(me._id);
+      const fRes = await getMyFriends(me._id, me.token);
+
+      dispatch(setFriendRequests(fRRes));
+      dispatch(setFriends(fRes));
+
       console.log('Accept request:', res);
-      fetchFriends();
-      fetchRequests();
-      socket.emit('acceptFriendRequest', {senderId: requestId, receiverId: me._id});
+      socket.emit('acceptFriendRequest', {
+        senderId: requestId,
+        receiverId: me._id,
+      });
     } catch (error) {
       console.error('Error caught:', error);
     }
@@ -159,48 +177,9 @@ const ContactScreen = ({navigation}) => {
 
   const handleRemoveFriend = async friendId => {
     setSelectedId(friendId);
-    socket.emit('unFriend', {senderId: me._id, receiverId: friendId})
     setBtnType('remove');
     showDialog('Remove friend', 'Do you want to remove this friend?');
   };
-
-  const handleInviteFriend = async friendId => {
-    console.log('Invite friend:', friendId);
-    try {
-      socket.emit('sendFriendRequest', {
-        senderId: me._id,
-        receiverId: friendId,
-      });
-      const res = await addFriend(me._id, friendId);
-      console.log('Invite friend:', res);
-    } catch (error) {
-      showMessage({
-        message: 'Kết bạn thất bại!',
-        description: 'Đã gửi lời mời kết bạn',
-        type: 'warning',
-      });
-    }
-  };
-
-  const filteredData = [...requests, ...friends, ...users].filter(item => {
-    const isAlreadyRequested = requests.some(
-      request => request._id === item._id,
-    );
-    const isFriend = friends.some(friend => friend._id === item._id);
-    return (
-      item._id !== me._id &&
-      !isAlreadyRequested &&
-      !isFriend &&
-      (item.fullname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.userName.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  });
-
-  const sections = [
-    {title: 'Requests', data: requests},
-    {title: 'Friends', data: friends},
-    {title: 'Suggest', data: filteredData},
-  ];
 
   const handleMenu = () => {
     navigation.navigate('SettingScreen');
@@ -214,7 +193,14 @@ const ContactScreen = ({navigation}) => {
         leftIcon="menu"
         leftIconPress={handleMenu}
         rightIcon="plus"
+        rightIconPress={handleRightIconPress}
       />
+      <SearchModal
+        visible={modalVisible}
+        title="Add new friend"
+        hideDialog={handleCloseModal}
+      />
+
       <CustomConfirmDialog
         visible={confirmVisible}
         title={dialogMessage.title}
@@ -230,51 +216,63 @@ const ContactScreen = ({navigation}) => {
           value={searchQuery}
         />
       </View>
-      <SectionList
-        sections={sections}
-        keyExtractor={(item, index) => index.toString()}
+      <View style={{paddingHorizontal: '5%'}}>
+        <SegmentedButtons
+          value={value}
+          onValueChange={setValue}
+          buttons={[
+            {
+              value: 'friends',
+              label: 'Friends',
+            },
+            {
+              value: 'requests',
+              label: 'Requests',
+            },
+            // {value: 'pending', label: 'Pending'},
+          ]}
+        />
+      </View>
+
+      <FlatList
+        data={value === 'requests' ? requests : friends}
+        keyExtractor={item => item._id.toString()}
         renderItem={({item}) => (
           <View style={styles.userContainer}>
             <Image source={{uri: item.avatar}} style={styles.avatar} />
-            <Text style={styles.fullname}>{item.fullname}</Text>
-            {item.type === 'request' ? (
-              <View style={styles.buttonContainer}>
+            <View style={{flexDirection: 'column'}}>
+              <Text style={styles.fullname}>{item.fullname}</Text>
+            </View>
+
+            <View style={styles.buttonContainer}>
+              {value === 'requests' ? (
+                <>
+                  <Button
+                    style={styles.acceptButton}
+                    labelStyle={styles.acceptButtonText}
+                    mode="contained"
+                    onPress={() => handleAcceptRequest(item._id)}>
+                    Accept
+                  </Button>
+                  <Button
+                    style={styles.denyButton}
+                    labelStyle={styles.denyButtonText}
+                    mode="contained"
+                    onPress={() => handleDenyRequest(item._id)}>
+                    Deny
+                  </Button>
+                </>
+              ) : (
                 <Button
-                  style={styles.acceptButton}
-                  labelStyle={styles.acceptButtonText}
+                  style={styles.unfriendButton}
+                  labelStyle={styles.unfriendButtonText}
                   mode="contained"
-                  onPress={() => handleAcceptRequest(item._id)}>
-                  Accept
+                  onPress={() => handleRemoveFriend(item._id)}>
+                  Unfriend
                 </Button>
-                <Button
-                  style={styles.denyButton}
-                  labelStyle={styles.denyButtonText}
-                  mode="contained"
-                  onPress={() => handleDenyRequest(item._id)}>
-                  Deny
-                </Button>
-              </View>
-            ) : item.type === 'friend' ? (
-              <Button
-                style={styles.unfriendButton}
-                labelStyle={styles.unfriendButtonText}
-                mode="contained"
-                onPress={() => handleRemoveFriend(item._id)}>
-                Unfriend
-              </Button>
-            ) : (
-              <Button
-                style={styles.inviteButton}
-                labelStyle={styles.inviteButtonText}
-                mode="contained"
-                onPress={() => handleInviteFriend(item._id)}>
-                Invite
-              </Button>
-            )}
+              )}
+            </View>
           </View>
-        )}
-        renderSectionHeader={({section: {title}}) => (
-          <Text style={styles.sectionHeader}>{title}</Text>
         )}
       />
     </View>

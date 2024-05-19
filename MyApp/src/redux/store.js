@@ -4,9 +4,8 @@ import languageReducer from './languageSlice';
 import authReducer from './authSlice';
 import screenReducer from './screenSlice';
 import chatReducer from './chatSlice';
-
 import userReducer from './userSlice';
-
+import socialSlice from './socialSlice';
 
 const store = configureStore({
   reducer: {
@@ -17,6 +16,7 @@ const store = configureStore({
     screen: screenReducer,
 
     chat: chatReducer,
+    social: socialSlice,
 
   },
 });
