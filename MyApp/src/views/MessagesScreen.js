@@ -17,6 +17,7 @@ const MessageScreen = ({ navigation }) => {
   const users = useSelector(state => state.user.users); // Access the user list from Redux store
 
   const id = useSelector(state => state.auth.user._id);
+  const chat = useSelector(state => state.chat.chat);
   const [list, setList] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [visible, setVisible] = useState(false);
@@ -71,12 +72,12 @@ const MessageScreen = ({ navigation }) => {
     socket.on('addChatGroupForMember', (data) => {
       findChatGroupById(data).then(d => {
         setList(prevList => [...prevList, d]);
+        showMessage({
+          message: 'Bạn đã được thêm vào nhóm chat' + d.name,
+          type: 'success',
+        })
       }
-
       );
-      showMessage({
-        message: 'Bạn đã được thêm vào nhóm chat' + data,
-      })
     });
     socket.on('deleteChatGroupForMember', (roomId) => {
       setList(prevList => prevList.filter(item => item._id !== roomId));
@@ -85,12 +86,14 @@ const MessageScreen = ({ navigation }) => {
       });
     });
     socket.on('outedGroup', (data) => {
-      console.log('data6666666666666666666666666666666666666666666', data);
       setList(prevList => prevList.filter(item => item._id !== data));
-      showMessage({
-        message: 'Bạn đã rời khỏi nhóm chat ' + data.roomId,
-        type: 'success',
-      });
+      findChatGroupById(data).then(d => {
+        showMessage({
+          message: 'Bạn đã rời khỏi nhóm chat ' + d.name,
+          type: 'success',
+        })
+      }
+      );
     });
 
     socket.on('deletedGroupForMember', (data) => {

@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteChatGroup, findChatGroupById, outChatGroup } from '../api/chatGroup';
+import { deleteChatGroup, findChatGroupById, notificationMessage, outChatGroup } from '../api/chatGroup';
 import { chatGroup, getListChats } from '../redux/chatSlice';
 import { socket } from '../socket/socket';
 import { listChats } from '../api/getListChats';
 
 const ChatInformation = ({ navigation, route }) => {
     const users = useSelector(state => state.user.users); // Access the user list from Redux store
+    const user = useSelector(state => state.auth.user);
     const id = useSelector(state => state.auth.user._id);
     const a = useSelector(state => state.chat.chat);
     const [chat, setChat] = useState(a);
@@ -23,8 +24,8 @@ const ChatInformation = ({ navigation, route }) => {
     const outChat = async (chatGroupId, userId, token) => {
         // Hiển thị hộp thoại xác nhận
         findChatGroupById(chatGroupId).then(data => {
-            if(data.admin.length <= 1 && data.admin.includes(userId)){
-               return Alert.alert('Bạn phải bổ nhiệm admin trước khi rời nhóm');
+            if (data.admin.length <= 1 && data.admin.includes(userId)) {
+                return Alert.alert('Bạn phải bổ nhiệm admin trước khi rời nhóm');
             }
         });
         // if(chat.admin.length <= 1 && chat.admin.includes(userId)){
@@ -45,6 +46,13 @@ const ChatInformation = ({ navigation, route }) => {
                     onPress: async () => {
                         // Nếu người dùng chọn "Có", thực hiện hành động rời nhóm chat
                         await outChatGroup(chatGroupId, userId, token);
+                        await notificationMessage(chatGroupId, userId, `${user.fullname} đã rời nhóm`, user.token);
+                        socket.emit('sendNotification',
+                            {
+                                roomId: chatGroupId,
+                                senderId: user._id,
+                                text: user.fullname + 'đã rời nhóm'
+                            })
                         socket.emit('outGroup', { roomId: chatGroupId, currentId: userId });
                         await listChats(userId, token).then((data) => {
                             dispatch(getListChats(data));
@@ -55,7 +63,7 @@ const ChatInformation = ({ navigation, route }) => {
             ],
             { cancelable: true }
         );
-    // }
+        // }
     };
 
 

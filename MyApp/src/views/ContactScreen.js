@@ -101,13 +101,13 @@ const ContactScreen = ({navigation}) => {
   const [btnType, setBtnType] = useState('');
 
   useEffect(() => {
-    socket.on('receiveNotification', data => {
-      showMessage({
-        message: data,
-        description: 'This is our second message',
-        type: 'success',
-      });
-    });
+    // socket.on('receiveNotification', data => {
+    //   showMessage({
+    //     message: data,
+    //     description: 'This is our second message',
+    //     type: 'success',
+    //   });
+    // });
   }, []);
 
   const handleNext = async () => {
