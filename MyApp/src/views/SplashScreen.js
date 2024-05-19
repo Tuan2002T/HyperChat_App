@@ -9,9 +9,10 @@ import LanguageSelector from '../components/LanguageSelector ';
 import AnimatedCircle from '../components/animated/AnimatedCircle';
 import styles from '../css/Styles';
 import {Button} from 'react-native-paper';
-import {allUsers} from '../api/allUser';
+import {allUsers, getRequests, getMyFriends} from '../api/allUser';
 import {loginUser} from '../api/loginUser';
 import {loginUserSuccess} from '../redux/authSlice';
+import {setMe, setFriends, setFriendRequests} from '../redux/socialSlice';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -62,6 +63,13 @@ const SplashScreen = () => {
     try {
       const res = await loginUser(user, password);
       dispatch(loginUserSuccess(res));
+      dispatch(setMe(res));
+
+      const requests = await getRequests(res._id);
+      dispatch(setFriendRequests(requests));
+
+      const friends = await getMyFriends(res._id, res.token);
+      dispatch(setFriends(friends));
 
       handleGotoChat();
     } catch (error) {

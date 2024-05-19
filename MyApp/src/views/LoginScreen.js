@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, Pressable} from 'react-native';
 import i18n from '../i18n/i18n';
 import {useDispatch} from 'react-redux';
@@ -8,30 +8,32 @@ import Header from '../components/Header';
 import CustomTextInput from '../components/CustomTextInput';
 import {loginUser} from '../api/loginUser'; // Import loginUser function
 import {loginUserSuccess} from '../redux/authSlice';
+import {setMe, setFriends, setFriendRequests} from '../redux/socialSlice';
 import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
-import {allUsers} from '../api/allUser';
+import {allUsers, getRequests, getMyFriends} from '../api/allUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {showMessage, hideMessage} from 'react-native-flash-message';
-// import FlashMessage from "react-native-flash-message";
 
 const LoginScreen = () => {
-  // const isLogin = true in asyncStorage
-
-  const handleNotify = () => {
-    setUsername('noname001');
-    setPassword('Tuan@123');
-    showMessage({
-      message: 'Login success',
-      type: 'success',
-    });
-  };
-
   const dispatch = useDispatch();
   const [indicator, setIndicator] = useState(false);
 
-  const [username, setUsername] = useState('noname001');
-  const [password, setPassword] = useState('Tuan@123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    const setData = async () => {
+      try {
+        const userInfo = await AsyncStorage.getItem('@user');
+        setUsername(JSON.parse(userInfo));
+        const passwordInfo = await AsyncStorage.getItem('@password');
+        setPassword(JSON.parse(passwordInfo));
+      } catch (error) {
+        console.error('Error loading language:', error);
+      }
+    };
+    setData();
+  }, []);
 
   const [showPassword, setShowPassword] = useState(true);
   const handleShowPassword = () => {
@@ -48,6 +50,8 @@ const LoginScreen = () => {
     try {
       const res = await loginUser(username, password);
       dispatch(loginUserSuccess(res));
+      dispatch(setMe(res));
+
       try {
         await AsyncStorage.setItem('isLogin', 'true');
         await AsyncStorage.setItem('@user', JSON.stringify(username));
@@ -56,6 +60,12 @@ const LoginScreen = () => {
         console.error(e);
       }
 
+      const requests = await getRequests(res._id);
+      dispatch(setFriendRequests(requests));
+
+      const friends = await getMyFriends(res._id, res.token);
+      dispatch(setFriends(friends));
+
       setIndicator(true);
 
       const isLogin = await AsyncStorage.getItem('isLogin');
@@ -63,7 +73,7 @@ const LoginScreen = () => {
 
       setTimeout(() => {
         handleGotoChat();
-      }, 1000);
+      }, 300);
     } catch (error) {
       showDialog('Login Fail', 'Account information or password not correct.');
     }
@@ -106,7 +116,6 @@ const LoginScreen = () => {
     setDialogMessage({title, message});
   };
   const hideConfirmDialog = () => setConfirmVisible(false);
-
   const [dialogMessage, setDialogMessage] = useState({title: '', message: ''});
 
   return (
