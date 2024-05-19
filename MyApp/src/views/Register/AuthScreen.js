@@ -3,28 +3,20 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {View, Text, TextInput, Pressable, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SvgIcons from '../assets/SvgIcons';
-import i18n from '../i18n/i18n';
+import i18n from '../../i18n/i18n';
 import axios from 'axios';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 import {Button} from 'react-native-paper';
-import {changeScreen} from '../redux/screenSlice';
-import {useDispatch} from 'react-redux';
-import API_CONFIG from '../api/apiConfig';
+import API_CONFIG from '../../api/apiConfig';
 
 const AuthScreen = ({navigation, route}) => {
-  const dispatch = useDispatch();
 
-  console.log(route.params);
+  const [email, setEmail] = useState(route.params.params);
+  const [phone, setPhone] = useState(route.params.params2);
 
-  const [email, setEmail] = useState('');
 
   const [otp, setOTP] = useState('');
-  AsyncStorage.getItem('email').then(email => {
-    if (email) {
-      setEmail(email);
-    }
-  });
+
 
   const [timer, setTimer] = useState(10);
   const [canResend, setCanResend] = useState(false);
@@ -54,28 +46,22 @@ const AuthScreen = ({navigation, route}) => {
 
   // handle continue
   const handleContinue = async () => {
-    console.log(otp);
-
-    const x = route.params.email;
-    console.log('xx', x);
-    console.log('otp', otp);
-    console.log('API_CONFIG', API_CONFIG.baseURL + API_CONFIG.endpoints.verify);
+    console.log('Continue:', email, otp);
     try {
       const response = await axios.post(
         API_CONFIG.baseURL + API_CONFIG.endpoints.verify,
         {
-          email: x,
+          email: email,
           userOTP: otp,
         },
       );
       console.log('REGISTER:', response);
-      dispatch(changeScreen('Login'));
+      navigation.navigate('Register', {email, phone});
       return response;
     } catch (error) {
       console.error(error.response?.data.error);
     }
 
-    dispatch(changeScreen('Login'));
   };
 
   handleBack = () => {
@@ -106,7 +92,7 @@ const AuthScreen = ({navigation, route}) => {
             color: 'black',
             marginTop: 5,
           }}>
-          ({route.params.email})
+          ({email})
         </Text>
       </View>
 
