@@ -114,7 +114,8 @@ const MessageScreen = ({ navigation }) => {
   // console.log("list", list);
   useEffect(() => {
     socket.on('receiveNotification', (data) => {
-      const {senderId, roomId} = data;
+      const {senderId, roomId, createdAt} = data;
+      // handleNewMessage(roomId, createdAt);
       const notification = 'Bạn có tin nhắn mới từ '+ users.find((user) => user._id === senderId).fullname;
       listChats(id).then(data => {
         data.forEach((item) => {
@@ -128,6 +129,10 @@ const MessageScreen = ({ navigation }) => {
         });
       });
     });
+    socket.on('sortChat', (data) => {
+      const {senderId, roomId, createdAt} = data;
+      handleNewMessage(roomId, createdAt);
+    })
     if (id) {
       socket.emit('userOnline', id);
       socket.emit('listOnlineUsers');
@@ -211,9 +216,25 @@ const MessageScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  const filteredChats = chats.filter(chat =>
+  const filteredChats = list.filter(chat =>
     chat.name.toLowerCase().includes(searchText.toLowerCase()),
   );
+
+  const sortedFilteredChats = filteredChats.sort((a, b) => {
+    return new Date(b.updatedAt) - new Date(a.updatedAt);
+  });
+
+  const handleNewMessage = (roomId, createdAt) => {  
+    listChats(id).then(data => {
+      data.forEach((item, index) => {
+        if (item._id === roomId) {
+          data[index].updatedAt = createdAt  
+          console.log('data', data[index].updatedAt, 'createdAt', createdAt);
+        }
+      });
+      setList(data);
+    });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white', width: '100%' }}>
@@ -240,7 +261,7 @@ const MessageScreen = ({ navigation }) => {
       </View>
 
       <FlatList
-        data={list}
+        data={sortedFilteredChats}
         renderItem={renderItem}
         keyExtractor={item => item._id}
       />
