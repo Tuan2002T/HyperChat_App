@@ -37,6 +37,15 @@ const ChatInformation = ({navigation, route}) => {
 
     const outChat = async (chatGroupId, userId, token) => {
         // Hiển thị hộp thoại xác nhận
+        findChatGroupById(chatGroupId).then(data => {
+            if(data.admin.length <= 1 && data.admin.includes(userId)){
+               return Alert.alert('Bạn phải bổ nhiệm admin trước khi rời nhóm');
+            }
+        });
+        // if(chat.admin.length <= 1 && chat.admin.includes(userId)){
+        //     Alert.alert('Bạn phải bổ nhiệm admin trước khi rời nhóm');
+        // }
+        // else{
         Alert.alert(
             'Xác nhận',
             'Bạn có chắc chắn muốn rời nhóm chat không?',
@@ -61,6 +70,7 @@ const ChatInformation = ({navigation, route}) => {
             ],
             { cancelable: true }
         );
+    // }
     };
 
 
