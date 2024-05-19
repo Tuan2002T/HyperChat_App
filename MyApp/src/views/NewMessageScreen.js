@@ -634,7 +634,7 @@ const NewMessageScreen = ({ navigation, route }) => {
   // ---------------------------
   return (
     <View style={{ flex: 1, width: '100%' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', height: '7%', width: '100%', backgroundColor: '#149AFD', justifyContent: 'space-between' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', height: 70, width: '100%', backgroundColor: '#76ABAE', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', width: '50%' }}>
           <IconButton size={30} iconColor='white' icon="arrow-left" onPress={() => { navigation.goBack(), socket.emit('leaveRoom', roomId); }} />
           <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>{route.params.item.name}</Text>

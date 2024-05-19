@@ -48,7 +48,7 @@ const LoginScreen = () => {
     }
 
     try {
-      const res = await loginUser(username, password);
+      const res = await loginUser(username.toLowerCase(), password);
       dispatch(loginUserSuccess(res));
       dispatch(setMe(res));
 

@@ -8,7 +8,6 @@ import {
   acceptRequest,
   denyRequest,
   unFriend,
-  addFriend,
   getRequests,
   getMyFriends,
 } from '../api/allUser';
@@ -21,10 +20,6 @@ const ContactScreen = ({navigation}) => {
   const me = useSelector(state => state.social.me);
   const friends = useSelector(state => state.social.friends);
   const requests = useSelector(state => state.social.friendRequests);
-
-  console.log('Me:', me);
-  console.log('Friends:', friends);
-  console.log('Requests:', requests);
 
   const dispatch = useDispatch();
   const [value, setValue] = React.useState('');

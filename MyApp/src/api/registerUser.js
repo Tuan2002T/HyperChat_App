@@ -11,24 +11,23 @@ const formatDate = date => {
 };
 
 export const registerUser = async (pwd, name, email, phone, birthday) => {
-    try {
-        const response = await axios.post(
-          
-          API_CONFIG.baseURL + API_CONFIG.endpoints.register,
-          {
-            userName: new Date().getTime(),
-            password: pwd,
-            fullname: name,
-            email: email,
-            phoneNumber: phone,
-            birthday: formatDate(birthday),
-          },
-        );
-        console.log('REGISTER:', response.data.message);
-        return response;
-      } catch (error) {
-        console.error(error.response?.data.error,
-        );
-        return error.response;
-      }
+  try {
+    const response = await axios.post(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.register,
+      {
+        userName: new Date().getTime(),
+        password: pwd,
+        fullname: name,
+        email: email,
+        phoneNumber: phone,
+        birthday: formatDate(birthday),
+      },
+    );
+    console.log('REGISTER:', response.data.message);
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.log(error.response?.data.error);
+    return error.response;
+  }
 };
