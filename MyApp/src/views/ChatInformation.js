@@ -48,6 +48,7 @@ const ChatInformation = ({ navigation, route }) => {
         );
     };
 
+
     const deleteChat = async (chatGroup, userId, token) => {
         // Hiển thị hộp thoại xác nhận
 
@@ -66,7 +67,7 @@ const ChatInformation = ({ navigation, route }) => {
                         // Nếu người dùng chọn "Có", thực hiện hành động xóa nhóm chat
                         if (chat.admin.includes(userId)) {
 
-                            socket.emit('deleteGroup', { roomId: chatGroup });
+                            socket.emit('deleteGroup', { roomId: chatGroup, name: a.name });
                             await deleteChatGroup(chatGroup, userId, token);
                             await listChats(userId, token).then((data) => {
                                 dispatch(getListChats(data));

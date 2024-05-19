@@ -19,8 +19,11 @@ const chatSlice = createSlice({
     chatGroup(state, action) {
       state.chat = action.payload;
     },
+    listMessages(state, action) {
+      state.messages = action.payload;
+    },
   },
 });
 
-export const {selectChat, getListChats, chatGroup} = chatSlice.actions;
+export const {selectChat, getListChats, chatGroup, listMessages} = chatSlice.actions;
 export default chatSlice.reducer;

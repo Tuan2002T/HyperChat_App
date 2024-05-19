@@ -296,16 +296,23 @@ const MessageChatGroup = ({ navigation, route }) => {
   }, [socket]);
 
   useEffect(() => {
-    socket.on('receiveNotification', (data) => {
-      showMessage({
-        message: data,
-        description: "This is our second message",
-        type: "success",
-      })
-    });
+    // socket.on('receiveNotification', (data) => {
+    //   const notification = 'Bạn có tin nhắn mới từ '+ users.find((user) => user._id === data).fullname;
+    //   console.log('data', notification);
+    //   showMessage({
+    //     message: notification,
+    //     description: "This is our second message",
+    //     type: "success",
+    //   })
+    // });
 
     socket.on('retrievedMessageRecall', (data) => {
-      setMessages(data)
+      getMessagesByChatId(roomId).then((data) => {
+        const convertedMessages = data.map(convertMessageToGiftedChatMessage);
+        setMessages(convertedMessages.reverse());
+      });
+      messages[data.id] = data;
+      setMessages(messages);
     });
     getMessagesByChatId(roomId).then((data) => {
       const convertedMessages = data.map(convertMessageToGiftedChatMessage);
@@ -661,9 +668,10 @@ const MessageChatGroup = ({ navigation, route }) => {
       // Sao chép danh sách tin nhắn và thay thế tin nhắn cũ bằng tin nhắn mới
       const updatedMessages = [...messages];
       updatedMessages[messageIndex] = updatedMessage;
-  
+      let ms  = updatedMessages[messageIndex];
+      console.log('updatedMessages', ms._id);
       // Gửi sự kiện thông báo server về việc cập nhật tin nhắn
-      socket.emit('retrieveMessages', { roomId, updatedMessages });
+      socket.emit('retrieveMessages', { roomId, ms });
   
       // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
       setMessages(updatedMessages);

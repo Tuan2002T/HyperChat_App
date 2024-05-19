@@ -24,18 +24,45 @@ const MessageScreen = ({ navigation }) => {
 
   useEffect(() => {
     socket.on('addAdminChatGroup', (data) => {
-      showMessage({
-        message: 'Người dùng ' + data.roomId + ' đã được bổ nhiệm làm admin nhóm ',
-        type: 'success',
+      let members = '';
+      data.members.forEach((member) => {
+        members += users.find((user) => user._id === member).fullname;
       });
+      listChats(id).then(d => {
+        d.forEach((item) => {
+          if (item._id === data.roomId) {
+            showMessage({
+              message: 'Người dùng ' + members + ' đã được bổ nhiệm làm admin nhóm ' + item.name,
+              type: "success",
+            })
+          }
+        });
+      });
+      // showMessage({
+      //   message: 'Người dùng ' + members + ' đã được bổ nhiệm làm admin nhóm ',
+      //   type: 'success',
+      // });
     });
 
     socket.on('deleteAdminChatGroup', (data) => {
-      console.log('data', data.members[0]);
-      showMessage({
-        message: 'Người dùng ' + data.members[0] + ' đã bị thu hồi quyền admin nhóm' + data.roomId,
-        type: 'success',
+      let members = '';
+      data.members.forEach((member) => {
+        members += users.find((user) => user._id === member).fullname;
       });
+      listChats(id).then(d => {
+        d.forEach((item) => {
+          if (item._id === data.roomId) {
+            showMessage({
+              message: 'Người dùng ' + members + ' đã bị thu hồi quyền admin nhóm ' + item.name,
+              type: "success",
+            })
+          }
+        });
+      });
+      // showMessage({
+      //   message: 'Người dùng ' + members + ' đã được bổ nhiệm làm admin nhóm ',
+      //   type: 'success',
+      // });
     });
   }, []);
 
@@ -67,9 +94,11 @@ const MessageScreen = ({ navigation }) => {
     });
 
     socket.on('deletedGroupForMember', (data) => {
-      setList(prevList => prevList.filter(item => item._id !== data));
+      const { roomId, name } = data;
+      setList(prevList => prevList.filter(item => item._id !== roomId));
+      
       showMessage({
-        message: 'Nhóm chat ' + data + ' đã bị xóa',
+        message: 'Nhóm chat ' + name + ' đã bị xóa',
         type: 'success',
       });
     });
@@ -85,11 +114,19 @@ const MessageScreen = ({ navigation }) => {
   // console.log("list", list);
   useEffect(() => {
     socket.on('receiveNotification', (data) => {
-      showMessage({
-        message: data,
-        description: "This is our second message",
-        type: "success",
-      })
+      const {senderId, roomId} = data;
+      const notification = 'Bạn có tin nhắn mới từ '+ users.find((user) => user._id === senderId).fullname;
+      listChats(id).then(data => {
+        data.forEach((item) => {
+          if (item._id === roomId) {
+            showMessage({
+              message: notification,
+              description: 'Từ : ' + item.name,
+              type: "success",
+            })
+          }
+        });
+      });
     });
     if (id) {
       socket.emit('userOnline', id);
