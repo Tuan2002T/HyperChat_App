@@ -242,16 +242,13 @@ const NewMessageScreen = ({ navigation, route }) => {
   }, [socket]);
 
   useEffect(() => {
-    socket.on('receiveNotification', (data) => {
-      showMessage({
-        message: data,
-        description: "This is our second message",
-        type: "success",
-      })
-    });
-
     socket.on('retrievedMessageRecall', (data) => {
-      setMessages(data)
+      getMessagesByChatId(roomId).then((data) => {
+        const convertedMessages = data.map(convertMessageToGiftedChatMessage);
+        setMessages(convertedMessages.reverse());
+      });
+      messages[data.id] = data;
+      setMessages(messages);
     });
     getMessagesByChatId(roomId).then((data) => {
       const convertedMessages = data.map(convertMessageToGiftedChatMessage);
@@ -581,9 +578,10 @@ const NewMessageScreen = ({ navigation, route }) => {
       // Sao chép danh sách tin nhắn và thay thế tin nhắn cũ bằng tin nhắn mới
       const updatedMessages = [...messages];
       updatedMessages[messageIndex] = updatedMessage;
-  
+      
+      let ms  = updatedMessages[messageIndex];
       // Gửi sự kiện thông báo server về việc cập nhật tin nhắn
-      socket.emit('retrieveMessages', { roomId, updatedMessages });
+      socket.emit('retrieveMessages', { roomId, ms });
   
       // Cập nhật state với danh sách tin nhắn mới đã được cập nhật
       setMessages(updatedMessages);
@@ -643,8 +641,10 @@ const NewMessageScreen = ({ navigation, route }) => {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', widthL: '50%' }}>
           <IconButton size={25} iconColor='white' icon="phone" onPress={() => { }} />
-          <IconButton size={28} iconColor='white' icon="video-outline" onPress={() => { }} />
-          <IconButton size={30} iconColor='white' icon="menu-open" onPress={() => { navigation.navigate('ChatInformation', {roomId: roomId, item: route.params.item}) }} />
+          <IconButton size={28} iconColor='white' icon="video-outline" onPress={() => { navigation.navigate('VideoCall') }} />
+          <IconButton size={30} iconColor='white' icon="menu-open" onPress={() => {}} />
+          {/* <IconButton size={30} iconColor='white' icon="menu-open" onPress={() => { navigation.navigate('ChatInformation', {roomId: roomId, item: route.params.item}) }} /> */}
+
         </View> 
 
       </View>
