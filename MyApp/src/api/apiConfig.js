@@ -1,17 +1,18 @@
-// const SERVER_IP = '192.168.2.41';
-// const SERVER_IP = '192.168.2.15';
-const SERVER_IP = '192.168.2.40';
-// const SERVER_IP = '172.28.117.195';
-// const SERVER_IP = '192.168.56.235';
+const SERVER_IP = '192.168.2.15';
+// const SERVER_IP = '192.168.2.40';
 const SERVER_PORT = '5000';
 const API_BASE_URL = `http://${SERVER_IP}:${SERVER_PORT}/api/`;
 const SOCKET_URL = `http://${SERVER_IP}:3000`;
-// const SOCKET_URL = `http://3.107.1.0`;
 
 const API_CONFIG = {
   baseURL: API_BASE_URL,
   socket: SOCKET_URL,
   endpoints: {
+    //reg
+    regSendMail: 'user/register/sendMailOTP',
+    regVerifyMail: 'user/register/verifyOTPRg',
+    reg: 'user/register/registerUser',
+
     myFriends: 'user/listFriends',
     allUsers: 'user',
     login: 'user/login',

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, FlatList, Pressable, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { IconButton } from 'react-native-paper';
@@ -21,44 +20,6 @@ const ChatInformation = ({ navigation, route }) => {
             dispatch(chatGroup(data));
         });
     }, []);
-=======
-import React, {useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  Image,
-  FlatList,
-  Pressable,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import {IconButton} from 'react-native-paper';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  deleteChatGroup,
-  findChatGroupById,
-  outChatGroup,
-} from '../api/chatGroup';
-import {chatGroup, getListChats} from '../redux/chatSlice';
-import {socket} from '../socket/socket';
-import {listChats} from '../api/getListChats';
-
-const ChatInformation = ({navigation, route}) => {
-  const users = useSelector(state => state.user.users); // Access the user list from Redux store
-  const id = useSelector(state => state.auth.user._id);
-  const a = useSelector(state => state.chat.chat);
-  const [chat, setChat] = useState(a);
-  const currentUser = useSelector(state => state.auth.user);
-  const dispatch = useDispatch();
-  useEffect(() => {
-    findChatGroupById(route.params.item._id).then(data => {
-      dispatch(chatGroup(data));
-    });
-  }, []);
->>>>>>> bbf0fc53b72a4d9eaf8f3447a09bf4fe3a118e61
 
     const outChat = async (chatGroupId, userId, token) => {
         // Hiển thị hộp thoại xác nhận
@@ -103,7 +64,6 @@ const ChatInformation = ({navigation, route}) => {
             { cancelable: true }
         );
         // }
-    };
 
 
     const deleteChat = async (chatGroup, userId, token) => {
@@ -455,20 +415,7 @@ const ChatInformation = ({navigation, route}) => {
       </TouchableOpacity>
     </View>
   );
-};
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // justifyContent: 'center',
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    width: '100%',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
 
 export default ChatInformation;

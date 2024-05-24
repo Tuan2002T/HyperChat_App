@@ -8,7 +8,7 @@ import Header from '../../components/Header';
 import CustomTextInput from '../../components/CustomTextInput';
 import {Button} from 'react-native-paper';
 import CustomDialog from '../../components/custom/CustomDialog';
-import {registerUser} from '../../api/registerUser';
+import {regSendMail} from '../../api/registerUser';
 
 const EmailInputScreen = ({navigation}) => {
   const [errors, setErrors] = useState({});
@@ -16,8 +16,6 @@ const EmailInputScreen = ({navigation}) => {
   const [isFormValid, setIsFormValid] = useState(false);
 
   useEffect(() => {
-    // Trigger form validation when name,
-    // email, or password changes
     validateForm();
   }, [email]);
 
@@ -47,29 +45,15 @@ const EmailInputScreen = ({navigation}) => {
   };
 
   const handleContinue = async () => {
-    let originalNumber = new Date().getTime();
-    let originalNumberStr = originalNumber.toString().substring(5, 13);
-    const modifiedNumberStr = '09' + originalNumberStr;
 
     if (isFormValid) {
       try {
-        const res = await registerUser(
-          'HyperCh@t#24',
-          'Your name',
-          email.toLowerCase(),
-          modifiedNumberStr,
-          new Date(),
-        );
-
-        if (res.status === 400) {
+        const res = await regSendMail(email.toLowerCase());
+        if (res.status === 404) {
           showDialog('Notify', i18n.t('Email is already in use!'));
         } else if (res.status === 200) {
           
-          params = email.toLowerCase();
-          params2 = modifiedNumberStr;
-
-          navigation.navigate('Auth', {params, params2});
-          console.log('Successfully!', params);
+          navigation.navigate('Auth', email);
         } else {
           console.log(`Unexpected response status: ${res.status}`);
           showDialog(

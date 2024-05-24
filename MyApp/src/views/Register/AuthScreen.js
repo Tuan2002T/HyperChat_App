@@ -1,23 +1,17 @@
 // AuthScreen.js
-
 import React, {useState, useRef, useEffect} from 'react';
 import {View, Text, TextInput, Pressable, Alert} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../../i18n/i18n';
 import axios from 'axios';
 import Header from '../../components/Header';
 import {Button} from 'react-native-paper';
 import API_CONFIG from '../../api/apiConfig';
+import {regSendMail} from '../../api/registerUser';
 
 const AuthScreen = ({navigation, route}) => {
-
-  const [email, setEmail] = useState(route.params.params);
-  const [phone, setPhone] = useState(route.params.params2);
-
+  const [email, setEmail] = useState(route.params);
 
   const [otp, setOTP] = useState('');
-
-
   const [timer, setTimer] = useState(10);
   const [canResend, setCanResend] = useState(false);
   // Countdown timer effect
@@ -42,6 +36,11 @@ const AuthScreen = ({navigation, route}) => {
     console.log('Resend OTP');
     setTimer(10);
     setCanResend(false);
+    try {
+      regSendMail(email.toLowerCase());
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // handle continue
@@ -49,14 +48,13 @@ const AuthScreen = ({navigation, route}) => {
     console.log('Continue:', email, otp);
     try {
       const response = await axios.post(
-        API_CONFIG.baseURL + API_CONFIG.endpoints.verify,
+        API_CONFIG.baseURL + API_CONFIG.endpoints.regVerifyMail,
         {
           email: email,
-          userOTP: otp,
+          OTP: otp,
         },
       );
-      console.log('REGISTER:', response);
-      navigation.navigate('Register', {email, phone});
+      navigation.navigate('Register', {email});
       return response;
     } catch (error) {
       console.error(error.response?.data.error);

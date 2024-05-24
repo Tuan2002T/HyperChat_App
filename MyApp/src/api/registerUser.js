@@ -10,7 +10,60 @@ const formatDate = date => {
   }`;
 };
 
-export const registerUser = async (pwd, name, email, phone, birthday) => {
+const regSendMail = async email => {
+  try {
+    const response = await axios.post(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.regSendMail,
+      {
+        email: email,
+      },
+    );
+    return response;
+  } catch (error) {
+    console.log(error.response?.data.error);
+    return error.response;
+  }
+};
+
+const regVerifyMail = async (email, otp) => {
+  try {
+    const response = await axios.post(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.regVerifyMail,
+      {
+        email: email,
+        otp: otp,
+      },
+    );
+    return response;
+  } catch (error) {
+    console.log(error.response?.data.error);
+    return error.response;
+  }
+};
+
+const reg = async (user) => {
+  console.log('REG:', user);
+  console.log(formatDate(user.dob));
+  try {
+    const response = await axios.post(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.reg,
+      {
+        userName: user.id,
+        password: user.pwd,
+        fullname: user.name,
+        email: user.email,
+        phoneNumber: user.phone,
+        birthday: formatDate(user.dob),
+      },
+    );
+    return response;
+  } catch (error) {
+    console.log(error.response?.data.error);
+    return error.response;
+  }
+};
+
+const registerUser = async (pwd, name, email, phone, birthday) => {
   try {
     const response = await axios.post(
       API_CONFIG.baseURL + API_CONFIG.endpoints.register,
@@ -31,3 +84,5 @@ export const registerUser = async (pwd, name, email, phone, birthday) => {
     return error.response;
   }
 };
+
+export {regSendMail, regVerifyMail, reg, registerUser};
