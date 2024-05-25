@@ -1,16 +1,35 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Dialog, Portal, Searchbar} from 'react-native-paper';
 import {View, FlatList, Image, StyleSheet, Text} from 'react-native';
 import {useSelector} from 'react-redux';
 import {showMessage} from 'react-native-flash-message';
-import {addFriend} from '../../api/allUser';
+import {addFriend, removeFriend, getMyFriends} from '../../api/allUser'; // Assuming you have a removeFriend function
 import {socket} from '../../socket/socket';
-
 
 const SearchModal = ({visible, title, hideDialog}) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [invitedUsers, setInvitedUsers] = useState({});
   const users = useSelector(state => state.user.users);
   const me = useSelector(state => state.auth.user);
+
+  useEffect(() => {
+    if (visible) {
+      // Fetch the list of friends when the modal is opened
+      const fetchFriends = async () => {
+        try {
+          const friends = await getMyFriends(me._id, me.token);
+          const invited = {};
+          friends.forEach(friend => {
+            invited[friend._id] = true;
+          });
+          setInvitedUsers(invited);
+        } catch (error) {
+          console.error('Error fetching friends:', error);
+        }
+      };
+      fetchFriends();
+    }
+  }, [visible]);
 
   const onChangeSearch = query => setSearchQuery(query);
 
@@ -24,23 +43,47 @@ const SearchModal = ({visible, title, hideDialog}) => {
     .slice(0, 4);
 
   const inviteFriend = async userId => {
-    console.log('Invite friend:', me._id, 'to', userId);
-    try {
+      const res = await addFriend(me._id, userId);
+      console.log('res', res);
       socket.emit('sendFriendRequest', {
         senderId: me._id,
         receiverId: userId,
       });
-      const res = await addFriend(me._id, userId);
-      console.log('Invite friend:', res);
+      if (res.message === 'Gửi lời mời kết bạn thành công') {
+        // socket.emit('sendFriendRequest', {
+        //   senderId: me._id,
+        //   receiverId: userId,
+        // });
+        showMessage({
+          message: 'Add new friend!',
+          description: 'Add new friend successfully!',
+          type: 'success',
+        });
+        setInvitedUsers(prev => ({...prev, [userId]: true}));
+      }
+
+      else {
+        showMessage({
+          message: 'Kết bạn !',
+          description: 'Đã gửi lơi mơi kết bạn hoặc đã la bạn bè!',
+          type: 'warning',
+        });
+      }
+  };
+
+  const uninviteFriend = async userId => {
+    try {
+      const res = await removeFriend(me._id, userId); // Assuming you have a removeFriend function
       showMessage({
-        message: 'Add new friend!',
-        description: 'Add new friend successfully!',
+        message: 'Remove friend!',
+        description: 'Remove friend successfully!',
         type: 'success',
       });
+      setInvitedUsers(prev => ({...prev, [userId]: false}));
     } catch (error) {
       showMessage({
-        message: 'Add new friend!',
-        description: 'Add new friend failed!',
+        message: 'Remove friend!',
+        description: 'Remove friend failed!',
         type: 'warning',
       });
     }
@@ -70,13 +113,23 @@ const SearchModal = ({visible, title, hideDialog}) => {
                   </View>
 
                   <View style={styles.buttonContainer}>
-                    <Button
-                      style={styles.acceptButton}
-                      labelStyle={styles.acceptButtonText}
-                      mode="contained"
-                      onPress={() => inviteFriend(item._id)}>
-                      Invite
-                    </Button>
+                    {invitedUsers[item._id] ? (
+                      <Button
+                        style={styles.uninviteButton}
+                        labelStyle={styles.uninviteButtonText}
+                        mode="contained"
+                        onPress={() => uninviteFriend(item._id)}>
+                        Uninvite
+                      </Button>
+                    ) : (
+                      <Button
+                        style={styles.inviteButton}
+                        labelStyle={styles.inviteButtonText}
+                        mode="contained"
+                        onPress={() => inviteFriend(item._id)}>
+                        Invite
+                      </Button>
+                    )}
                   </View>
                 </View>
               )}
@@ -121,54 +174,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginLeft: 'auto',
   },
-  acceptButton: {
-    backgroundColor: null,
-    borderWidth: 1,
-    borderColor: 'green',
-  },
-  acceptButtonText: {
-    color: 'green',
-  },
-  denyButton: {
-    backgroundColor: null,
-    borderWidth: 1,
-    borderColor: 'red',
-    marginLeft: 5,
-  },
-  denyButtonText: {
-    color: 'red',
-  },
-  unfriendButton: {
-    backgroundColor: null,
-    borderWidth: 1,
-    borderColor: 'red',
-    marginLeft: 'auto',
-  },
-  unfriendButtonText: {
-    color: 'red',
-  },
   inviteButton: {
     backgroundColor: null,
     borderWidth: 1,
     borderColor: '#76ABAE',
-    marginLeft: 'auto',
   },
   inviteButtonText: {
     color: '#76ABAE',
   },
-  sectionHeader: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  searchbar: {
-    marginHorizontal: '5%',
+  uninviteButton: {
+    backgroundColor: null,
     borderWidth: 1,
-    borderColor: '#76ABAE',
-    backgroundColor: 'white',
+    borderColor: 'red',
+  },
+  uninviteButtonText: {
+    color: 'red',
   },
 });
 

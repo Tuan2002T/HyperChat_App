@@ -17,6 +17,8 @@ import {changePassword} from '../../api/changePassword';
 import {updateUser} from '../../api';
 import {getData} from '../../api/loginUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { socket } from '../../socket/socket';
+import { getUserById } from '../../api/allUser';
 
 const RegisterScreen = ({navigation, route}) => {
   const [avatarUri, setAvatarUri] = useState('');
@@ -39,11 +41,11 @@ const RegisterScreen = ({navigation, route}) => {
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
 
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState('Tina');
+  const [phone, setPhone] = useState('033');
 
-  const [pwd, setPwd] = useState('');
-  const [cpwd, setCpwd] = useState('');
+  const [pwd, setPwd] = useState('Tuan@123');
+  const [cpwd, setCpwd] = useState('Tuan@123');
   const [open, setOpen] = useState(false);
   const [birthday, setBirthday] = useState(new Date(2000, 0, 1));
   const formatDate = date => {
@@ -94,10 +96,13 @@ const RegisterScreen = ({navigation, route}) => {
         } catch (e) {
           console.error(e);
         }
+        socket.emit('userNewRegister', res.data.fullUser);
         handleBack();
       } else {
         console.log('Register failed:', res.data.error);
         showDialog('Register failed', res.data.error);
+        console.log('Register failed:', user.data.error);
+        showDialog('Register failed', user.data.error);
       }
     } catch (error) {
       console.error('Register error:', error);

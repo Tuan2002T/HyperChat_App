@@ -11,6 +11,8 @@ import { showMessage, hideMessage } from "react-native-flash-message";
 import { useDispatch, useSelector } from 'react-redux';
 import { findChatGroupById } from '../api/chatGroup';
 import { chatGroup } from '../redux/chatSlice';
+import { allUsers } from '../api/allUser';
+import { getUsersSuccess } from '../redux/userSlice';
 
 const MessageChatGroup = ({ navigation, route }) => {
   const users = useSelector(state => state.user.users);
@@ -33,6 +35,14 @@ const MessageChatGroup = ({ navigation, route }) => {
 
     socket.on('deletedGroup', (data) => {
       navigation.navigate('Chats');
+    });
+    socket.on('newUserRegister', (data) => {
+      console.log('New user:', data); 
+        const addNewUser = [...users, data]
+        console.log(
+          'addNewUser', addNewUser
+        );
+        dispatch(getUsersSuccess(addNewUser))
     });
   }, []);
 
@@ -254,7 +264,7 @@ const MessageChatGroup = ({ navigation, route }) => {
           fileContent = content.files[0];
         }
       }
-      console.log(users.find((user) => user._id === sender).avatar);
+      console.log("AVAAAAAAAAA",users.find((user) => user._id === sender).avatar);
       return {
         _id,
         text: messageContent,

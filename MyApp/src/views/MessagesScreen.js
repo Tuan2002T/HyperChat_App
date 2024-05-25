@@ -112,6 +112,13 @@ const MessageScreen = ({ navigation }) => {
         type: 'success',
       });
     });
+    socket.on('createdChat', (data) => {
+      setList(prevList => [...prevList, data]);
+      showMessage({
+        message: 'Đoạn chat ' + data.name + ' đã được tạo',
+        type: 'success',
+      });
+    });
   }, []);
 
   // console.log("list", list);

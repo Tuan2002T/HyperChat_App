@@ -416,6 +416,18 @@ const ChatInformation = ({ navigation, route }) => {
     </View>
   );
 }
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    // justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    width: '100%',
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+});
 
 export default ChatInformation;

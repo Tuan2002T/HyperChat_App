@@ -11,7 +11,7 @@ import {loginUserSuccess} from '../redux/authSlice';
 import {setMe, setFriends, setFriendRequests} from '../redux/socialSlice';
 import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
-import {allUsers, getRequests, getMyFriends} from '../api/allUser';
+import {allUsers, getRequests, getMyFriends, allUsers1} from '../api/allUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = () => {
@@ -99,7 +99,7 @@ const LoginScreen = () => {
   };
 
   const handleGotoChat = () => {
-    allUsers();
+    allUsers1();
     dispatch(changeScreen('Main'));
   };
 
