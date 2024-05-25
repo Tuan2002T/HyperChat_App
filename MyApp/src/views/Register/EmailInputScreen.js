@@ -55,7 +55,6 @@ const EmailInputScreen = ({navigation}) => {
           
           navigation.navigate('Auth', email);
         } else {
-          console.log(`Unexpected response status: ${res.status}`);
           showDialog(
             'Notify',
             i18n.t('An unexpected error occurred. Please try again.'),

@@ -45,7 +45,6 @@ const AuthScreen = ({navigation, route}) => {
 
   // handle continue
   const handleContinue = async () => {
-    console.log('Continue:', email, otp);
     try {
       const response = await axios.post(
         API_CONFIG.baseURL + API_CONFIG.endpoints.regVerifyMail,

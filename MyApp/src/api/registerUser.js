@@ -42,18 +42,16 @@ const regVerifyMail = async (email, otp) => {
 };
 
 const reg = async (user) => {
-  console.log('REG:', user);
-  console.log(formatDate(user.dob));
   try {
     const response = await axios.post(
       API_CONFIG.baseURL + API_CONFIG.endpoints.reg,
       {
         userName: user.id,
-        password: user.pwd,
         fullname: user.name,
         email: user.email,
         phoneNumber: user.phone,
         birthday: formatDate(user.dob),
+        password: user.pwd,
       },
     );
     return response;

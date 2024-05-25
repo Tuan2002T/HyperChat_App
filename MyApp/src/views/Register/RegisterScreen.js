@@ -56,7 +56,14 @@ const RegisterScreen = ({navigation, route}) => {
   };
 
   const handleContinue = async () => {
-    //check not null
+    let age = new Date().getFullYear() - birthday.getFullYear();
+    const monthDifference = new Date().getMonth() - birthday.getMonth();
+    const dayDifference = new Date().getDate() - birthday.getDate();
+
+    if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
+      age--;
+    }
+
     if (
       uName == '' ||
       name === '' ||
@@ -64,27 +71,33 @@ const RegisterScreen = ({navigation, route}) => {
       pwd === '' ||
       cpwd === ''
     ) {
-      showDialog('Input', 'Please enter all information.');
+      showDialog('Input', 'Please enter all information!');
       return;
     }
 
     if (pwd !== cpwd) {
-      showDialog('Password', 'Password and confirm password do not match.');
+      showDialog('Password', 'Password and confirm password do not match!');
       return;
     }
-
+    if (age < 18) {
+      showDialog('Age', 'You must be at least 18 years old to register!');
+      return;
+    }
     try {
       const userData = {
-        id: uName,
-        pwd: pwd,
+        id: uName.toLowerCase(),
         name: name,
         email: route.params.email,
         phone: phone,
         dob: birthday,
+        pwd: pwd,
       };
       const res = await reg(userData);
+      if (res.status === 500) {
+        showDialog('Phone', 'Phone number is already in use!');
+        return;
+      }
       if (res.status === 200) {
-        console.log('Register success:', res.data);
         try {
           await AsyncStorage.setItem(
             '@user',
@@ -96,11 +109,9 @@ const RegisterScreen = ({navigation, route}) => {
         }
         handleBack();
       } else {
-        console.log('Register failed:', res.data.error);
         showDialog('Register failed', res.data.error);
       }
     } catch (error) {
-      console.error('Register error:', error);
       showDialog('Register error', error);
     }
   };
@@ -111,12 +122,10 @@ const RegisterScreen = ({navigation, route}) => {
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
-    console.log('Show password: ', showPassword);
   };
 
   const handleShowConfirmPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
-    console.log('Show confirm password: ', showConfirmPassword);
   };
 
   return (
