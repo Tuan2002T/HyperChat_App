@@ -36,7 +36,8 @@ const MainTabNavigator = () => {
           socket.on('newUserRegister', (data) => {
             allUsers1().then((res) => {
               // dispatch(getUsersSuccess(res));
-              // const addNewUser = [...res, data]
+              // const addNewUser = [...res, data]\
+              console.log('New usersssssss:', res);
               dispatch(getUsersSuccess(res))
             });
           });

@@ -13,6 +13,7 @@ import CustomDialog from '../components/custom/CustomDialog';
 import CustomConfirmDialog from '../components/custom/CustomConfirmDialog';
 import {allUsers, getRequests, getMyFriends, allUsers1} from '../api/allUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUsersSuccess } from '../redux/userSlice';
 
 const LoginScreen = () => {
   const dispatch = useDispatch();
@@ -99,7 +100,10 @@ const LoginScreen = () => {
   };
 
   const handleGotoChat = () => {
-    allUsers1();
+    allUsers1().then((res) => {
+      dispatch(getUsersSuccess(res))
+    });
+    allUsers()
     dispatch(changeScreen('Main'));
   };
 

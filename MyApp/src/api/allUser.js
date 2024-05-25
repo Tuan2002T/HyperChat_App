@@ -26,7 +26,6 @@ const allUsers1 = async () => {
     const response = await axios.get(
       API_CONFIG.baseURL + API_CONFIG.endpoints.allUsers,
     );
-    console.log('NGHIIII', response.data);
     return response.data;
   } catch (error) {
     console.error('Error while fetching all users', error);

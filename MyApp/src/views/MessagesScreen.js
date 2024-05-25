@@ -11,6 +11,7 @@ import { socket } from '../socket/socket';
 
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { findChatGroupById } from '../api/chatGroup';
+import { allUsers1 } from '../api/allUser';
 const MessageScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
@@ -126,7 +127,8 @@ const MessageScreen = ({ navigation }) => {
     socket.on('receiveNotification', (data) => {
       const {senderId, roomId, createdAt} = data;
       // handleNewMessage(roomId, createdAt);
-      const notification = 'Bạn có tin nhắn mới từ '+ users.find((user) => user._id === senderId).fullname;
+      allUsers1().then((res) => {
+      const notification = 'Bạn có tin nhắn mới từ '+ res.find((user) => user._id === senderId).fullname;
       listChats(id).then(data => {
         data.forEach((item) => {
           if (item._id === roomId) {
@@ -138,6 +140,7 @@ const MessageScreen = ({ navigation }) => {
           }
         });
       });
+    })
     });
     socket.on('sortChat', (data) => {
       const {senderId, roomId, createdAt} = data;
