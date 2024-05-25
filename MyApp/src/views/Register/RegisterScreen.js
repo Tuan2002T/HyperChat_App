@@ -1,5 +1,5 @@
 // src/screens/RegisterScreen.js
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {View, Text, Pressable, Image, StyleSheet, Alert} from 'react-native';
 import SvgIcons from '../../assets/SvgIcons';
 import i18n from '../../i18n/i18n';
@@ -9,20 +9,13 @@ import DatePicker from 'react-native-date-picker';
 import Header from '../../components/Header';
 import CustomTextInput from '../../components/CustomTextInput';
 import {Button} from 'react-native-paper';
-import {reg, registerUser} from '../../api/registerUser';
+import {reg} from '../../api/registerUser';
 import CustomDialog from '../../components/custom/CustomDialog';
-import {PermissionsAndroid} from 'react-native';
-import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
-import {changePassword} from '../../api/changePassword';
-import {updateUser} from '../../api';
-import {getData} from '../../api/loginUser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { socket } from '../../socket/socket';
-import { getUserById } from '../../api/allUser';
+import {socket} from '../../socket/socket';
 
 const RegisterScreen = ({navigation, route}) => {
   const [avatarUri, setAvatarUri] = useState('');
-  const [res, setRes] = useState(null);
   const [user, setUser] = useState(null);
   const [uName, setUName] = useState('');
 
@@ -41,11 +34,11 @@ const RegisterScreen = ({navigation, route}) => {
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
 
-  const [name, setName] = useState('Tina');
-  const [phone, setPhone] = useState('033');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
 
-  const [pwd, setPwd] = useState('Tuan@123');
-  const [cpwd, setCpwd] = useState('Tuan@123');
+  const [pwd, setPwd] = useState('');
+  const [cpwd, setCpwd] = useState('');
   const [open, setOpen] = useState(false);
   const [birthday, setBirthday] = useState(new Date(2000, 0, 1));
   const formatDate = date => {
