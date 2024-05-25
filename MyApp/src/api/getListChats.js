@@ -13,7 +13,6 @@ const listChats = async (id) => {
 };
 
 const createNewChat = async (id, friendId) => {
-  console.log('createNewChat:', id, friendId);
   try {
     const res = await axios.post(
       API_CONFIG.baseURL + API_CONFIG.endpoints.createChat,

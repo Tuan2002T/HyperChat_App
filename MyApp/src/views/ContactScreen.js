@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Image, FlatList} from 'react-native';
+import {View, Text, StyleSheet, Image, FlatList, RefreshControl} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {Button, Searchbar, SegmentedButtons} from 'react-native-paper';
 import CustomHeader from '../components/CustomHeader';
@@ -10,19 +10,23 @@ import {
   unFriend,
   getRequests,
   getMyFriends,
+  allUsers1,
 } from '../api/allUser';
 import {showMessage} from 'react-native-flash-message';
 import {socket} from '../socket/socket';
 import SearchModal from '../components/custom/SearchModal';
 import {setFriends, setFriendRequests} from '../redux/socialSlice';
+import { getUsersSuccess } from '../redux/userSlice';
 
 const ContactScreen = ({navigation}) => {
   const me = useSelector(state => state.social.me);
   const friends = useSelector(state => state.social.friends);
+  const users = useSelector(state => state.user.users);
   const requests = useSelector(state => state.social.friendRequests);
 
   const dispatch = useDispatch();
   const [value, setValue] = React.useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     socket.on('acceptedFriendRequest', async data => {
@@ -40,7 +44,15 @@ const ContactScreen = ({navigation}) => {
         type: 'success',
       });
     });
+
+    // socket.on('newUserRegister', (data) => {
+    //   console.log('New user:', data); 
+    //     const addNewUser = [...users, data]
+    //     dispatch(getUsersSuccess(addNewUser))
+    // });
+  
   }, []);
+  // allUsers1()
 
   useEffect(() => {
     socket.on('undedFriend', async data => {
@@ -56,29 +68,29 @@ const ContactScreen = ({navigation}) => {
     });
   }, []);
 
-  useEffect(() => {
-    socket.on('receiveFriendRequest', async data => {
-      console.log('Me:', me._id);
-      console.log('Receive friend request:', data);
+  // useEffect(() => {
+  //   socket.on('receiveFriendRequest', async data => {
+  //     console.log('Me:', me._id);
+  //     console.log('Receive friend request:', data);
 
-      setTimeout(async () => {
-        try {
-          const res = await getRequests(me._id);
-          console.log('Friend requests:', res);
-          dispatch(setFriendRequests(res));
-        } catch (error) {
-          console.error('Error fetching friend requests:', error);
-          // Xử lý lỗi ở đây nếu cần thiết
-        }
-      }, 1000);
+  //     // setTimeout(async () => {
+  //       try {
+  //         const res = await getRequests(me._id);
+  //         console.log('Friend requests:', res);
+  //         dispatch(setFriendRequests(res));
+  //       } catch (error) {
+  //         console.error('Error fetching friend requests:', error);
+  //         // Xử lý lỗi ở đây nếu cần thiết
+  //       }
+  //     // }, 1000);
 
-      showMessage({
-        message: data,
-        description: 'This is our second message',
-        type: 'success',
-      });
-    });
-  }, []);
+  //     showMessage({
+  //       message: data,
+  //       description: 'This is our second message',
+  //       type: 'success',
+  //     });
+  //   });
+  // }, []);
 
   const [modalVisible, setModalVisible] = useState(false);
   const handleRightIconPress = () => {
@@ -104,6 +116,19 @@ const ContactScreen = ({navigation}) => {
     //   });
     // });
   }, []);
+
+  const refreshFriendsAndRequests = async () => {
+    setRefreshing(true);
+    try {
+      const fRes = await getMyFriends(me._id, me.token);
+      const rRes = await getRequests(me._id);
+      dispatch(setFriends(fRes));
+      dispatch(setFriendRequests(rRes));
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    }
+    setRefreshing(false);
+  };
 
   const handleNext = async () => {
     hideConfirmDialog();
@@ -232,6 +257,12 @@ const ContactScreen = ({navigation}) => {
       <FlatList
         data={value === 'requests' ? requests : friends}
         keyExtractor={item => item._id.toString()}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refreshFriendsAndRequests}
+          />
+        }
         renderItem={({item}) => (
           <View style={styles.userContainer}>
             <Image source={{uri: item.avatar}} style={styles.avatar} />

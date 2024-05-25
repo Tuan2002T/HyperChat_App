@@ -9,6 +9,7 @@ import { deleteMessageAPI, getMessagesByChatId, retrieveMessages, sendMessage } 
 import Video from 'react-native-video';
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { useDispatch, useSelector } from 'react-redux';
+import { allUsers } from '../api/allUser';
 
 const NewMessageScreen = ({ navigation, route }) => {
   const users = useSelector(state => state.user.users);
@@ -242,6 +243,7 @@ const NewMessageScreen = ({ navigation, route }) => {
   }, [socket]);
 
   useEffect(() => {
+    allUsers();
     socket.on('retrievedMessageRecall', (data) => {
       getMessagesByChatId(roomId).then((data) => {
         const convertedMessages = data.map(convertMessageToGiftedChatMessage);

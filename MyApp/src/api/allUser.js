@@ -13,9 +13,21 @@ const allUsers = () => async dispatch => {
     const response = await axios.get(
       API_CONFIG.baseURL + API_CONFIG.endpoints.allUsers,
     );
+    console.log('All users:', response.data);
     dispatch(getUsersSuccess(response.data));
   } catch (error) {
     dispatch(getUsersFailure(error));
+    console.error('Error while fetching all users', error);
+  }
+};
+
+const allUsers1 = async () => {
+  try {
+    const response = await axios.get(
+      API_CONFIG.baseURL + API_CONFIG.endpoints.allUsers,
+    );
+    return response.data;
+  } catch (error) {
     console.error('Error while fetching all users', error);
   }
 };
@@ -122,7 +134,7 @@ const addFriend = async (from, to) => {
     );
     return res.data;
   } catch (error) {
-    console.error('Error caught:', error);
+        return error.response.data;
     throw error.response ? error.response.data.message : error.message;
   }
 };
@@ -165,6 +177,7 @@ const getUserById = async userId => {
 
 export {
   allUsers,
+  allUsers1,
   getRequests,
   getMyFriends,
   acceptRequest,
