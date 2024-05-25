@@ -12,7 +12,7 @@ const AuthScreen = ({navigation, route}) => {
   const [email, setEmail] = useState(route.params);
 
   const [otp, setOTP] = useState('');
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
   // Countdown timer effect
   useEffect(() => {
@@ -34,7 +34,7 @@ const AuthScreen = ({navigation, route}) => {
   // handle resend OTP
   const resendOTP = async () => {
     console.log('Resend OTP');
-    setTimer(10);
+    setTimer(30);
     setCanResend(false);
     try {
       regSendMail(email.toLowerCase());

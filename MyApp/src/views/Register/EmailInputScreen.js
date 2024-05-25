@@ -53,7 +53,7 @@ const EmailInputScreen = ({navigation}) => {
           showDialog('Notify', i18n.t('Email is already in use!'));
         } else if (res.status === 200) {
           
-          navigation.navigate('Auth', email);
+          navigation.navigate('Auth', email.toLowerCase());
         } else {
           showDialog(
             'Notify',

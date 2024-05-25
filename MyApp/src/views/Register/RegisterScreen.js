@@ -66,16 +66,21 @@ const RegisterScreen = ({navigation, route}) => {
       pwd === '' ||
       cpwd === ''
     ) {
-      showDialog('Input', 'Please enter all information!');
+      showDialog('Error', 'Please enter all information!');
+      return;
+    }
+
+    if (phone.length < 10) {
+      showDialog('Error', 'Phone number must have 10 digits!');
       return;
     }
 
     if (pwd !== cpwd) {
-      showDialog('Password', 'Password and confirm password do not match!');
+      showDialog('Error', 'Password and confirm password do not match!');
       return;
     }
     if (age < 18) {
-      showDialog('Age', 'You must be at least 18 years old to register!');
+      showDialog('Error', 'You must be at least 18 years old to register!');
       return;
     }
     try {
@@ -88,8 +93,13 @@ const RegisterScreen = ({navigation, route}) => {
         pwd: pwd,
       };
       const res = await reg(userData);
+      if (res.status === 400) {
+        showDialog('Error', res.data.error);
+        return;
+      }
+
       if (res.status === 500) {
-        showDialog('Phone', 'Phone number is already in use!');
+        showDialog('Error', 'Phone number is already in use!');
         return;
       }
       if (res.status === 200) {

@@ -74,8 +74,6 @@ const registerUser = async (pwd, name, email, phone, birthday) => {
         birthday: formatDate(birthday),
       },
     );
-    console.log('REGISTER:', response.data.message);
-    console.log(response);
     return response;
   } catch (error) {
     console.log(error.response?.data.error);

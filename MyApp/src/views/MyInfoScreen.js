@@ -20,7 +20,7 @@ import {loginUserSuccess} from '../redux/authSlice';
 import {SharedElement} from 'react-navigation-shared-element';
 import SvgIcons from '../assets/SvgIcons';
 import DatePicker from 'react-native-date-picker';
-import {format} from 'date-fns';
+import {format, set} from 'date-fns';
 import CustomTextInput from '../components/CustomTextInput';
 
 const MyInfoScreen = ({navigation}) => {
@@ -159,7 +159,7 @@ const MyInfoScreen = ({navigation}) => {
 
       await updateUser(user._id, userData);
       Alert.alert('Success', 'Your profile has been updated successfully.');
-
+      setEnableSave(false);
       getData(user.phoneNumber).then(res => {
         dispatch(loginUserSuccess(res));
       });
